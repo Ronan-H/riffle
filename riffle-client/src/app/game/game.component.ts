@@ -2,12 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
+import { Card, GameState } from '../../../../riffle-server/src/rooms/schema/MyRoomState';
 import { ColyseusService } from '../colyseus.service';
-
-interface Card {
-  num: number;
-  suit: number;
-}
 
 @Component({
   selector: 'app-game',
@@ -32,7 +28,7 @@ export class GameComponent implements OnInit {
     );
 
     this.colyseus.room$.pipe(take(1)).subscribe(room => {
-      room.onStateChange((state: any) => {
+      room.onStateChange((state: GameState) => {
         this.commonCards = state.commonCards.cards;
         this.handCards = state.players[0].cards.cards;
       });

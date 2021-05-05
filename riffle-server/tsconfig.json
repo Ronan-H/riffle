@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "lib",
+    "outFile": "lib/types.d.ts",
     "target": "es6",
     "module": "commonjs",
     "strict": true,
@@ -9,6 +10,9 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true
+  },
+  "angularCompilerOptions": {
+    "strictTemplates ": true
   },
   "include": [
     "src"
