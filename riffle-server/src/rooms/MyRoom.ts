@@ -48,7 +48,11 @@ export class MyRoom extends Room {
 
   onJoin (client: Client, options: any) {
     this.state.players.set(client.sessionId, new Player());
-    this.startRound();
+    
+    // assume only 2 players will join for now
+    if (this.state.players.size === 2) {
+      this.startRound();
+    }
   }
 
   onLeave (client: Client, consented: boolean) {

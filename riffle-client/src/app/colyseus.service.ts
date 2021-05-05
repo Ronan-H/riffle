@@ -63,6 +63,24 @@ export class ColyseusService {
     return this.room$;
   }
 
+  public joinGame(roomId: string): Observable<Room> {
+    this.room$ = from(
+      this.client.joinById(roomId, {
+        password: 'test'
+      })
+    ).pipe(
+        tap(room => {
+          this.room = room;
+
+          room.onMessage('debug', (obj) => {
+            console.log('DEBUG:', obj);
+          });
+        }),
+      );
+
+    return this.room$;
+  }
+
   public swapCards(commonIndex: number, handIndex: number): void {
     this.room.send('swap-cards', {
       handIndex,
