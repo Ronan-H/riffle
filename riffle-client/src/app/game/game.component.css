@@ -1,0 +1,30 @@
+
+.card-row {
+    width: 50%;
+    margin: 1em auto;
+}
+
+.card {
+    display: inline-block;
+    border: 5px outset lightblue;
+    border-radius: 8px;
+
+    /* disable click and drag */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+
+    /* disable highlighting */
+    khtml-user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.selected-card {
+    border-style: inset;
+    border-color: lightcoral;
+}
