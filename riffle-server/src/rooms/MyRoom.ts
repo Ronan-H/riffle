@@ -18,7 +18,7 @@ export class MyRoom extends Room {
       const handIndex: number = message.handIndex;
 
       const common = this.state.commonCards.cards;
-      const hand = this.state.players[0].cards.cards;
+      const hand = this.state.players.get(client.sessionId).cards.cards;
 
       // perform the swap
       const temp = common[commonIndex];
@@ -47,7 +47,7 @@ export class MyRoom extends Room {
   }
 
   onJoin (client: Client, options: any) {
-    this.state.players.push(new Player());
+    this.state.players.set(client.sessionId, new Player());
     this.startRound();
   }
 
