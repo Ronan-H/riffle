@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { GameState, Card, Player } from "./schema/MyRoomState";
+import { GameState, Card, Player } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 
 export class MyRoom extends Room {

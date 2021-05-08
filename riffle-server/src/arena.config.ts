@@ -5,7 +5,7 @@ import { LobbyRoom } from "colyseus";
 /**
  * Import your Room files
  */
-import { MyRoom } from "./rooms/MyRoom";
+import { MyRoom } from "./RiffleRoom";
 
 export default Arena({
     getId: () => "Your Colyseus App",

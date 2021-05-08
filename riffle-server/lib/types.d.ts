@@ -1,1 +1,1 @@
-export * from "../src/rooms/schema/MyRoomState";
+export * from "../src/RiffleRoom";
