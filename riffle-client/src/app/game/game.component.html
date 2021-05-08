@@ -1,37 +1,39 @@
 <br/>
-<h3 class="text-center">Make the best hand you can!</h3>
 
-<div
-    class="progress round-timer"
-    >
-    <div
-        class="progress-bar progress-bar-striped"
-        [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
-        role="progressbar"
-        [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
+<div [ngSwitch]="gameView">
+    <div *ngSwitchCase="GameView.Swapping">
+        <h3 class="text-center">Make the best hand you can!</h3>
+        <div
+            class="progress round-timer"
+            >
+            <div
+                class="progress-bar progress-bar-striped"
+                [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
+                role="progressbar"
+                [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
+            </div>
+        </div>
+        <div class="card-row">
+            <h3>Common Cards:</h3>
+            <img
+                [src]='cardToImagePath(card)'
+                width="100"
+                class="card"
+                [class.selected-card]="selectedCommonIndex === i"
+                *ngFor="let card of commonCards; let i = index"
+                (click)="selectCommonCard(i)"
+            >
+        </div>
+        <div class="card-row">
+            <h3>Your Hand:</h3>
+            <img
+                [src]='cardToImagePath(card)'
+                width="100"
+                class="card"
+                [class.selected-card]="selectedHandIndex === i"
+                *ngFor="let card of handCards; let i = index"
+                (click)="selectHandCard(i)"
+            >
+        </div>
     </div>
-</div>
-
-<div class="card-row">
-    <h3>Common Cards:</h3>
-    <img
-        [src]='cardToImagePath(card)'
-        width="100"
-        class="card"
-        [class.selected-card]="selectedCommonIndex === i"
-        *ngFor="let card of commonCards; let i = index"
-        (click)="selectCommonCard(i)"
-    >
-</div>
-
-<div class="card-row">
-    <h3>Your Hand:</h3>
-    <img
-        [src]='cardToImagePath(card)'
-        width="100"
-        class="card"
-        [class.selected-card]="selectedHandIndex === i"
-        *ngFor="let card of handCards; let i = index"
-        (click)="selectHandCard(i)"
-    >
 </div>

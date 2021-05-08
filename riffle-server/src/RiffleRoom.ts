@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { RiffleState, Card, Player, GameView } from "./RiffleSchema";
+import { RiffleState, Card, Player, GameView, GameConstants } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 
 export class RiffleRoom extends Room<RiffleState> {
@@ -33,12 +33,20 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private startRound() {
-    this.state.gameView = GameView.Swapping;
     this.populateDeck();
     this.state.deck = this.shuffle(this.state.deck);
     this.deal();
 
-    this.broadcast('game-view-changed', this.state.gameView);
+    this.updateGameView(GameView.Swapping);
+
+    setTimeout(() => {
+      this.updateGameView(GameView.Showdown);
+    }, GameConstants.roundTimeMS);
+  }
+
+  private updateGameView(nextGameView: GameView): void {
+    this.state.gameView = nextGameView;
+    this.broadcast('game-view-changed', nextGameView);
   }
 
   private populateDeck(): void {

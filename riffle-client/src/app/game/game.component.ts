@@ -16,6 +16,8 @@ export class GameComponent implements OnInit {
   public handCards: Card[];
   public selectedCommonIndex = -1;
   public selectedHandIndex = -1;
+  public GameView = GameView;
+  public gameView: GameView;
 
   public GameConstants = GameConstants;
   public roundTimeRemainingMS: number;
@@ -40,6 +42,7 @@ export class GameComponent implements OnInit {
 
     this.colyseus.room$.pipe(take(1)).subscribe(room => {
       room.onStateChange((state: RiffleState) => {
+        this.gameView = state.gameView;
         this.commonCards = state.commonCards;
         this.handCards = state.players.get(room.sessionId).cards;
       });
