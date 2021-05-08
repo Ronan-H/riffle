@@ -42,6 +42,10 @@ export class GameComponent implements OnInit {
 
     this.colyseus.room$.pipe(take(1)).subscribe(room => {
       room.onStateChange((state: RiffleState) => {
+        if (state.showdownResults[0]) {
+          console.log('Player 0 hand:', state.showdownResults[0].hand);
+        }
+
         this.gameView = state.gameView;
         this.commonCards = state.commonCards;
         this.handCards = state.players.get(room.sessionId).cards;

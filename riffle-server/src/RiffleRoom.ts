@@ -1,10 +1,10 @@
 import { Room, Client } from "colyseus";
-import { RiffleState, Card, Player, GameView, GameConstants } from "./RiffleSchema";
+import { RiffleState, Card, Player, GameView, GameConstants, ShowdownResult } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
+var Hand = require('pokersolver').Hand;
 
 export class RiffleRoom extends Room<RiffleState> {
-  private curMetadata: {};
-
+  
   onCreate (options: any) {
     this.setMetadata({
       ...this.metadata,
@@ -41,6 +41,7 @@ export class RiffleRoom extends Room<RiffleState> {
 
     setTimeout(() => {
       this.updateGameView(GameView.Showdown);
+      this.startShowdown();
     }, GameConstants.roundTimeMS);
   }
 
@@ -84,6 +85,19 @@ export class RiffleRoom extends Room<RiffleState> {
     });
   }
 
+  private startShowdown(): void {
+    // build showdown sequence
+    const showdownSeq: ShowdownResult[] = [];
+    this.state.players.forEach(player => {
+      const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
+
+      showdownSeq.push(new ShowdownResult(player.id, hand.descr, 0));
+    });
+
+    showdownSeq.sort((a, b) => b.rank - a.rank);
+    this.state.showdownResults = showdownSeq;
+  }
+
   onJoin (client: Client, options: any) {
     client.send('debug', {
       optionsPass: options.password,
@@ -102,7 +116,7 @@ export class RiffleRoom extends Room<RiffleState> {
     else {
       client.send('password-accepted');
 
-      this.state.players.set(client.sessionId, new Player());
+      this.state.players.set(client.sessionId, new Player(client.sessionId));
     
       // assume only 2 players will join for now
       if (this.state.players.size === 1) {
