@@ -2,14 +2,14 @@ import Arena from "@colyseus/arena";
 import { monitor } from "@colyseus/monitor";
 import { LobbyRoom } from "colyseus";
 
-import { MyRoom } from "./RiffleRoom";
+import { RiffleRoom } from "./RiffleRoom";
 
 export default Arena({
     getId: () => "Riffle",
 
     initializeGameServer: (gameServer) => {
         gameServer.define("lobby", LobbyRoom);
-        gameServer.define('my_room', MyRoom).enableRealtimeListing();
+        gameServer.define('my_room', RiffleRoom).enableRealtimeListing();
     },
 
     initializeExpress: (app) => {

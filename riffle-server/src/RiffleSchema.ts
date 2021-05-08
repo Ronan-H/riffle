@@ -6,6 +6,10 @@ export enum GameView {
   Showdown
 }
 
+export const GameConstants = {
+  roundTimeMS: 20 * 1000,
+};
+
 export class Card extends Schema {
   @type("uint8") num: number = 0;
   @type("uint8") suit: number = 0;

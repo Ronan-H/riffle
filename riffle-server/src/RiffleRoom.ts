@@ -2,7 +2,7 @@ import { Room, Client } from "colyseus";
 import { GameState, Card, Player, GameView } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 
-export class MyRoom extends Room {
+export class RiffleRoom extends Room {
 
   onCreate (options: any) {
     // this.setPrivate();
@@ -33,6 +33,8 @@ export class MyRoom extends Room {
     this.populateDeck();
     this.state.deck = this.shuffle(this.state.deck);
     this.deal();
+
+    this.broadcast('game-view-changed', this.state.gameView);
   }
 
   private populateDeck(): void {

@@ -1,5 +1,18 @@
 <p><em>Game ID:</em> {{ gameId | async }}</p>
 
+<h2 class="text-center">Make the best hand you can!</h2>
+
+<div
+    class="progress round-timer"
+    >
+    <div
+        class="progress-bar progress-bar-striped"
+        [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
+        role="progressbar"
+        [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
+    </div>
+</div>
+
 <div class="card-row">
     <h2>Common Cards:</h2>
     <img

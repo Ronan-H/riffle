@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Card, GameState } from '../../../../riffle-server/src/RiffleSchema';
+import { Card, GameConstants, GameState, GameView } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 
 @Component({
@@ -16,6 +16,11 @@ export class GameComponent implements OnInit {
   public handCards: Card[];
   public selectedCommonIndex = -1;
   public selectedHandIndex = -1;
+
+  public GameConstants = GameConstants;
+  public roundTimeRemainingMS: number;
+  private roundTimeInterval: any;
+  private roundTimeDeltaMS = 15;
 
   constructor(
     private route: ActivatedRoute,
@@ -31,6 +36,22 @@ export class GameComponent implements OnInit {
       room.onStateChange((state: GameState) => {
         this.commonCards = state.commonCards;
         this.handCards = state.players.get(room.sessionId).cards;
+      });
+
+      room.onMessage('game-view-changed', (newGameView: GameView) => {
+        switch (newGameView) {
+          case GameView.Swapping:
+            // start the round timer
+            this.roundTimeRemainingMS = GameConstants.roundTimeMS;
+
+            this.roundTimeInterval = setInterval(() => {
+              this.roundTimeRemainingMS -= this.roundTimeDeltaMS;
+            }, this.roundTimeDeltaMS);
+            break;
+          case GameView.Showdown:
+            clearInterval(this.roundTimeInterval);
+            break;
+        }
       });
     });
   }

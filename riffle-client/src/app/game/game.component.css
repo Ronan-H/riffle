@@ -1,4 +1,9 @@
 
+.round-timer {
+    width: 50%;
+    margin: auto;
+}
+
 .card-row {
     width: 50%;
     margin: 1em auto;
