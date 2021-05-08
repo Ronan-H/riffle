@@ -15,9 +15,6 @@
           placeholder="Username"
           required
         />
-        <div class="invalid-feedback">
-          Please choose a username.
-        </div>
       </div>
     </div>
   
@@ -53,7 +50,7 @@
           />
           <div class="input-group-append">
             <button
-              class="btn btn-outline-primary"
+              class="btn btn-primary"
               type="submit"
               [disabled]="createForm.invalid"
               (click)="createRoom()"
@@ -85,7 +82,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let room of colyseus.allRooms" (click)="joinGame(room.roomId)">
+              <tr *ngFor="let room of colyseus.allRooms" (click)="openPasswordModal(passwordModal, room.roomId)">
                 <th scope="row">{{ room.metadata.roomName }}</th>
                 <td>{{ room.roomId }}</td>
                 <td>{{ room.clients }}</td>
@@ -96,4 +93,46 @@
         </div>
     </div>
   </div>
+
+  <!-- Join Game Password Modal -->
+  <form [formGroup]="joinForm">
+    <ng-template #passwordModal let-modal>
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Enter room password</h4>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="wrongPassword" class="alert alert-danger" role="alert">
+          Incorrect password, please try again.
+        </div>
+        <div class="input-group input-group-lg">
+          <input
+            formControlName="password"
+            (keydown.enter)="tryJoinRoom()"
+            type="text"
+            class="form-control"
+            aria-label="Large"
+            placeholder="Password"
+            autofocus
+            required
+          />
+          <button
+            class="btn btn-primary"
+            type="submit"
+            (click)="tryJoinRoom()"
+          >
+            Join
+          </button>
+          <button
+            class="btn btn-outline-secondary"
+            aria-label="Close"
+            (click)="modal.dismiss()"
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </form>
 </form>
+
+

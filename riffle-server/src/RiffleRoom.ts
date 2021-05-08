@@ -8,7 +8,7 @@ export class RiffleRoom extends Room<RiffleState> {
   onCreate (options: any) {
     this.setMetadata({
       ...this.metadata,
-      roomName: options.roomName,
+      ...options
     });
 
     this.setState(new RiffleState());
@@ -77,11 +77,29 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   onJoin (client: Client, options: any) {
-    this.state.players.set(client.sessionId, new Player());
+    client.send('debug', {
+      optionsPass: options.password,
+      metaPass: this.metadata.password,
+    });
+
+    // validate password
+    if (options.password !== this.metadata.password) {
+      client.send('password-rejected');
+
+      // server error if leave() is called straight away
+      setTimeout(() => {
+        client.leave();
+      }, 500);
+    }
+    else {
+      client.send('password-accepted');
+
+      this.state.players.set(client.sessionId, new Player());
     
-    // assume only 2 players will join for now
-    if (this.state.players.size === 1) {
-      this.startRound();
+      // assume only 2 players will join for now
+      if (this.state.players.size === 1) {
+        this.startRound();
+      }
     }
   }
 

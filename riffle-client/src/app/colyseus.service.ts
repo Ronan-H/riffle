@@ -57,10 +57,10 @@ export class ColyseusService {
     return this.room$;
   }
 
-  public joinGame(roomId: string): Observable<Room> {
+  public joinGame(roomId: string, password: string): Observable<Room> {
     this.room$ = from(
       this.client.joinById(roomId, {
-        password: 'test'
+        password
       })
     ).pipe(
         tap(room => {

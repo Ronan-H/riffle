@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
+
+import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-lobby',
@@ -10,13 +12,17 @@ import { ColyseusService } from '../colyseus.service';
   styleUrls: ['./lobby.component.css']
 })
 export class LobbyComponent implements OnInit {
-  public lobbyForm: FormGroup;
   public createForm: FormGroup;
+  public joinForm: FormGroup;
+  public lobbyForm: FormGroup;
+  private modalRef: NgbModalRef;
+  public wrongPassword: boolean;
 
   constructor(
     private router: Router,
     public colyseus: ColyseusService,
     private fb: FormBuilder,
+    private modalService: NgbModal,
   ) { }
 
   ngOnInit() {
@@ -25,9 +31,15 @@ export class LobbyComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
     });
 
+    this.joinForm = this.fb.group({
+      roomId: ['', [Validators.required]],
+      password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
+    });
+
     this.lobbyForm = this.fb.group({
       username:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(10)]],
-      createForm: this.createForm
+      createForm: this.createForm,
+      joinForm: this.joinForm,
     })
 
     // TODO remove this, temporary while debugging
@@ -35,6 +47,10 @@ export class LobbyComponent implements OnInit {
       username: 'Ronan',
       createForm: {
         roomName: 'Test room',
+        password: 'qwerty123'
+      },
+      joinForm: {
+        roomId: 'ABCDEF',
         password: 'qwerty123'
       }
     });
@@ -50,11 +66,31 @@ export class LobbyComponent implements OnInit {
     });
   }
 
-  public joinGame(roomId: string): void {
+  public openPasswordModal(content: TemplateRef<any>, roomId: string): void {
+    this.joinForm.controls['roomId'].setValue(roomId);
+
     if (this.lobbyForm.get('username').valid) {
-      this.colyseus.joinGame(roomId).pipe(take(1)).subscribe(room => {
-        this.router.navigate(['game', room.id]);
+      this.modalRef = this.modalService.open(content);
+
+      this.modalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.wrongPassword = false;
       });
     }
+  }
+
+  public tryJoinRoom(): void {
+    const roomId = this.joinForm.get('roomId').value;
+    const password = this.joinForm.get('password').value;
+
+    this.colyseus.joinGame(roomId, password).pipe(take(1)).subscribe(room => {
+      room.onMessage('password-accepted', () => {
+        this.modalRef.close();
+        this.router.navigate(['game', room.id]);
+      });
+
+      room.onMessage('password-rejected', () => {
+        this.wrongPassword = true;
+      });
+    });
   }
 }
