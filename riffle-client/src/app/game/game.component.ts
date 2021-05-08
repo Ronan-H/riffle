@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Card, GameConstants, GameState, GameView } from '../../../../riffle-server/src/RiffleSchema';
@@ -23,11 +23,17 @@ export class GameComponent implements OnInit {
   private roundTimeDeltaMS = 15;
 
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
     private colyseus: ColyseusService,
   ) { }
   
   ngOnInit(): void {
+    if (this.colyseus.room === undefined) {
+      // no handle on this game; redirect to the lobby
+      this.router.navigate(['lobby']);
+    }
+
     this.gameId = this.route.params.pipe(
       map((params => params['id'])),
     );

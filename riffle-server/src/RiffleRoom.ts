@@ -3,8 +3,14 @@ import { GameState, Card, Player, GameView } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 
 export class RiffleRoom extends Room {
+  private curMetadata: {};
 
   onCreate (options: any) {
+    this.setMetadata({
+      ...this.metadata,
+      roomName: options.roomName,
+    });
+
     // this.setPrivate();
 
     this.setState(new GameState());

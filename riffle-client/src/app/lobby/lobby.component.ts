@@ -24,10 +24,17 @@ export class LobbyComponent implements OnInit {
       roomName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
       password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
     });
+
+    // TODO remove this, temporary while debugging
+    this.createForm.setValue({
+      username: 'Ronan',
+      roomName: 'Test room',
+      password: 'qwerty123'
+    });
   }
 
   public createRoom(): void {
-    this.colyseus.createRoom().pipe(take(1)).subscribe(room => {
+    this.colyseus.createRoom(this.createForm.value).pipe(take(1)).subscribe(room => {
       this.router.navigate(['game', room.id]);
     });
   }

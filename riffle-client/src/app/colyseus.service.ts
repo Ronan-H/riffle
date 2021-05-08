@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { Client as ColyseusClient, Room, RoomAvailable } from 'colyseus.js';
 import { from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -10,12 +9,10 @@ import { tap } from 'rxjs/operators';
 export class ColyseusService {
   public allRooms: RoomAvailable[];
   private client: ColyseusClient;
-  private room: Room;
+  public room: Room;
   public room$: Observable<Room>;
 
-  constructor(
-    private router: Router,
-  ) {
+  constructor() {
     this.initClient();
   }
 
@@ -41,10 +38,11 @@ export class ColyseusService {
     });
   }
 
-  public createRoom(): Observable<Room> {
+  public createRoom(options: any): Observable<Room> {
     this.room$ = from(
       this.client.create('my_room', {
-        password: 'test'
+        password: 'test',
+        ...options
       })
     ).pipe(
         tap(room => {
