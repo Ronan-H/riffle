@@ -1,5 +1,6 @@
 import { Room, Client } from "colyseus";
 import { GameState, Card, Player } from "./schema/MyRoomState";
+import { ArraySchema } from "@colyseus/schema";
 
 export class MyRoom extends Room {
 
@@ -17,8 +18,8 @@ export class MyRoom extends Room {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
 
-      const common = this.state.commonCards.cards;
-      const hand = this.state.players.get(client.sessionId).cards.cards;
+      const common = this.state.commonCards;
+      const hand = this.state.players.get(client.sessionId).cards;
 
       // perform the swap
       const temp = common[commonIndex];
@@ -30,18 +31,42 @@ export class MyRoom extends Room {
   }
 
   private startRound() {
-    this.state.deck.shuffle();
+    this.populateDeck();
+    this.state.deck = this.shuffle(this.state.deck);
     this.deal();
+  }
+
+  private populateDeck(): void {
+    for (let suit = 0; suit < 4; suit++) {
+      for (let num = 1; num <= 13; num++) {
+        this.state.deck.push(new Card(num, suit));
+      }
+    }
+  }
+
+  private shuffle(cards: ArraySchema<Card>): ArraySchema<Card> {
+    // Fisher–Yates shuffle -- https://bost.ocks.org/mike/shuffle/
+    let m = cards.length, t, i;
+
+    while (m) {
+      i = Math.floor(Math.random() * m--);
+
+      t = cards[m];
+      cards[m] = cards[i];
+      cards[i] = t;
+    }
+
+    return cards;
   }
 
   private deal(): void {
     for (let i = 0; i < 5; i++) {
-      this.state.commonCards.cards.push(this.state.deck.cards.pop());
+      this.state.commonCards.push(this.state.deck.pop());
     }
 
     this.state.players.forEach((player: Player) => {
       for (let i = 0; i < 5; i++) {
-        player.cards.cards.push(this.state.deck.cards.pop());
+        player.cards.push(this.state.deck.pop());
       }
     });
   }
@@ -50,7 +75,7 @@ export class MyRoom extends Room {
     this.state.players.set(client.sessionId, new Player());
     
     // assume only 2 players will join for now
-    if (this.state.players.size === 2) {
+    if (this.state.players.size === 1) {
       this.startRound();
     }
   }

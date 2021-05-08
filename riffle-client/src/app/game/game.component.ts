@@ -29,8 +29,8 @@ export class GameComponent implements OnInit {
 
     this.colyseus.room$.pipe(take(1)).subscribe(room => {
       room.onStateChange((state: GameState) => {
-        this.commonCards = state.commonCards.cards;
-        this.handCards = state.players.get(room.sessionId).cards.cards;
+        this.commonCards = state.commonCards;
+        this.handCards = state.players.get(room.sessionId).cards;
       });
     });
   }
