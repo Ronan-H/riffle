@@ -40,7 +40,7 @@ export class ColyseusService {
 
   public createRoom(options: any): Observable<Room> {
     this.room$ = from(
-      this.client.create('my_room', {
+      this.client.create('riffle_room', {
         password: 'test',
         ...options
       })

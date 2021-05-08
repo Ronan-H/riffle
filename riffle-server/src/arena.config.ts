@@ -9,7 +9,9 @@ export default Arena({
 
     initializeGameServer: (gameServer) => {
         gameServer.define("lobby", LobbyRoom);
-        gameServer.define('my_room', RiffleRoom).enableRealtimeListing();
+        gameServer
+            .define('riffle_room', RiffleRoom)
+            .enableRealtimeListing();
     },
 
     initializeExpress: (app) => {

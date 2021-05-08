@@ -32,7 +32,7 @@ export class Player extends Schema {
   score = 0;
 }
 
-export class GameState extends Schema {
+export class RiffleState extends Schema {
   @type('uint8')
   gameView: GameView;
 

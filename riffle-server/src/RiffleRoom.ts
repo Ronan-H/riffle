@@ -1,8 +1,8 @@
 import { Room, Client } from "colyseus";
-import { GameState, Card, Player, GameView } from "./RiffleSchema";
+import { RiffleState, Card, Player, GameView } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 
-export class RiffleRoom extends Room {
+export class RiffleRoom extends Room<RiffleState> {
   private curMetadata: {};
 
   onCreate (options: any) {
@@ -11,9 +11,7 @@ export class RiffleRoom extends Room {
       roomName: options.roomName,
     });
 
-    // this.setPrivate();
-
-    this.setState(new GameState());
+    this.setState(new RiffleState());
 
     this.onMessage('swap-cards', (client, message) => {
       client.send('debug', {
