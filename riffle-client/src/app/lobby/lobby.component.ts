@@ -18,18 +18,12 @@ export class LobbyComponent {
 
   public createRoom(): void {
     this.colyseus.createRoom().pipe(take(1)).subscribe(room => {
-      console.log('joinOrCreate sub');
-
       this.router.navigate(['game', room.id]);
     });
   }
 
   public joinGame(roomId: string): void {
-    console.log('Joining game by Room ID:', roomId);
-
     this.colyseus.joinGame(roomId).pipe(take(1)).subscribe(room => {
-      console.log('joinOrCreate sub');
-
       this.router.navigate(['game', room.id]);
     });
   }

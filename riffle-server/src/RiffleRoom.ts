@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { GameState, Card, Player } from "./RiffleSchema";
+import { GameState, Card, Player, GameView } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 
 export class MyRoom extends Room {
@@ -26,11 +26,10 @@ export class MyRoom extends Room {
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
     });
-
-    // this.setSimulationInterval(() => this.state.update());
   }
 
   private startRound() {
+    this.state.gameView = GameView.Swapping;
     this.populateDeck();
     this.state.deck = this.shuffle(this.state.deck);
     this.deal();

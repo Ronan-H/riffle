@@ -22,10 +22,8 @@ export class ColyseusService {
   private initClient(): void {
     this.client = new ColyseusClient('ws://localhost:2567');
     this.client.joinOrCreate('lobby').then(lobby => {
-      console.log('Joined the lobby');
       lobby.onMessage("rooms", (rooms) => {
         this.allRooms = rooms;
-        console.log('Got rooms from lobby');
       });
       
       lobby.onMessage("+", ([roomId, room]) => {
@@ -35,12 +33,10 @@ export class ColyseusService {
         } else {
           this.allRooms.push(room);
         }
-        console.log('Room added');
       });
       
       lobby.onMessage("-", (roomId) => {
         this.allRooms = this.allRooms.filter((room) => room.roomId !== roomId);
-        console.log('Room removed');
       });
     });
   }
