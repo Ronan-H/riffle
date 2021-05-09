@@ -25,6 +25,9 @@ export class GameComponent implements OnInit {
   private roundTimeDeltaMS = 15;
 
   public showdownResults: ShowdownResult[];
+  public isNextRoundClicked: boolean;
+  public numVotedNextRound: number;
+  public nextRoundVotesRequired: number;
 
   constructor(
     private router: Router,
@@ -47,7 +50,10 @@ export class GameComponent implements OnInit {
         this.gameView = state.gameView;
         this.commonCards = state.commonCards;
         this.handCards = state.players.get(room.sessionId).cards;
+
         this.showdownResults = state.showdownResults;
+        this.numVotedNextRound = state.numVotedNextRound;
+        this.nextRoundVotesRequired = state.nextRoundVotesRequired;
       });
 
       room.onMessage('game-view-changed', (newGameView: GameView) => {
@@ -61,6 +67,8 @@ export class GameComponent implements OnInit {
             }, this.roundTimeDeltaMS);
             break;
           case GameView.Showdown:
+            this.isNextRoundClicked = false;
+
             clearInterval(this.roundTimeInterval);
             break;
         }
@@ -95,6 +103,11 @@ export class GameComponent implements OnInit {
       this.selectedCommonIndex = -1;
       this.selectedHandIndex = -1;
     }
+  }
+
+  public onNextRoundClicked(): void {
+    this.isNextRoundClicked = true;
+    this.colyseus.room.send('next-round-vote');
   }
 
   public cardToImagePath(card: Card): string {

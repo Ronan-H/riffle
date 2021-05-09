@@ -30,9 +30,22 @@ export class RiffleRoom extends Room<RiffleState> {
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
     });
+
+    this.onMessage('next-round-vote', (client, message) => {
+      if (!this.state.players.get(client.sessionId).votedNextRound) {
+        this.state.players.get(client.sessionId).votedNextRound = true;
+        this.state.numVotedNextRound++;
+
+        if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
+          // enough players voted to continue; start new round
+          this.startRound();
+        }
+      }
+    });
   }
 
   private startRound() {
+    this.resetCards();
     this.populateDeck();
     this.state.deck = this.shuffle(this.state.deck);
     this.deal();
@@ -56,6 +69,14 @@ export class RiffleRoom extends Room<RiffleState> {
         this.state.deck.push(new Card(num, suit));
       }
     }
+  }
+
+  private resetCards(): void {
+    this.state.deck = new ArraySchema<Card>();
+    this.state.commonCards = new ArraySchema<Card>();
+    this.state.players.forEach(player => {
+      player.cards = new ArraySchema<Card>();
+    });
   }
 
   private shuffle(cards: ArraySchema<Card>): ArraySchema<Card> {
@@ -96,6 +117,12 @@ export class RiffleRoom extends Room<RiffleState> {
 
     showdownSeq.sort((a, b) => b.rank - a.rank);
     this.state.showdownResults = showdownSeq;
+
+    this.state.numVotedNextRound = 0;
+    this.state.players.forEach(player => {
+      player.votedNextRound = false;
+    });
+    this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
   }
 
   onJoin (client: Client, options: any) {

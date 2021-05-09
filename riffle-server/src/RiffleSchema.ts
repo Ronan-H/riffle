@@ -7,7 +7,7 @@ export enum GameView {
 }
 
 export const GameConstants = {
-  roundTimeMS: 20 * 1000,
+  roundTimeMS: 500,
 };
 
 export class Card extends Schema {
@@ -68,6 +68,9 @@ export class Player extends Schema {
   @type('uint16')
   score = 0;
 
+  @type('boolean')
+  votedNextRound: boolean = false;
+
   constructor(id: string, name: string) {
     super();
     this.id = id;
@@ -108,8 +111,14 @@ export class RiffleState extends Schema {
   commonCards = new ArraySchema<Card>();
 
   @type([ Card ])
-  deck = new ArraySchema<Card>();
+  deck: ArraySchema<Card>;
 
   @type([ ShowdownResult ])
   showdownResults: ShowdownResult[];
+
+  @type('uint8')
+  numVotedNextRound: number;
+
+  @type('uint8')
+  nextRoundVotesRequired: number;
 }
