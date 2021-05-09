@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView } from '../../../../riffle-server/src/RiffleSchema';
+import { Card, GameConstants, RiffleState, GameView, ShowdownResult } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 
 @Component({
@@ -24,6 +24,8 @@ export class GameComponent implements OnInit {
   private roundTimeInterval: any;
   private roundTimeDeltaMS = 15;
 
+  public showdownResults: ShowdownResult[];
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -42,13 +44,10 @@ export class GameComponent implements OnInit {
 
     this.colyseus.room$.pipe(take(1)).subscribe(room => {
       room.onStateChange((state: RiffleState) => {
-        if (state.showdownResults[0]) {
-          console.log('Player 0 hand:', state.showdownResults[0].hand);
-        }
-
         this.gameView = state.gameView;
         this.commonCards = state.commonCards;
         this.handCards = state.players.get(room.sessionId).cards;
+        this.showdownResults = state.showdownResults;
       });
 
       room.onMessage('game-view-changed', (newGameView: GameView) => {

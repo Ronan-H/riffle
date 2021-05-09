@@ -91,7 +91,7 @@ export class RiffleRoom extends Room<RiffleState> {
     this.state.players.forEach(player => {
       const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
 
-      showdownSeq.push(new ShowdownResult(player.id, hand.descr, 0));
+      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, 0));
     });
 
     showdownSeq.sort((a, b) => b.rank - a.rank);
@@ -116,10 +116,10 @@ export class RiffleRoom extends Room<RiffleState> {
     else {
       client.send('password-accepted');
 
-      this.state.players.set(client.sessionId, new Player(client.sessionId));
+      this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
     
       // assume only 2 players will join for now
-      if (this.state.players.size === 1) {
+      if (this.state.players.size === 2) {
         this.startRound();
       }
     }

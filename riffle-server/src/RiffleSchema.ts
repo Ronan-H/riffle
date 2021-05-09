@@ -57,10 +57,10 @@ export class Card extends Schema {
 
 export class Player extends Schema {
   @type('string')
-  name: string;
+  id: string;
 
   @type('string')
-  id: string;
+  name: string;
 
   @type([ Card ])
   cards = new ArraySchema<Card>();
@@ -68,9 +68,10 @@ export class Player extends Schema {
   @type('uint16')
   score = 0;
 
-  constructor(id: string) {
+  constructor(id: string, name: string) {
     super();
     this.id = id;
+    this.name = name;
   }
 }
 
@@ -79,14 +80,18 @@ export class ShowdownResult extends Schema{
   playerId: string;
 
   @type('string')
+  playerName: string;
+
+  @type('string')
   hand: string;
 
   @type('uint8')
   rank: number
 
-  constructor(playerId: string, hand: string, rank: number) {
+  constructor(playerId: string, playerName: string, hand: string, rank: number) {
     super();
     this.playerId = playerId;
+    this.playerName = playerName;
     this.hand = hand;
     this.rank = rank;
   }

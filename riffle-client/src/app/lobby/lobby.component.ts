@@ -79,10 +79,14 @@ export class LobbyComponent implements OnInit {
   }
 
   public tryJoinRoom(): void {
+    const username = this.lobbyForm.get('username').value;
     const roomId = this.joinForm.get('roomId').value;
     const password = this.joinForm.get('password').value;
 
-    this.colyseus.joinGame(roomId, password).pipe(take(1)).subscribe(room => {
+    this.colyseus.joinGame(roomId, {
+      username,
+      password,
+    }).pipe(take(1)).subscribe(room => {
       room.onMessage('password-accepted', () => {
         this.modalRef.close();
         this.router.navigate(['game', room.id]);

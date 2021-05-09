@@ -40,6 +40,8 @@
     <div *ngSwitchCase="GameView.Showdown">
         <div class="text-center">
             <h3>Showdown!</h3>
+
+            <h4 *ngFor="let result of showdownResults">{{ result.playerName }} has: {{ result.hand }}</h4>
         </div>
     </div>
 </div>
