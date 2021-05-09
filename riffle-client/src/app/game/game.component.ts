@@ -14,8 +14,8 @@ export class GameComponent implements OnInit {
   public gameId: Observable<string>;
   public commonCards: Card[];
   public handCards: Card[];
-  public selectedCommonIndex = -1;
-  public selectedHandIndex = -1;
+  public selectedCommonIndex;
+  public selectedHandIndex;
   public GameView = GameView;
   public gameView: GameView;
 
@@ -59,6 +59,10 @@ export class GameComponent implements OnInit {
       room.onMessage('game-view-changed', (newGameView: GameView) => {
         switch (newGameView) {
           case GameView.Swapping:
+            // reset
+            this.selectedCommonIndex = -1;
+            this.selectedHandIndex = -1;
+
             // start the round timer
             this.roundTimeRemainingMS = GameConstants.roundTimeMS;
 
@@ -67,6 +71,7 @@ export class GameComponent implements OnInit {
             }, this.roundTimeDeltaMS);
             break;
           case GameView.Showdown:
+            // reset
             this.isNextRoundClicked = false;
 
             clearInterval(this.roundTimeInterval);
