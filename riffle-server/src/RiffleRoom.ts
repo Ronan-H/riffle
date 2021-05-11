@@ -109,11 +109,30 @@ export class RiffleRoom extends Room<RiffleState> {
   private startShowdown(): void {
     // build showdown sequence
     const showdownSeq: ShowdownResult[] = [];
+    const playerHands: {}[] = [];
     this.state.players.forEach(player => {
       const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
-
-      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, 0));
+      // store the player reference in the hand object, so we can tell which player has won
+      // just from the returned hand object from calling Hand.winners(...)
+      hand.player = player;
+      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, hand.rank));
+      playerHands.push(hand);
     });
+
+    // find showndown winner
+    let winnerHand = Hand.winners(playerHands);
+    if (winnerHand.length > 1) {
+      // it's a tie!
+      this.broadcast('debug', 'Showdown tie between ' + winnerHand.length + ' players');
+      // TODO: handle ties properly, just picking a random player for now
+      const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
+      this.broadcast('debug', '...randomly chose hand at index ' + randomWinnerIndex + ' as the winner');
+      winnerHand = winnerHand[randomWinnerIndex];
+    }
+    else {
+      winnerHand = winnerHand[0];
+    }
+    this.state.showdownWinner = winnerHand.player;
 
     showdownSeq.sort((a, b) => b.rank - a.rank);
     this.state.showdownResults = showdownSeq;

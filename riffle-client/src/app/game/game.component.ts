@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView, ShowdownResult } from '../../../../riffle-server/src/RiffleSchema';
+import { Card, GameConstants, RiffleState, GameView, ShowdownResult, Player } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 
 @Component({
@@ -25,6 +25,7 @@ export class GameComponent implements OnInit {
   private roundTimeDeltaMS = 15;
 
   public showdownResults: ShowdownResult[];
+  public showdownWinner: Player;
   public isNextRoundClicked: boolean;
   public numVotedNextRound: number;
   public nextRoundVotesRequired: number;
@@ -52,6 +53,7 @@ export class GameComponent implements OnInit {
         this.handCards = state.players.get(room.sessionId).cards;
 
         this.showdownResults = state.showdownResults;
+        this.showdownWinner = state.showdownWinner;
         this.numVotedNextRound = state.numVotedNextRound;
         this.nextRoundVotesRequired = state.nextRoundVotesRequired;
       });
