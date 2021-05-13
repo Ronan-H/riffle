@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "start": "npm run build --prefix ./riffle-server"
+    }
+}

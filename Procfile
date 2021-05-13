@@ -1,0 +1,1 @@
+web: cd riffle-server && npm run heroku-build-ts && node ./lib/index.js

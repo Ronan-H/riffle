@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
     "outDir": "lib",
-    "outFile": "lib/types.d.ts",
     "target": "es6",
     "module": "commonjs",
-    "strict": true,
+    "strict": false,
     "allowJs": true,
     "strictNullChecks": false,
     "esModuleInterop": true,

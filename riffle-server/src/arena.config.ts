@@ -1,6 +1,9 @@
 import Arena from "@colyseus/arena";
 import { monitor } from "@colyseus/monitor";
 import { LobbyRoom } from "colyseus";
+import serveIndex from 'serve-index';
+import express from 'express';
+import path from 'path';
 
 import { RiffleRoom } from "./RiffleRoom";
 
@@ -15,8 +18,11 @@ export default Arena({
     },
 
     initializeExpress: (app) => {
+        app.use('/', serveIndex(path.join(__dirname, "static"), {'icons': true}))
+        app.use('/', express.static(path.join(__dirname, "static")));
+
         // https://docs.colyseus.io/tools/monitor/
-        app.use("/colyseus", monitor());
+        // app.use("/colyseus", monitor());
     },
 
 

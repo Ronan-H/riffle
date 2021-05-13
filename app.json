@@ -1,0 +1,13 @@
+{
+  "name": "Riffle",
+  "description": "A simple multiplayer card game",
+  "repository": "https://github.com/Ronan-H/riffle",
+  "logo": "https://github.com/colyseus/colyseus/blob/master/media/logo.png?raw=true",
+  "keywords": ["node", "multiplayer", "colyseus"],
+  "env": {
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "Leave as 'false' to install required devDependencies.",
+      "value": "false"
+    }
+  }
+}
