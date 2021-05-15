@@ -1,5 +1,5 @@
 {
     "scripts": {
-        "start": "npm run build --prefix ./riffle-server"
+        "start": "cd riffle-server && npm install && ./node_modules/pm2/bin/pm2 start ./lib/index.js -f --no-daemon"
     }
 }

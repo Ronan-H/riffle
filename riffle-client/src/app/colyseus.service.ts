@@ -17,7 +17,10 @@ export class ColyseusService {
   }
 
   private initClient(): void {
-    this.client = new ColyseusClient('ws://localhost:2567');
+    const host = window.document.location.host.replace(/:.*/, '');
+    const serverUrl = location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':'+ location.port : '');
+
+    this.client = new ColyseusClient(serverUrl);
     this.client.joinOrCreate('lobby').then(lobby => {
       lobby.onMessage("rooms", (rooms) => {
         this.allRooms = rooms;

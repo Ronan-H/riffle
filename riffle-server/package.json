@@ -5,11 +5,7 @@
   "description": "npm init template for bootstrapping an empty Colyseus project",
   "main": "lib/index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
     "loadtest": "colyseus-loadtest loadtest/example.ts --room my_room --numClients 2",
-    "build": "npm run clean && tsc && node node_modules/copyfiles/copyfiles package.json ./lib && node node_modules/copyfiles/copyfiles arena.env ./lib",
-    "heroku-build-ts": "npm install && npm run clean && tsc && node node_modules/copyfiles/copyfiles package.json ./lib && node node_modules/copyfiles/copyfiles arena.env ./lib && node node_modules/copyfiles/copyfiles -u 1 src/static/* ./lib",
-    "postinstall": "cd ../riffle-client && npm install && ng build --output-path ../riffle-server/src/static && cd ../riffle-server",
     "clean": "node node_modules/rimraf/bin lib",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -33,12 +29,14 @@
     "@colyseus/monitor": "^0.14.0",
     "@colyseus/social": "^0.10.9",
     "colyseus": "^0.14.0",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.16.4",
-    "ts-node": "^8.1.0",
-    "typescript": "^3.4.5",
-    "serve-index": "^1.9.1",
+    "pm2": "^4.5.6",
+    "pokersolver": "^2.1.4",
     "rimraf": "^2.7.1",
-    "pokersolver": "^2.1.4"
+    "serve-index": "^1.9.1",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.4.5"
   }
 }

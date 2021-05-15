@@ -164,8 +164,8 @@ export class RiffleRoom extends Room<RiffleState> {
 
       this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
     
-      // assume only 2 players will join for now
-      if (this.state.players.size === 2) {
+      // assume only 3 players will join for now
+      if (this.state.players.size === 3) {
         this.startRound();
       }
     }
