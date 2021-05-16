@@ -1,1 +1,1 @@
-git push heroku staging:master
+git push -f heroku staging:master
