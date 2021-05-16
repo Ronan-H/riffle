@@ -7,7 +7,7 @@ export enum GameView {
 }
 
 export const GameConstants = {
-  roundTimeMS: 15 * 1000,
+  roundTimeMS: 30 * 1000,
 };
 
 export class Card extends Schema {
