@@ -5,6 +5,7 @@ import { take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
 import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { ResourceService } from '../resource.service';
 
 @Component({
   selector: 'app-lobby',
@@ -21,6 +22,7 @@ export class LobbyComponent implements OnInit {
   constructor(
     private router: Router,
     public colyseus: ColyseusService,
+    private resourceService: ResourceService,
     private fb: FormBuilder,
     private modalService: NgbModal,
   ) { }

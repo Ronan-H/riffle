@@ -15,7 +15,7 @@
             <div class="card-row">
                 <h3>Common Cards:</h3>
                 <img
-                    [src]='cardToImagePath(card)'
+                    [src]='resourceService.cardToImage(card).src'
                     width="100"
                     class="card"
                     [class.selected-card]="selectedCommonIndex === i"
@@ -26,7 +26,7 @@
             <div class="card-row">
                 <h3>Your Hand:</h3>
                 <img
-                    [src]='cardToImagePath(card)'
+                    [src]='resourceService.cardToImage(card).src'
                     width="100"
                     class="card"
                     [class.selected-card]="selectedHandIndex === i"
