@@ -4,8 +4,25 @@ import { ArraySchema } from "@colyseus/schema";
 var Hand = require('pokersolver').Hand;
 
 export class RiffleRoom extends Room<RiffleState> {
-  
+  // this can be set to true to indicate that a patch of the state
+  // should be sent to each client during the next clock interval
+  private isStateDirty: boolean;
+
   onCreate (options: any) {
+    // disable automatic patches
+    this.setPatchRate(null);
+
+    // ensure clock timers are enabled
+    this.setSimulationInterval(() => {});
+
+    this.clock.setInterval(() => {
+        // only broadcast patches if your custom conditions are met.
+        if (this.isStateDirty) {
+            this.broadcastPatch();
+            this.isStateDirty = false;
+        }
+    }, 100);
+
     this.setMetadata({
       ...this.metadata,
       ...options
@@ -29,6 +46,8 @@ export class RiffleRoom extends Room<RiffleState> {
       const temp = common[commonIndex];
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
+
+      this.syncClientState();
     });
 
     this.onMessage('next-round-vote', (client, message) => {
@@ -44,6 +63,10 @@ export class RiffleRoom extends Room<RiffleState> {
     });
   }
 
+  private syncClientState(): void {
+    this.isStateDirty = true;
+  }
+
   private startRound() {
     this.resetCards();
     this.populateDeck();
@@ -51,6 +74,8 @@ export class RiffleRoom extends Room<RiffleState> {
     this.deal();
 
     this.updateGameView(GameView.Swapping);
+
+    this.syncClientState();
 
     setTimeout(() => {
       this.updateGameView(GameView.Showdown);
@@ -142,6 +167,8 @@ export class RiffleRoom extends Room<RiffleState> {
       player.votedNextRound = false;
     });
     this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
+
+    this.syncClientState();
   }
 
   onJoin (client: Client, options: any) {
@@ -163,6 +190,7 @@ export class RiffleRoom extends Room<RiffleState> {
       client.send('password-accepted');
 
       this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
+      this.syncClientState();
     
       // assume only 3 players will join for now
       if (this.state.players.size === 3) {
