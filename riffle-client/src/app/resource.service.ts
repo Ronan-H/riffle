@@ -1,29 +1,20 @@
 import { Injectable } from '@angular/core';
+import { CardSpritesheetMap } from 'src/data/card-spritesheet-map';
 import { Card } from '../../../riffle-server/src/RiffleSchema';
+import { SpritesheetMetadata } from './types/spritesheet-metadata';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ResourceService {
-  // access: cardImages[suit][number]
-  private cardImages: HTMLImageElement[][];
+  public spritesheet: HTMLImageElement;
 
   constructor() {
-    this.cardImages = [];
-    
-    // loading the images sources here effectively preloads/caches them
-    for (let suit = 0; suit <= 3; suit++) {
-      this.cardImages[suit] = [];
-      for (let num = 1; num <= 13; num++) {
-        const imgPath = this.cardToImagePath(new Card(num, suit));
-        const cardImg = new Image();
-        cardImg.src = imgPath;
-        this.cardImages[suit].push(cardImg);
-      }
-    }
+    this.spritesheet = new Image();
+    this.spritesheet.src = 'assets/playingCards.png';
   }
 
-  private cardToImagePath(card: Card): string {
+  public getCardSpritesheetMedata(card: Card): SpritesheetMetadata {
     const suit = {
       0: 'Clubs',
       1: 'Diamonds',
@@ -49,11 +40,7 @@ export class ResourceService {
         num = card.num.toString();
     }
 
-    return `assets/card${suit}${num}.png`;
-  }
-
-  public cardToImage(card: Card): HTMLImageElement {
-    // TODO: why is the card image sometimes undefined?
-    return this.cardImages[card.suit][card.num] ?? new Image();
+    const metadataKey = `${suit}${num}`;
+    return CardSpritesheetMap[metadataKey];
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -12,6 +12,11 @@ import { ResourceService } from '../resource.service';
   styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit {
+  @ViewChild('cardCanvas')
+  myCanvas: ElementRef<HTMLCanvasElement>;
+
+  public ctx: CanvasRenderingContext2D;
+
   public gameId: Observable<string>;
   public commonCards: Card[];
   public handCards: Card[];
@@ -37,7 +42,7 @@ export class GameComponent implements OnInit {
     private colyseus: ColyseusService,
     public resourceService: ResourceService,
   ) { }
-  
+
   ngOnInit(): void {
     if (this.colyseus.room === undefined) {
       // no handle on this game; redirect to the lobby
@@ -58,6 +63,8 @@ export class GameComponent implements OnInit {
         this.showdownWinner = state.showdownWinner;
         this.numVotedNextRound = state.numVotedNextRound;
         this.nextRoundVotesRequired = state.nextRoundVotesRequired;
+
+        this.drawCards();
       });
 
       room.onMessage('game-view-changed', (newGameView: GameView) => {
@@ -82,6 +89,31 @@ export class GameComponent implements OnInit {
             break;
         }
       });
+    });
+  }
+
+  private drawCards(): void {
+    this.ctx = this.myCanvas.nativeElement.getContext('2d');
+    this.ctx.fillRect(10,10,10,10)
+
+    const spritesheet = this.resourceService.spritesheet;
+    this.commonCards.forEach((card, index) => {
+      const metadata = this.resourceService.getCardSpritesheetMedata(card);
+      const cardWidth = 100;
+      const cardHeight = 135;
+      const offsetX = cardWidth * index;
+      const offsetY = 0;
+      this.ctx.drawImage(
+        spritesheet,
+        metadata.x,
+        metadata.y,
+        metadata.width,
+        metadata.height,
+        offsetX,
+        offsetY,
+        cardWidth,
+        cardHeight
+      );
     });
   }
 

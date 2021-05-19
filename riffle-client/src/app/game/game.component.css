@@ -36,3 +36,7 @@
     border-style: inset;
     border-color: lightcoral;
 }
+
+canvas {
+    border: thin solid black;
+}

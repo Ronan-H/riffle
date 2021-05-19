@@ -12,28 +12,11 @@
                     [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
                 </div>
             </div>
-            <div class="card-row">
-                <h3>Common Cards:</h3>
-                <img
-                    [src]='resourceService.cardToImage(card).src'
-                    width="100"
-                    class="card"
-                    [class.selected-card]="selectedCommonIndex === i"
-                    *ngFor="let card of commonCards; let i = index"
-                    (click)="selectCommonCard(i)"
-                >
-            </div>
-            <div class="card-row">
-                <h3>Your Hand:</h3>
-                <img
-                    [src]='resourceService.cardToImage(card).src'
-                    width="100"
-                    class="card"
-                    [class.selected-card]="selectedHandIndex === i"
-                    *ngFor="let card of handCards; let i = index"
-                    (click)="selectHandCard(i)"
-                >
-            </div>
+            <canvas
+                #cardCanvas
+                width=500
+                height=405
+            ></canvas>
         </div>
 
         <div *ngSwitchCase="GameView.Showdown">

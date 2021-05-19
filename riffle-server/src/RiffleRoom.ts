@@ -193,7 +193,7 @@ export class RiffleRoom extends Room<RiffleState> {
       this.syncClientState();
     
       // assume only 3 players will join for now
-      if (this.state.players.size === 3) {
+      if (this.state.players.size === 1) {
         this.startRound();
       }
     }
