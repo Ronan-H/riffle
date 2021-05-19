@@ -94,13 +94,13 @@ export class GameComponent implements OnInit {
 
   private drawCards(): void {
     this.ctx = this.myCanvas.nativeElement.getContext('2d');
-    this.ctx.fillRect(10,10,10,10)
+    const cardWidth = 100;
+    const cardHeight = 135;
+    const handStartY = cardHeight * 2;
 
     const spritesheet = this.resourceService.spritesheet;
     this.commonCards.forEach((card, index) => {
       const metadata = this.resourceService.getCardSpritesheetMedata(card);
-      const cardWidth = 100;
-      const cardHeight = 135;
       const offsetX = cardWidth * index;
       const offsetY = 0;
       this.ctx.drawImage(
@@ -115,6 +115,43 @@ export class GameComponent implements OnInit {
         cardHeight
       );
     });
+
+    if (this.selectedCommonIndex !== -1) {
+      // highlight this card as being selected
+      const offsetX = cardWidth * this.selectedCommonIndex;
+      this.ctx.strokeStyle = "#00BB00";
+      this.ctx.lineWidth = 3;
+      this.ctx.beginPath();
+      this.ctx.rect(offsetX, 0, cardWidth, cardHeight);
+      this.ctx.stroke();
+    }
+
+    this.handCards.forEach((card, index) => {
+      const metadata = this.resourceService.getCardSpritesheetMedata(card);
+      const offsetX = cardWidth * index;
+      const offsetY = handStartY;
+      this.ctx.drawImage(
+        spritesheet,
+        metadata.x,
+        metadata.y,
+        metadata.width,
+        metadata.height,
+        offsetX,
+        offsetY,
+        cardWidth,
+        cardHeight
+      );
+    });
+
+    if (this.selectedHandIndex !== -1) {
+      // highlight this card as being selected
+      const offsetX = cardWidth * this.selectedHandIndex;
+      this.ctx.strokeStyle = "#00BB00";
+      this.ctx.lineWidth = 3;
+      this.ctx.beginPath();
+      this.ctx.rect(offsetX, handStartY, cardWidth, cardHeight);
+      this.ctx.stroke();
+    }
   }
 
   public selectCommonCard(index: number): void {
