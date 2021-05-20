@@ -192,9 +192,11 @@ export class RiffleRoom extends Room<RiffleState> {
 
       this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
       this.syncClientState();
-    
-      // assume only 3 players will join for now
-      if (this.state.players.size === 3) {
+
+      // TODO remove this temporary hack to take the room capacity from the last digit of the password
+      const roomCapacity = parseInt(this.metadata.password[this.metadata.password.length - 1]);
+
+      if (this.state.players.size === roomCapacity) {
         this.startRound();
       }
     }
