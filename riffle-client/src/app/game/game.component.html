@@ -1,59 +1,57 @@
 <div class="container mt-3">
-    <div [ngSwitch]="gameView">
-        <div *ngSwitchCase="GameView.Swapping">
-            <h3 class="text-center">Make the best hand you can!</h3>
+    <div [hidden]="gameView !== GameView.Swapping">
+        <h3 class="text-center">Make the best hand you can!</h3>
+        <div
+            class="progress round-timer"
+            >
             <div
-                class="progress round-timer"
-                >
-                <div
-                    class="progress-bar progress-bar-striped"
-                    [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
-                    role="progressbar"
-                    [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
-                </div>
+                class="progress-bar progress-bar-striped"
+                [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
+                role="progressbar"
+                [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
             </div>
-            <canvas
-                #cardCanvas
-                width=500
-                height=405
-            ></canvas>
         </div>
+        <canvas
+            #cardCanvas
+            width=500
+            height=405
+        ></canvas>
+    </div>
 
-        <div *ngSwitchCase="GameView.Showdown">
-            <div class="text-center">
-                <h3>Showdown!</h3>
+    <div *ngIf="gameView === GameView.Showdown">
+        <div class="text-center">
+            <h3>Showdown!</h3>
 
-                <div class="row justify-content-center">
-                    <table class="table table-bordered">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th class="fit" scope="col">Name</th>
-                                <th class="fit" scope="col">Hand</th>
-                                <th class="fit" scope="col">Hand ranking</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let result of showdownResults">
-                                <th class="fit" scope="row">{{ result.playerName }}</th>
-                                <td class="fit" >{{ result.hand }}</td>
-                                <td class="fit" >{{ result.rank }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="row justify-content-center">
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="fit" scope="col">Name</th>
+                            <th class="fit" scope="col">Hand</th>
+                            <th class="fit" scope="col">Hand ranking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let result of showdownResults">
+                            <th class="fit" scope="row">{{ result.playerName }}</th>
+                            <td class="fit" >{{ result.hand }}</td>
+                            <td class="fit" >{{ result.rank }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-                <h3>{{ showdownWinner.name }} wins!</h3>
+            <h3>{{ showdownWinner.name }} wins!</h3>
 
-                <div class="fixed-bottom">
-                    <button
-                        class="btn btn-primary mb-3"
-                        type="button"
-                        [disabled]="isNextRoundClicked"
-                        (click)="onNextRoundClicked()"
-                    >
-                        {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ numVotedNextRound }} / {{ nextRoundVotesRequired }}]
-                    </button>
-                </div>
+            <div class="fixed-bottom">
+                <button
+                    class="btn btn-primary mb-3"
+                    type="button"
+                    [disabled]="isNextRoundClicked"
+                    (click)="onNextRoundClicked()"
+                >
+                    {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ numVotedNextRound }} / {{ nextRoundVotesRequired }}]
+                </button>
             </div>
         </div>
     </div>
