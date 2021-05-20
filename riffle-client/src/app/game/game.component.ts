@@ -1,7 +1,7 @@
 import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map, startWith, take } from 'rxjs/operators';
 import { Card, GameConstants, RiffleState, GameView, ShowdownResult, Player } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { ResourceService } from '../resource.service';
@@ -27,23 +27,21 @@ export class GameComponent implements OnInit, AfterViewInit {
   private handStartY = this.cardHeight * 2;
 
   public gameId: Observable<string>;
-  public commonCards: Card[];
-  public handCards: Card[];
   public selectedCommonIndex;
   public selectedHandIndex;
+  public state: RiffleState;
   public GameView = GameView;
-  public gameView: GameView;
 
   public GameConstants = GameConstants;
   public roundTimeRemainingMS: number;
   private roundTimeInterval: any;
   private roundTimeDeltaMS = 200;
 
-  public showdownResults: ShowdownResult[];
-  public showdownWinner: Player;
   public isNextRoundClicked: boolean;
-  public numVotedNextRound: number;
-  public nextRoundVotesRequired: number;
+
+  public get stateHandCards(): Card[] {
+    return this.state.players.get(this.colyseus.room.sessionId).cards;
+  }
 
   constructor(
     private router: Router,
@@ -69,18 +67,17 @@ export class GameComponent implements OnInit, AfterViewInit {
       map((params => params['id'])),
     );
 
-    this.colyseus.room$.pipe(take(1)).subscribe(room => {
+    // start with default state to prevent undefined errors before the state is downloaded initially
+    this.state = new RiffleState();
+
+    this.colyseus.room$.pipe(
+      take(1)
+    ).subscribe(room => {
       room.onStateChange((state: RiffleState) => {
-        this.gameView = state.gameView;
-        this.commonCards = state.commonCards;
-        this.handCards = state.players.get(room.sessionId).cards;
-
-        this.showdownResults = state.showdownResults;
-        this.showdownWinner = state.showdownWinner;
-        this.numVotedNextRound = state.numVotedNextRound;
-        this.nextRoundVotesRequired = state.nextRoundVotesRequired;
-
-        this.drawCards();
+        this.state = state;
+        if (state.gameView === GameView.Swapping) {
+          this.drawCards();
+        }
       });
 
       room.onMessage('game-view-changed', (newGameView: GameView) => {
@@ -208,7 +205,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const spritesheet = this.resourceService.spritesheet;
-    this.commonCards.forEach((card, index) => {
+    this.state.commonCards.forEach((card, index) => {
       const metadata = this.resourceService.getCardSpritesheetMedata(card);
       const offsetX = this.cardWidth * index;
       const offsetY = 0;
@@ -235,7 +232,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       this.ctx.stroke();
     }
 
-    this.handCards.forEach((card, index) => {
+    this.stateHandCards.forEach((card, index) => {
       const metadata = this.resourceService.getCardSpritesheetMedata(card);
       const offsetX = this.cardWidth * index;
       const offsetY = this.handStartY;
@@ -283,18 +280,16 @@ export class GameComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private deselectAllCards(): void {
-    this.selectedCommonIndex = -1;
-    this.selectedHandIndex = -1;
-  }
-
   private swapIfBothSelected(): void {
     if (this.selectedCommonIndex !== -1 && this.selectedHandIndex !== -1) {
       this.colyseus.swapCards(this.selectedCommonIndex, this.selectedHandIndex);
-
-      this.selectedCommonIndex = -1;
-      this.selectedHandIndex = -1;
+      this.deselectAllCards();
     }
+  }
+
+  private deselectAllCards(): void {
+    this.selectedCommonIndex = -1;
+    this.selectedHandIndex = -1;
   }
 
   public onNextRoundClicked(): void {

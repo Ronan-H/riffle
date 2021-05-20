@@ -1,5 +1,5 @@
 <div class="container mt-3">
-    <div [hidden]="gameView !== GameView.Swapping">
+    <div [hidden]="state.gameView !== GameView.Swapping">
         <h3 class="text-center">Make the best hand you can!</h3>
         <div
             class="progress round-timer"
@@ -18,7 +18,7 @@
         ></canvas>
     </div>
 
-    <div *ngIf="gameView === GameView.Showdown">
+    <div *ngIf="state.gameView === GameView.Showdown">
         <div class="text-center">
             <h3>Showdown!</h3>
 
@@ -32,7 +32,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let result of showdownResults">
+                        <tr *ngFor="let result of state.showdownResults">
                             <th class="fit" scope="row">{{ result.playerName }}</th>
                             <td class="fit" >{{ result.hand }}</td>
                             <td class="fit" >{{ result.rank }}</td>
@@ -41,7 +41,7 @@
                 </table>
             </div>
 
-            <h3>{{ showdownWinner.name }} wins!</h3>
+            <h3>{{ state.showdownWinner.name }} wins!</h3>
 
             <div class="fixed-bottom">
                 <button
@@ -50,7 +50,7 @@
                     [disabled]="isNextRoundClicked"
                     (click)="onNextRoundClicked()"
                 >
-                    {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ numVotedNextRound }} / {{ nextRoundVotesRequired }}]
+                    {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
                 </button>
             </div>
         </div>
