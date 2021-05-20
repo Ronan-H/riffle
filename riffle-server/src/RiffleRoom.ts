@@ -54,6 +54,7 @@ export class RiffleRoom extends Room<RiffleState> {
       if (!this.state.players.get(client.sessionId).votedNextRound) {
         this.state.players.get(client.sessionId).votedNextRound = true;
         this.state.numVotedNextRound++;
+        this.syncClientState();
 
         if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
           // enough players voted to continue; start new round
@@ -193,7 +194,7 @@ export class RiffleRoom extends Room<RiffleState> {
       this.syncClientState();
     
       // assume only 3 players will join for now
-      if (this.state.players.size === 1) {
+      if (this.state.players.size === 3) {
         this.startRound();
       }
     }
