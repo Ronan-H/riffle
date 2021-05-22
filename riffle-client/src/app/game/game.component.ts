@@ -1,4 +1,4 @@
-import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, startWith, take } from 'rxjs/operators';
@@ -22,9 +22,9 @@ export class GameComponent implements OnInit, AfterViewInit {
   private isMobile: boolean;
 
   // for drawing cards on the canvas, and to detect which card has been clicked on mouse down
-  private cardWidth = 100;
-  private cardHeight = 135;
-  private handStartY = this.cardHeight * 2;
+  private cardWidth: number;
+  private cardHeight: number;
+  private handStartY: number;
 
   public gameId: Observable<string>;
   public selectedCommonIndex;
@@ -49,6 +49,35 @@ export class GameComponent implements OnInit, AfterViewInit {
     private colyseus: ColyseusService,
     public resourceService: ResourceService,
   ) { }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    this.autoAdjustCanvas();
+    // TODO possiblity of cards being undefined here?
+    this.drawCards();
+  }
+
+  /**
+   * Automatically adjust canvas size to fit nicely on the screen
+   */
+  private autoAdjustCanvas(): void {
+    const cardsPerRow = 5;
+    const cardsPerCol = 3;
+
+    const defaultWidth = 500;
+    const defaultHeight = 405;
+    const canvasRatio = defaultWidth / defaultHeight;
+
+    const chosenWidth = Math.min(window.innerWidth, defaultWidth);
+    const chosenHeight = Math.floor(chosenWidth / canvasRatio);
+
+    this.cardWidth = Math.floor(chosenWidth / cardsPerRow);
+    this.cardHeight = Math.floor(chosenHeight / cardsPerCol);
+    this.handStartY = this.cardHeight * 2;
+
+    this.canvas.width = chosenWidth;
+    this.canvas.height = chosenHeight;
+  }
 
   ngOnInit(): void {
     // from https://stackoverflow.com/a/3540295
@@ -113,6 +142,8 @@ export class GameComponent implements OnInit, AfterViewInit {
   private initCanvas(): void {
     this.canvas = this.myCanvas.nativeElement;
     this.ctx = this.myCanvas.nativeElement.getContext('2d');
+
+    this.autoAdjustCanvas();
 
     // register mouse event listeners
     this.canvas.addEventListener('mousedown', e => {
