@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { GameComponent } from './game/game.component';
 import { LobbyComponent } from './lobby/lobby.component';

@@ -1,4 +1,4 @@
-import { Schema, ArraySchema, MapSchema, type } from "@colyseus/schema";
+import { Schema, ArraySchema, MapSchema, type } from '@colyseus/schema';
 
 export enum GameView {
   GameLobby,
@@ -11,8 +11,8 @@ export const GameConstants = {
 };
 
 export class Card extends Schema {
-  @type("uint8") num: number = 0;
-  @type("uint8") suit: number = 0;
+  @type('uint8') num: number = 0;
+  @type('uint8') suit: number = 0;
 
   constructor(num: number, suit: number) {
     super();
@@ -51,7 +51,7 @@ export class Card extends Schema {
         num = this.num.toString();
     }
 
-    return num + suit;
+    return num.concat(suit);
   }
 }
 
@@ -116,8 +116,8 @@ export class RiffleState extends Schema {
   @type([ ShowdownResult ])
   showdownResults: ShowdownResult[];
 
-  @type(Player)
-  showdownWinner: Player;
+  @type('string')
+  showdownWinner: string;
 
   @type('uint8')
   numVotedNextRound: number;

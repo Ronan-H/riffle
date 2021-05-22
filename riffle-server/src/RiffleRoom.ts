@@ -4,8 +4,24 @@ import { ArraySchema } from "@colyseus/schema";
 var Hand = require('pokersolver').Hand;
 
 export class RiffleRoom extends Room<RiffleState> {
-  
+  // this can be set to true to indicate that a patch of the state
+  // should be sent to each client during the next clock interval
+  private isStateDirty: boolean;
+
   onCreate (options: any) {
+    // disable automatic patches
+    this.setPatchRate(null);
+
+    // ensure clock timers are enabled
+    this.setSimulationInterval(() => {});
+
+    this.clock.setInterval(() => {
+        if (this.isStateDirty) {
+            this.broadcastPatch();
+            this.isStateDirty = false;
+        }
+    }, 100);
+
     this.setMetadata({
       ...this.metadata,
       ...options
@@ -22,6 +38,8 @@ export class RiffleRoom extends Room<RiffleState> {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
 
+      client.send('debug', 'BEF\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
+
       const common = this.state.commonCards;
       const hand = this.state.players.get(client.sessionId).cards;
 
@@ -29,12 +47,17 @@ export class RiffleRoom extends Room<RiffleState> {
       const temp = common[commonIndex];
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
+
+      client.send('debug', 'AFT\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
+
+      this.syncClientState();
     });
 
     this.onMessage('next-round-vote', (client, message) => {
       if (!this.state.players.get(client.sessionId).votedNextRound) {
         this.state.players.get(client.sessionId).votedNextRound = true;
         this.state.numVotedNextRound++;
+        this.syncClientState();
 
         if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
           // enough players voted to continue; start new round
@@ -44,13 +67,19 @@ export class RiffleRoom extends Room<RiffleState> {
     });
   }
 
+  private syncClientState(): void {
+    this.isStateDirty = true;
+  }
+
   private startRound() {
     this.resetCards();
     this.populateDeck();
-    this.state.deck = this.shuffle(this.state.deck);
+    this.shuffle(this.state.deck);
     this.deal();
 
     this.updateGameView(GameView.Swapping);
+
+    this.syncClientState();
 
     setTimeout(() => {
       this.updateGameView(GameView.Showdown);
@@ -79,7 +108,7 @@ export class RiffleRoom extends Room<RiffleState> {
     });
   }
 
-  private shuffle(cards: ArraySchema<Card>): ArraySchema<Card> {
+  private shuffle(cards: ArraySchema<Card>): void {
     // Fisher–Yates shuffle -- https://bost.ocks.org/mike/shuffle/
     let m = cards.length, t, i;
 
@@ -90,8 +119,6 @@ export class RiffleRoom extends Room<RiffleState> {
       cards[m] = cards[i];
       cards[i] = t;
     }
-
-    return cards;
   }
 
   private deal(): void {
@@ -132,7 +159,7 @@ export class RiffleRoom extends Room<RiffleState> {
     else {
       winnerHand = winnerHand[0];
     }
-    this.state.showdownWinner = winnerHand.player;
+    this.state.showdownWinner = winnerHand.player.name;
 
     showdownSeq.sort((a, b) => b.rank - a.rank);
     this.state.showdownResults = showdownSeq;
@@ -142,6 +169,8 @@ export class RiffleRoom extends Room<RiffleState> {
       player.votedNextRound = false;
     });
     this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
+
+    this.syncClientState();
   }
 
   onJoin (client: Client, options: any) {
@@ -163,9 +192,12 @@ export class RiffleRoom extends Room<RiffleState> {
       client.send('password-accepted');
 
       this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
-    
-      // assume only 3 players will join for now
-      if (this.state.players.size === 3) {
+      this.syncClientState();
+
+      // TODO remove this temporary hack to take the room capacity from the last digit of the password
+      const roomCapacity = parseInt(this.metadata.password[this.metadata.password.length - 1]);
+
+      if (this.state.players.size === roomCapacity) {
         this.startRound();
       }
     }

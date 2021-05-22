@@ -5,6 +5,7 @@ import { take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
 import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { ResourceService } from '../resource.service';
 
 @Component({
   selector: 'app-lobby',
@@ -17,15 +18,19 @@ export class LobbyComponent implements OnInit {
   public lobbyForm: FormGroup;
   private modalRef: NgbModalRef;
   public wrongPassword: boolean;
+  public isLoading: boolean;
 
   constructor(
     private router: Router,
     public colyseus: ColyseusService,
+    private resourceService: ResourceService, // eagerly load card spritesheet
     private fb: FormBuilder,
     private modalService: NgbModal,
   ) { }
 
   ngOnInit() {
+    this.isLoading = false;
+
     this.createForm = this.fb.group({
       roomName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
       password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
@@ -57,6 +62,8 @@ export class LobbyComponent implements OnInit {
   }
 
   public createRoom(): void {
+    this.isLoading = true;
+
     this.colyseus.createRoom({
       username: this.lobbyForm.get('username').value,
       roomName: this.lobbyForm.get(['createForm', 'roomName']).value,
@@ -74,11 +81,14 @@ export class LobbyComponent implements OnInit {
 
       this.modalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.wrongPassword = false;
+        this.isLoading = false;
       });
     }
   }
 
   public tryJoinRoom(): void {
+    this.isLoading = true;
+
     const username = this.lobbyForm.get('username').value;
     const roomId = this.joinForm.get('roomId').value;
     const password = this.joinForm.get('password').value;
@@ -94,6 +104,7 @@ export class LobbyComponent implements OnInit {
 
       room.onMessage('password-rejected', () => {
         this.wrongPassword = true;
+        this.isLoading = false;
       });
     });
   }

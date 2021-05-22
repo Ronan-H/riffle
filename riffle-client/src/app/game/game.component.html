@@ -1,76 +1,60 @@
 <div class="container mt-3">
-    <div [ngSwitch]="gameView">
-        <div *ngSwitchCase="GameView.Swapping">
-            <h3 class="text-center">Make the best hand you can!</h3>
+    <div [hidden]="state.gameView !== GameView.Swapping">
+        <h3 class="text-center">Make the best hand you can!</h3>
+        <div
+            class="progress round-timer"
+            >
             <div
-                class="progress round-timer"
-                >
-                <div
-                    class="progress-bar progress-bar-striped"
-                    [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
-                    role="progressbar"
-                    [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
-                </div>
-            </div>
-            <div class="card-row">
-                <h3>Common Cards:</h3>
-                <img
-                    [src]='cardToImagePath(card)'
-                    width="100"
-                    class="card"
-                    [class.selected-card]="selectedCommonIndex === i"
-                    *ngFor="let card of commonCards; let i = index"
-                    (click)="selectCommonCard(i)"
-                >
-            </div>
-            <div class="card-row">
-                <h3>Your Hand:</h3>
-                <img
-                    [src]='cardToImagePath(card)'
-                    width="100"
-                    class="card"
-                    [class.selected-card]="selectedHandIndex === i"
-                    *ngFor="let card of handCards; let i = index"
-                    (click)="selectHandCard(i)"
-                >
+                class="progress-bar progress-bar-striped"
+                [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
+                role="progressbar"
+                [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
             </div>
         </div>
+        <div id="card-canvas-div">
+            <canvas
+                id="card-canvas"
+                #cardCanvas
+                width=500
+                height=405
+            ></canvas>
+        </div>
+    </div>
 
-        <div *ngSwitchCase="GameView.Showdown">
-            <div class="text-center">
-                <h3>Showdown!</h3>
+    <div *ngIf="state.gameView === GameView.Showdown">
+        <div class="text-center">
+            <h3>Showdown!</h3>
 
-                <div class="row justify-content-center">
-                    <table class="table table-bordered">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th class="fit" scope="col">Name</th>
-                                <th class="fit" scope="col">Hand</th>
-                                <th class="fit" scope="col">Hand ranking</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let result of showdownResults">
-                                <th class="fit" scope="row">{{ result.playerName }}</th>
-                                <td class="fit" >{{ result.hand }}</td>
-                                <td class="fit" >{{ result.rank }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="row justify-content-center">
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="fit" scope="col">Name</th>
+                            <th class="fit" scope="col">Hand</th>
+                            <th class="fit" scope="col">Hand ranking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let result of state.showdownResults">
+                            <th class="fit" scope="row">{{ result.playerName }}</th>
+                            <td class="fit" >{{ result.hand }}</td>
+                            <td class="fit" >{{ result.rank }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-                <h3>{{ showdownWinner.name }} wins!</h3>
+            <h3>{{ state.showdownWinner }} wins!</h3>
 
-                <div class="fixed-bottom">
-                    <button
-                        class="btn btn-primary mb-3"
-                        type="button"
-                        [disabled]="isNextRoundClicked"
-                        (click)="onNextRoundClicked()"
-                    >
-                        {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ numVotedNextRound }} / {{ nextRoundVotesRequired }}]
-                    </button>
-                </div>
+            <div class="fixed-bottom">
+                <button
+                    class="btn btn-primary mb-3"
+                    type="button"
+                    [disabled]="isNextRoundClicked"
+                    (click)="onNextRoundClicked()"
+                >
+                    {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
+                </button>
             </div>
         </div>
     </div>
