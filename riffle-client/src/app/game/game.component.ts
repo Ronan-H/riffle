@@ -75,6 +75,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     ).subscribe(room => {
       room.onStateChange((state: RiffleState) => {
         this.state = state;
+
         if (state.gameView === GameView.Swapping) {
           this.drawCards();
         }

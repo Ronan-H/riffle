@@ -16,7 +16,6 @@ export class RiffleRoom extends Room<RiffleState> {
     this.setSimulationInterval(() => {});
 
     this.clock.setInterval(() => {
-        // only broadcast patches if your custom conditions are met.
         if (this.isStateDirty) {
             this.broadcastPatch();
             this.isStateDirty = false;
@@ -39,6 +38,8 @@ export class RiffleRoom extends Room<RiffleState> {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
 
+      client.send('debug', 'BEF\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
+
       const common = this.state.commonCards;
       const hand = this.state.players.get(client.sessionId).cards;
 
@@ -46,6 +47,8 @@ export class RiffleRoom extends Room<RiffleState> {
       const temp = common[commonIndex];
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
+
+      client.send('debug', 'AFT\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
 
       this.syncClientState();
     });
@@ -71,7 +74,7 @@ export class RiffleRoom extends Room<RiffleState> {
   private startRound() {
     this.resetCards();
     this.populateDeck();
-    this.state.deck = this.shuffle(this.state.deck);
+    this.shuffle(this.state.deck);
     this.deal();
 
     this.updateGameView(GameView.Swapping);
@@ -105,7 +108,7 @@ export class RiffleRoom extends Room<RiffleState> {
     });
   }
 
-  private shuffle(cards: ArraySchema<Card>): ArraySchema<Card> {
+  private shuffle(cards: ArraySchema<Card>): void {
     // Fisher–Yates shuffle -- https://bost.ocks.org/mike/shuffle/
     let m = cards.length, t, i;
 
@@ -116,8 +119,6 @@ export class RiffleRoom extends Room<RiffleState> {
       cards[m] = cards[i];
       cards[i] = t;
     }
-
-    return cards;
   }
 
   private deal(): void {
@@ -158,7 +159,7 @@ export class RiffleRoom extends Room<RiffleState> {
     else {
       winnerHand = winnerHand[0];
     }
-    this.state.showdownWinner = winnerHand.player;
+    this.state.showdownWinner = winnerHand.player.name;
 
     showdownSeq.sort((a, b) => b.rank - a.rank);
     this.state.showdownResults = showdownSeq;
