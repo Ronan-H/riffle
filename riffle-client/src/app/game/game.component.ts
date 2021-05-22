@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map, startWith, take } from 'rxjs/operators';
 import { Card, GameConstants, RiffleState, GameView, ShowdownResult, Player } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
+import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
 
 type MouseTouchEvent = MouseEvent & TouchEvent;
@@ -48,6 +49,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private colyseus: ColyseusService,
     public resourceService: ResourceService,
+    private navbarService: NavbarService,
   ) { }
 
   @HostListener('window:resize', ['$event'])
@@ -68,8 +70,20 @@ export class GameComponent implements OnInit, AfterViewInit {
     const defaultHeight = 405;
     const canvasRatio = defaultWidth / defaultHeight;
 
-    const chosenWidth = Math.min(window.innerWidth, defaultWidth);
-    const chosenHeight = Math.floor(chosenWidth / canvasRatio);
+    const border = 10;
+
+    const availableWidth = window.innerWidth - (border * 2);
+    const availableHeight = window.innerHeight - this.canvas.offsetTop - (border * 2);
+
+    // try using all the available width
+    let chosenWidth = Math.min(availableWidth, defaultWidth);
+    let chosenHeight = Math.floor(chosenWidth / canvasRatio);
+
+    if (chosenHeight > availableHeight) {
+      // canvas is too big for the height; scale to fill the height instead
+      chosenHeight = availableHeight;
+      chosenWidth = canvasRatio * chosenHeight;
+    }
 
     this.cardWidth = Math.floor(chosenWidth / cardsPerRow);
     this.cardHeight = Math.floor(chosenHeight / cardsPerCol);
@@ -123,10 +137,16 @@ export class GameComponent implements OnInit, AfterViewInit {
             this.roundTimeInterval = setInterval(() => {
               this.roundTimeRemainingMS -= this.roundTimeDeltaMS;
             }, this.roundTimeDeltaMS);
+
+            // set navbar message
+            this.navbarService.setMessage('Make the best hand you can!');
             break;
           case GameView.Showdown:
             // reset
             this.isNextRoundClicked = false;
+
+            // set navbar message
+            this.navbarService.setMessage('Showdown!');
 
             clearInterval(this.roundTimeInterval);
             break;

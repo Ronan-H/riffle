@@ -6,6 +6,7 @@ import { ColyseusService } from '../colyseus.service';
 
 import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { ResourceService } from '../resource.service';
+import { NavbarService } from '../navbar/navbar.service';
 
 @Component({
   selector: 'app-lobby',
@@ -26,10 +27,12 @@ export class LobbyComponent implements OnInit {
     private resourceService: ResourceService, // eagerly load card spritesheet
     private fb: FormBuilder,
     private modalService: NgbModal,
+    private navbarService: NavbarService,
   ) { }
 
   ngOnInit() {
     this.isLoading = false;
+    this.navbarService.setMessage('Lobby');
 
     this.createForm = this.fb.group({
       roomName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],

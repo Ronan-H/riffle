@@ -1,6 +1,5 @@
 <div class="container mt-3">
     <div [hidden]="state.gameView !== GameView.Swapping">
-        <h3 class="text-center">Make the best hand you can!</h3>
         <div
             class="progress round-timer"
             >
@@ -21,8 +20,6 @@
 
     <div *ngIf="state.gameView === GameView.Showdown">
         <div class="text-center">
-            <h3>Showdown!</h3>
-
             <div class="row justify-content-center">
                 <table class="table table-bordered">
                     <thead class="thead-dark">
