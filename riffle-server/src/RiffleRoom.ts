@@ -30,15 +30,8 @@ export class RiffleRoom extends Room<RiffleState> {
     this.setState(new RiffleState());
 
     this.onMessage('swap-cards', (client, message) => {
-      client.send('debug', {
-        id: client.id,
-        sessionId: client.sessionId,
-      });
-
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
-
-      client.send('debug', 'BEF\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
 
       const common = this.state.commonCards;
       const hand = this.state.players.get(client.sessionId).cards;
@@ -47,8 +40,6 @@ export class RiffleRoom extends Room<RiffleState> {
       const temp = common[commonIndex];
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
-
-      client.send('debug', 'AFT\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
 
       this.syncClientState();
     });
@@ -150,10 +141,8 @@ export class RiffleRoom extends Room<RiffleState> {
     let winnerHand = Hand.winners(playerHands);
     if (winnerHand.length > 1) {
       // it's a tie!
-      this.broadcast('debug', 'Showdown tie between ' + winnerHand.length + ' players');
       // TODO: handle ties properly, just picking a random player for now
       const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
-      this.broadcast('debug', '...randomly chose hand at index ' + randomWinnerIndex + ' as the winner');
       winnerHand = winnerHand[randomWinnerIndex];
     }
     else {
@@ -174,11 +163,6 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   onJoin (client: Client, options: any) {
-    client.send('debug', {
-      optionsPass: options.password,
-      metaPass: this.metadata.password,
-    });
-
     // validate password
     if (options.password !== this.metadata.password) {
       client.send('password-rejected');

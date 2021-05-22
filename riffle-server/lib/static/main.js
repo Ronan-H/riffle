@@ -319,18 +319,12 @@ class ColyseusService {
     createRoom(options) {
         this.room$ = Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["from"])(this.client.create('riffle_room', Object.assign({ password: 'test' }, options))).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["tap"])(room => {
             this.room = room;
-            room.onMessage('debug', (obj) => {
-                console.log('DEBUG:', obj);
-            });
         }));
         return this.room$;
     }
     joinGame(roomId, options) {
         this.room$ = Object(rxjs__WEBPACK_IMPORTED_MODULE_1__["from"])(this.client.joinById(roomId, Object.assign({}, options))).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_2__["tap"])(room => {
             this.room = room;
-            room.onMessage('debug', (obj) => {
-                console.log('DEBUG:', obj);
-            });
         }));
         return this.room$;
     }

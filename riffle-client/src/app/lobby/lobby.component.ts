@@ -46,19 +46,6 @@ export class LobbyComponent implements OnInit {
       createForm: this.createForm,
       joinForm: this.joinForm,
     })
-
-    // TODO remove this, temporary while debugging
-    this.lobbyForm.setValue({
-      username: 'Ronan',
-      createForm: {
-        roomName: 'Test room',
-        password: 'qwerty123'
-      },
-      joinForm: {
-        roomId: 'ABCDEF',
-        password: 'qwerty123'
-      }
-    });
   }
 
   public createRoom(): void {

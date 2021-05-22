@@ -10,10 +10,6 @@ class RiffleRoom extends colyseus_1.Room {
         this.setMetadata(Object.assign(Object.assign({}, this.metadata), options));
         this.setState(new RiffleSchema_1.RiffleState());
         this.onMessage('swap-cards', (client, message) => {
-            client.send('debug', {
-                id: client.id,
-                sessionId: client.sessionId,
-            });
             const commonIndex = message.commonIndex;
             const handIndex = message.handIndex;
             const common = this.state.commonCards;
@@ -100,10 +96,8 @@ class RiffleRoom extends colyseus_1.Room {
         let winnerHand = Hand.winners(playerHands);
         if (winnerHand.length > 1) {
             // it's a tie!
-            this.broadcast('debug', 'Showdown tie between ' + winnerHand.length + ' players');
             // TODO: handle ties properly, just picking a random player for now
             const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
-            this.broadcast('debug', '...randomly chose hand at index ' + randomWinnerIndex + ' as the winner');
             winnerHand = winnerHand[randomWinnerIndex];
         }
         else {
@@ -119,10 +113,6 @@ class RiffleRoom extends colyseus_1.Room {
         this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
     }
     onJoin(client, options) {
-        client.send('debug', {
-            optionsPass: options.password,
-            metaPass: this.metadata.password,
-        });
         // validate password
         if (options.password !== this.metadata.password) {
             client.send('password-rejected');

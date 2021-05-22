@@ -50,10 +50,6 @@ export class ColyseusService {
     ).pipe(
         tap(room => {
           this.room = room;
-
-          room.onMessage('debug', (obj) => {
-            console.log('DEBUG:', obj);
-          });
         }),
       );
 
@@ -66,10 +62,6 @@ export class ColyseusService {
     ).pipe(
         tap(room => {
           this.room = room;
-
-          room.onMessage('debug', (obj) => {
-            console.log('DEBUG:', obj);
-          });
         }),
       );
 
