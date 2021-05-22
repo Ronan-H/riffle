@@ -54,14 +54,14 @@ class Card extends schema_1.Schema {
             default:
                 num = this.num.toString();
         }
-        return num + suit;
+        return num.concat(suit);
     }
 }
 __decorate([
-    schema_1.type("uint8")
+    schema_1.type('uint8')
 ], Card.prototype, "num", void 0);
 __decorate([
-    schema_1.type("uint8")
+    schema_1.type('uint8')
 ], Card.prototype, "suit", void 0);
 exports.Card = Card;
 class Player extends schema_1.Schema {
@@ -135,7 +135,7 @@ __decorate([
     schema_1.type([ShowdownResult])
 ], RiffleState.prototype, "showdownResults", void 0);
 __decorate([
-    schema_1.type(Player)
+    schema_1.type('string')
 ], RiffleState.prototype, "showdownWinner", void 0);
 __decorate([
     schema_1.type('uint8')

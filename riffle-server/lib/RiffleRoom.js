@@ -7,6 +7,16 @@ const schema_1 = require("@colyseus/schema");
 var Hand = require('pokersolver').Hand;
 class RiffleRoom extends colyseus_1.Room {
     onCreate(options) {
+        // disable automatic patches
+        this.setPatchRate(null);
+        // ensure clock timers are enabled
+        this.setSimulationInterval(() => { });
+        this.clock.setInterval(() => {
+            if (this.isStateDirty) {
+                this.broadcastPatch();
+                this.isStateDirty = false;
+            }
+        }, 100);
         this.setMetadata(Object.assign(Object.assign({}, this.metadata), options));
         this.setState(new RiffleSchema_1.RiffleState());
         this.onMessage('swap-cards', (client, message) => {
@@ -18,11 +28,13 @@ class RiffleRoom extends colyseus_1.Room {
             const temp = common[commonIndex];
             common[commonIndex] = hand[handIndex];
             hand[handIndex] = temp;
+            this.syncClientState();
         });
         this.onMessage('next-round-vote', (client, message) => {
             if (!this.state.players.get(client.sessionId).votedNextRound) {
                 this.state.players.get(client.sessionId).votedNextRound = true;
                 this.state.numVotedNextRound++;
+                this.syncClientState();
                 if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
                     // enough players voted to continue; start new round
                     this.startRound();
@@ -30,12 +42,16 @@ class RiffleRoom extends colyseus_1.Room {
             }
         });
     }
+    syncClientState() {
+        this.isStateDirty = true;
+    }
     startRound() {
         this.resetCards();
         this.populateDeck();
-        this.state.deck = this.shuffle(this.state.deck);
+        this.shuffle(this.state.deck);
         this.deal();
         this.updateGameView(RiffleSchema_1.GameView.Swapping);
+        this.syncClientState();
         setTimeout(() => {
             this.updateGameView(RiffleSchema_1.GameView.Showdown);
             this.startShowdown();
@@ -68,7 +84,6 @@ class RiffleRoom extends colyseus_1.Room {
             cards[m] = cards[i];
             cards[i] = t;
         }
-        return cards;
     }
     deal() {
         for (let i = 0; i < 5; i++) {
@@ -103,7 +118,7 @@ class RiffleRoom extends colyseus_1.Room {
         else {
             winnerHand = winnerHand[0];
         }
-        this.state.showdownWinner = winnerHand.player;
+        this.state.showdownWinner = winnerHand.player.name;
         showdownSeq.sort((a, b) => b.rank - a.rank);
         this.state.showdownResults = showdownSeq;
         this.state.numVotedNextRound = 0;
@@ -111,6 +126,7 @@ class RiffleRoom extends colyseus_1.Room {
             player.votedNextRound = false;
         });
         this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
+        this.syncClientState();
     }
     onJoin(client, options) {
         // validate password
@@ -124,8 +140,10 @@ class RiffleRoom extends colyseus_1.Room {
         else {
             client.send('password-accepted');
             this.state.players.set(client.sessionId, new RiffleSchema_1.Player(client.sessionId, options.username));
-            // assume only 3 players will join for now
-            if (this.state.players.size === 3) {
+            this.syncClientState();
+            // TODO remove this temporary hack to take the room capacity from the last digit of the password
+            const roomCapacity = parseInt(this.metadata.password[this.metadata.password.length - 1]);
+            if (this.state.players.size === roomCapacity) {
                 this.startRound();
             }
         }
