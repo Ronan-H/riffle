@@ -52,7 +52,7 @@
             <button
               class="btn btn-primary"
               type="submit"
-              [disabled]="createForm.invalid"
+              [disabled]="createForm.invalid || isLoading"
               (click)="createRoom()"
               autofocus
             >
@@ -118,6 +118,7 @@
           <button
             class="btn btn-primary"
             type="submit"
+            [disabled]="isLoading"
             (click)="tryJoinRoom()"
           >
             Join
