@@ -11,11 +11,14 @@
                 [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
             </div>
         </div>
-        <canvas
-            #cardCanvas
-            width=500
-            height=405
-        ></canvas>
+        <div id="card-canvas-div">
+            <canvas
+                id="card-canvas"
+                #cardCanvas
+                width=500
+                height=405
+            ></canvas>
+        </div>
     </div>
 
     <div *ngIf="state.gameView === GameView.Showdown">

@@ -37,6 +37,14 @@
     border-color: lightcoral;
 }
 
-canvas {
-    border: thin solid black;
+#card-canvas-div {
+    width: 100%;
+    text-align: center;
+    margin-top: 1em;
+}
+
+#card-canvas {
+    border: 2px solid gray;
+    border-radius: 5px;
+    display: inline;
 }
