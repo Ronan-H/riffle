@@ -68,8 +68,20 @@ export class GameComponent implements OnInit, AfterViewInit {
     const defaultHeight = 405;
     const canvasRatio = defaultWidth / defaultHeight;
 
-    const chosenWidth = Math.min(window.innerWidth, defaultWidth);
-    const chosenHeight = Math.floor(chosenWidth / canvasRatio);
+    const border = 10;
+
+    const availableWidth = window.innerWidth - (border * 2);
+    const availableHeight = window.innerHeight - this.canvas.offsetTop - (border * 2);
+
+    // try using all the available width
+    let chosenWidth = Math.min(availableWidth, defaultWidth);
+    let chosenHeight = Math.floor(chosenWidth / canvasRatio);
+
+    if (chosenHeight > availableHeight) {
+      // canvas is too big for the height; scale to fill the height instead
+      chosenHeight = availableHeight;
+      chosenWidth = canvasRatio * chosenHeight;
+    }
 
     this.cardWidth = Math.floor(chosenWidth / cardsPerRow);
     this.cardHeight = Math.floor(chosenHeight / cardsPerCol);
