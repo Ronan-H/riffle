@@ -1,37 +1,35 @@
 <form [formGroup]="lobbyForm">
   <div class="container mt-3">
     <div class="row justify-content-center">
-      <div class="input-group input-group-lg">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-lg"
-            >Username</span
-          >
+      <div class="col-xs-6">
+        <div class="row justify-content-center">
+          <em>Enter a username</em>
         </div>
-        <input
-          formControlName="username"
-          type="text"
-          class="form-control"
-          aria-label="Large"
-          placeholder="Username"
-          required
-        />
+        <div class="row justify-content-center">
+          <input
+            id="username-input"
+            formControlName="username"
+            type="text"
+            class="form-control"
+            aria-label="Large"
+            placeholder="Username"
+            required
+          />
+        </div>
       </div>
     </div>
+
+    <hr />
   
     <div class="row justify-content-center">
-      <h3>Create a Game</h3>
+      <h4>Create a Game</h4>
     </div>
-    <div class="row justify-content-center">
-      <em>All fields are required</em>
-    </div>
-    <div class="row justify-content-center">
-      <form [formGroup]="createForm">
-        <div class="input-group input-group-lg mt-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-lg"
-              >Room Info</span
-            >
-          </div>
+    <div class="col-xs-6">
+      <div class="row justify-content-center">
+        <em>All fields are required</em>
+      </div>
+      <div class="row justify-content-center">
+        <form [formGroup]="createForm">
           <input
             formControlName="roomName"
             type="text"
@@ -48,23 +46,23 @@
             placeholder="Password"
             required
           />
-          <div class="input-group-append">
-            <button
-              class="btn btn-primary"
-              type="submit"
-              [disabled]="createForm.invalid || isLoading"
-              (click)="createRoom()"
-              autofocus
-            >
-              Create Game
-            </button>
-          </div>
-        </div>
-      </form>
+          <button
+            class="btn btn-primary"
+            type="submit"
+            [disabled]="createForm.invalid || isLoading"
+            (click)="createRoom()"
+            autofocus
+          >
+            Create Game
+          </button>
+        </form>
+      </div>
     </div>
+
     <hr />
+
     <div class="row justify-content-center">
-      <h3>Join a Game</h3>
+      <h4>Join a Game</h4>
     </div>
     <div class="row justify-content-center">
       <ng-template #noRooms>
