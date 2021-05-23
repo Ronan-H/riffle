@@ -9,6 +9,14 @@ import { RiffleRoom } from "./RiffleRoom";
 
 const compression = require('compression');
 
+// Ref: https://stackoverflow.com/a/31144924
+function requireHTTPS(req, res, next) {
+    if (!req.secure && req.get('x-forwarded-proto') !== 'https') {
+        return res.redirect('https://' + req.get('host') + req.url);
+    }
+    next();
+}
+
 export default Arena({
     getId: () => "Riffle",
 
@@ -22,20 +30,10 @@ export default Arena({
     initializeExpress: (app) => {
         app
             .use(compression())
+            .use(requireHTTPS)
             .use(express.static(path.join(__dirname, 'static')))
             .use((req, res) => res.sendFile('index.html', { root: path.join(__dirname, 'static') })
         );
-
-        // app.use('/', (req, res) => 
-        //     res.sendFile('index.html', { root: path.join(__dirname, 'static') })
-        // );
-        // app.use('/', serveIndex(path.join(__dirname, "static"), {'icons': true}))
-        // app.use('/assets', express.static(path.join(__dirname, 'static', 'assets')));pp.get('/', function(req, res){
-        //     res.sendFile('default.html', { root: __dirname + "/relative_path_of_file" } );
-        // });
-        // app.use('*', express.static(path.join(__dirname, "static")));
-        // https://docs.colyseus.io/tools/monitor/
-        // app.use("/colyseus", monitor());
     },
 
 
