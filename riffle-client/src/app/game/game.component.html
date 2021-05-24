@@ -1,15 +1,5 @@
 <div class="container mt-3">
     <div [hidden]="state.gameView !== GameView.Swapping">
-        <div
-            class="progress round-timer"
-            >
-            <div
-                class="progress-bar progress-bar-striped"
-                [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
-                role="progressbar"
-                [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
-            </div>
-        </div>
         <div id="card-canvas-div">
             <canvas
                 id="card-canvas"

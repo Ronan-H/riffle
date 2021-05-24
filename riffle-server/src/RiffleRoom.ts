@@ -38,8 +38,6 @@ export class RiffleRoom extends Room<RiffleState> {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
 
-      client.send('debug', 'BEF\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
-
       const common = this.state.commonCards;
       const hand = this.state.players.get(client.sessionId).cards;
 
@@ -47,8 +45,6 @@ export class RiffleRoom extends Room<RiffleState> {
       const temp = common[commonIndex];
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
-
-      client.send('debug', 'AFT\nCom cards:' + this.state.commonCards.map(card => `${card.suit} ${card.num}`) + '\nHan ' + this.state.players.get(client.sessionId).cards.map(card => `${card.suit} ${card.num}`))
 
       this.syncClientState();
     });
