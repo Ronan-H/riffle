@@ -139,7 +139,7 @@ export class GameComponent implements OnInit, AfterViewInit {
             }, this.roundTimeDeltaMS);
 
             // set navbar message
-            this.navbarService.setMessage('Make the best hand you can!');
+            this.navbarService.setMessage('Swap for a good hand!');
             break;
           case GameView.Showdown:
             // reset
