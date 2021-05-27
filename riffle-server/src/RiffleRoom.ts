@@ -30,13 +30,10 @@ export class RiffleRoom extends Room<RiffleState> {
     this.setState(new RiffleState());
 
     this.onMessage('swap-cards', (client, message) => {
-      client.send('debug', {
-        id: client.id,
-        sessionId: client.sessionId,
-      });
-
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
+
+      this.broadcast('common-index-swapped', commonIndex);
 
       const common = this.state.commonCards;
       const hand = this.state.players.get(client.sessionId).cards;

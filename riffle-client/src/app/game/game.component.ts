@@ -153,6 +153,13 @@ export class GameComponent implements OnInit, AfterViewInit {
             break;
         }
       });
+
+      room.onMessage('common-index-swapped', (commonIndex) => {
+        if (this.selectedCommonIndex === commonIndex) {
+          // deselect selected common card, since it was swapped out by someone else
+          this.selectedCommonIndex = -1;
+        }
+      });
     });
   }
 
@@ -353,6 +360,11 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   public selectHandCard(index: number): void {
+    if (this.selectedCommonIndex === -1) {
+      // must select common card first
+      return;
+    }
+
     if (this.selectedHandIndex === index) {
       this.selectedHandIndex = -1;
     }
