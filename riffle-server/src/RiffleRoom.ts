@@ -130,34 +130,34 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private startShowdown(): void {
-    // build showdown sequence
-    const showdownSeq: ShowdownResult[] = [];
-    const playerHands: {}[] = [];
+    // solve hands
+    const playerHands: any[] = [];
     this.state.players.forEach(player => {
       const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
       // store the player reference in the hand object, so we can tell which player has won
       // just from the returned hand object from calling Hand.winners(...)
       hand.player = player;
-      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, hand.rank));
       playerHands.push(hand);
     });
 
-    // find showndown winner
-    let winnerHand = Hand.winners(playerHands);
-    if (winnerHand.length > 1) {
-      // it's a tie!
-      this.broadcast('debug', 'Showdown tie between ' + winnerHand.length + ' players');
-      // TODO: handle ties properly, just picking a random player for now
-      const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
-      this.broadcast('debug', '...randomly chose hand at index ' + randomWinnerIndex + ' as the winner');
-      winnerHand = winnerHand[randomWinnerIndex];
-    }
-    else {
-      winnerHand = winnerHand[0];
-    }
-    this.state.showdownWinner = winnerHand.player.name;
+    const scoreModifier = (rank: number) => Math.pow(rank, 2);
 
-    showdownSeq.sort((a, b) => b.rank - a.rank);
+    playerHands.forEach((hand) => {
+      const player = hand.player as Player;
+      const handScore = scoreModifier(hand.rank);
+      player.score += handScore;
+      hand.score = handScore;
+    });
+
+    // populate round results
+    const showdownSeq: ShowdownResult[] = [];
+    this.state.players.forEach(player => {
+      // TODO optimise this
+      const hand = playerHands.find(hand => hand.player.id === player.id);
+      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, hand.score, player.score));
+    });
+
+    showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
     this.state.showdownResults = showdownSeq;
 
     this.state.numVotedNextRound = 0;

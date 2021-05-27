@@ -16,20 +16,20 @@
                         <tr>
                             <th class="fit" scope="col">Name</th>
                             <th class="fit" scope="col">Hand</th>
-                            <th class="fit" scope="col">Hand ranking</th>
+                            <th class="fit" scope="col">Hand Score</th>
+                            <th class="fit" scope="col">Total Score</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let result of state.showdownResults">
                             <th class="fit" scope="row">{{ result.playerName }}</th>
                             <td class="fit" >{{ result.hand }}</td>
-                            <td class="fit" >{{ result.rank }}</td>
+                            <td class="fit" >{{ result.handScore }}</td>
+                            <td class="fit" >{{ result.totalScore }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
-            <h3>{{ state.showdownWinner }} wins!</h3>
 
             <div class="fixed-bottom">
                 <button
