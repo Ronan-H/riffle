@@ -1,8 +1,8 @@
-import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, startWith, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView, ShowdownResult, Player } from '../../../../riffle-server/src/RiffleSchema';
+import { map, take } from 'rxjs/operators';
+import { Card, GameConstants, RiffleState, GameView } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
@@ -47,7 +47,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private colyseus: ColyseusService,
+    public colyseus: ColyseusService,
     public resourceService: ResourceService,
     private navbarService: NavbarService,
   ) { }

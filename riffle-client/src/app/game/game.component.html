@@ -1,12 +1,21 @@
 <div class="container mt-3">
-    <strong class="text-center">
-        <p [innerText]="
-            selectedCommonIndex === -1 ?
-            'Select a card to swap (top row)' :
-            'Select a card to swap (bottom row)'">
-        </p>
-    </strong>
+    <div [hidden]="state.gameView !== GameView.GameLobby">
+        <div class="text-center">
+            <h3>Passcode: {{ colyseus.gamePasscode }}</h3>
+        </div>
+        <div class="text-center">
+            <p>Waiting for people to join...</p>
+        </div>
+    </div> 
+
     <div [hidden]="state.gameView !== GameView.Swapping">
+        <strong class="text-center">
+            <p [innerText]="
+                selectedCommonIndex === -1 ?
+                'Select a card to swap (top row)' :
+                'Select a card to swap (bottom row)'">
+            </p>
+        </strong>
         <div id="card-canvas-div">
             <canvas
                 id="card-canvas"

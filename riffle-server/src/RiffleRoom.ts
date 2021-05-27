@@ -8,6 +8,10 @@ export class RiffleRoom extends Room<RiffleState> {
   // should be sent to each client during the next clock interval
   private isStateDirty: boolean;
 
+  private generateRandomPasscode(length: number): string {
+    return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
+  }
+
   onCreate (options: any) {
     // disable automatic patches
     this.setPatchRate(null);
@@ -24,7 +28,8 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.setMetadata({
       ...this.metadata,
-      ...options
+      ...options,
+      passcode: this.generateRandomPasscode(6)
     });
 
     this.setState(new RiffleState());
@@ -167,14 +172,9 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   onJoin (client: Client, options: any) {
-    client.send('debug', {
-      optionsPass: options.password,
-      metaPass: this.metadata.password,
-    });
-
-    // validate password
-    if (options.password !== this.metadata.password) {
-      client.send('password-rejected');
+    // validate passcode
+    if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
+      client.send('passcode-rejected');
 
       // server error if leave() is called straight away
       setTimeout(() => {
@@ -182,13 +182,16 @@ export class RiffleRoom extends Room<RiffleState> {
       }, 500);
     }
     else {
-      client.send('password-accepted');
+      client.send('passcode-accepted');
+      client.send('passcode', this.metadata.passcode)
 
       this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
       this.syncClientState();
 
-      // TODO remove this temporary hack to take the room capacity from the last digit of the password
-      const roomCapacity = parseInt(this.metadata.password[this.metadata.password.length - 1]);
+      this.updateGameView(GameView.GameLobby);
+
+      // TODO remove this temporary hack to take the room capacity from the last digit of the passcode
+      const roomCapacity = parseInt(this.metadata.passcode[this.metadata.passcode.length - 1]);
 
       if (this.state.players.size === roomCapacity) {
         this.startRound();

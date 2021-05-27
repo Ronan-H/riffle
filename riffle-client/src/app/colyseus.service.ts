@@ -11,6 +11,7 @@ export class ColyseusService {
   private client: ColyseusClient;
   public room: Room;
   public room$: Observable<Room>;
+  public gamePasscode: string;
 
   constructor() {
     this.initClient();
@@ -41,18 +42,17 @@ export class ColyseusService {
   public createRoom(options: any): Observable<Room> {
     this.room$ = from(
       this.client.create('riffle_room', {
-        password: 'test',
         ...options
       })
     ).pipe(
-        tap(room => {
-          this.room = room;
+      tap(room => {
+        this.room = room;
 
-          room.onMessage('debug', (obj) => {
-            console.log('DEBUG:', obj);
-          });
-        }),
-      );
+        room.onMessage('passcode', (passcode) => {
+          this.gamePasscode = passcode;
+        });
+      }),
+    );
 
     return this.room$;
   }
@@ -61,14 +61,14 @@ export class ColyseusService {
     this.room$ = from(
       this.client.joinById(roomId, { ...options })
     ).pipe(
-        tap(room => {
-          this.room = room;
+      tap(room => {
+        this.room = room;
 
-          room.onMessage('debug', (obj) => {
-            console.log('DEBUG:', obj);
-          });
-        }),
-      );
+        room.onMessage('passcode', (passcode) => {
+          this.gamePasscode = passcode;
+        });
+      }),
+    );
 
     return this.room$;
   }
