@@ -1,5 +1,8 @@
 {
     "scripts": {
         "start": "cd riffle-server && npm install && ./node_modules/pm2/bin/pm2 start ./lib/index.js -f --no-daemon"
+    },
+    "dependencies": {
+        "typescript": "^4.3.2"
     }
 }

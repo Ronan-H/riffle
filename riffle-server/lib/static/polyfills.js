@@ -7,7 +7,7 @@
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! C:\Users\Ronan\code\riffle\riffle-client\src\polyfills.ts */"hN/g");
+module.exports = __webpack_require__(/*! /home/ro/code/riffle/riffle-client/src/polyfills.ts */"hN/g");
 
 
 /***/ }),

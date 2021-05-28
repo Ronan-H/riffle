@@ -65,13 +65,15 @@ __decorate([
 ], Card.prototype, "suit", void 0);
 exports.Card = Card;
 class Player extends schema_1.Schema {
-    constructor(id, name) {
+    constructor(id, name, isHost) {
         super();
         this.cards = new schema_1.ArraySchema();
         this.score = 0;
         this.votedNextRound = false;
+        this.isHost = false;
         this.id = id;
         this.name = name;
+        this.isHost = isHost;
     }
 }
 __decorate([
@@ -89,14 +91,18 @@ __decorate([
 __decorate([
     schema_1.type('boolean')
 ], Player.prototype, "votedNextRound", void 0);
+__decorate([
+    schema_1.type('boolean')
+], Player.prototype, "isHost", void 0);
 exports.Player = Player;
 class ShowdownResult extends schema_1.Schema {
-    constructor(playerId, playerName, hand, rank) {
+    constructor(playerId, playerName, hand, handScore, totalScore) {
         super();
         this.playerId = playerId;
         this.playerName = playerName;
         this.hand = hand;
-        this.rank = rank;
+        this.handScore = handScore;
+        this.totalScore = totalScore;
     }
 }
 __decorate([
@@ -109,8 +115,11 @@ __decorate([
     schema_1.type('string')
 ], ShowdownResult.prototype, "hand", void 0);
 __decorate([
-    schema_1.type('uint8')
-], ShowdownResult.prototype, "rank", void 0);
+    schema_1.type('uint16')
+], ShowdownResult.prototype, "handScore", void 0);
+__decorate([
+    schema_1.type('uint16')
+], ShowdownResult.prototype, "totalScore", void 0);
 exports.ShowdownResult = ShowdownResult;
 class RiffleState extends schema_1.Schema {
     constructor() {
@@ -134,9 +143,6 @@ __decorate([
 __decorate([
     schema_1.type([ShowdownResult])
 ], RiffleState.prototype, "showdownResults", void 0);
-__decorate([
-    schema_1.type('string')
-], RiffleState.prototype, "showdownWinner", void 0);
 __decorate([
     schema_1.type('uint8')
 ], RiffleState.prototype, "numVotedNextRound", void 0);

@@ -6,6 +6,9 @@ const RiffleSchema_1 = require("./RiffleSchema");
 const schema_1 = require("@colyseus/schema");
 var Hand = require('pokersolver').Hand;
 class RiffleRoom extends colyseus_1.Room {
+    generateRandomPasscode(length) {
+        return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
+    }
     onCreate(options) {
         // disable automatic patches
         this.setPatchRate(null);
@@ -17,11 +20,18 @@ class RiffleRoom extends colyseus_1.Room {
                 this.isStateDirty = false;
             }
         }, 100);
-        this.setMetadata(Object.assign(Object.assign({}, this.metadata), options));
+        this.setMetadata(Object.assign(Object.assign(Object.assign({}, this.metadata), options), { passcode: this.generateRandomPasscode(6) }));
         this.setState(new RiffleSchema_1.RiffleState());
+        this.onMessage('start-game', (client) => {
+            if (this.state.gameView === RiffleSchema_1.GameView.GameLobby &&
+                this.state.players.get(client.sessionId).isHost) {
+                this.startRound();
+            }
+        });
         this.onMessage('swap-cards', (client, message) => {
             const commonIndex = message.commonIndex;
             const handIndex = message.handIndex;
+            this.broadcast('common-index-swapped', commonIndex);
             const common = this.state.commonCards;
             const hand = this.state.players.get(client.sessionId).cards;
             // perform the swap
@@ -96,30 +106,30 @@ class RiffleRoom extends colyseus_1.Room {
         });
     }
     startShowdown() {
-        // build showdown sequence
-        const showdownSeq = [];
+        // solve hands
         const playerHands = [];
         this.state.players.forEach(player => {
             const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
             // store the player reference in the hand object, so we can tell which player has won
             // just from the returned hand object from calling Hand.winners(...)
             hand.player = player;
-            showdownSeq.push(new RiffleSchema_1.ShowdownResult(player.id, player.name, hand.descr, hand.rank));
             playerHands.push(hand);
         });
-        // find showndown winner
-        let winnerHand = Hand.winners(playerHands);
-        if (winnerHand.length > 1) {
-            // it's a tie!
-            // TODO: handle ties properly, just picking a random player for now
-            const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
-            winnerHand = winnerHand[randomWinnerIndex];
-        }
-        else {
-            winnerHand = winnerHand[0];
-        }
-        this.state.showdownWinner = winnerHand.player.name;
-        showdownSeq.sort((a, b) => b.rank - a.rank);
+        const scoreModifier = (rank) => Math.pow(rank, 2);
+        playerHands.forEach((hand) => {
+            const player = hand.player;
+            const handScore = scoreModifier(hand.rank);
+            player.score += handScore;
+            hand.score = handScore;
+        });
+        // populate round results
+        const showdownSeq = [];
+        this.state.players.forEach(player => {
+            // TODO optimise this
+            const hand = playerHands.find(hand => hand.player.id === player.id);
+            showdownSeq.push(new RiffleSchema_1.ShowdownResult(player.id, player.name, hand.descr, hand.score, player.score));
+        });
+        showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
         this.state.showdownResults = showdownSeq;
         this.state.numVotedNextRound = 0;
         this.state.players.forEach(player => {
@@ -129,23 +139,21 @@ class RiffleRoom extends colyseus_1.Room {
         this.syncClientState();
     }
     onJoin(client, options) {
-        // validate password
-        if (options.password !== this.metadata.password) {
-            client.send('password-rejected');
+        // validate passcode
+        if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
+            client.send('passcode-rejected');
             // server error if leave() is called straight away
             setTimeout(() => {
                 client.leave();
             }, 500);
         }
         else {
-            client.send('password-accepted');
-            this.state.players.set(client.sessionId, new RiffleSchema_1.Player(client.sessionId, options.username));
+            client.send('passcode-accepted');
+            client.send('passcode', this.metadata.passcode);
+            const player = new RiffleSchema_1.Player(client.sessionId, options.username, this.state.players.size === 0);
+            this.state.players.set(client.sessionId, player);
             this.syncClientState();
-            // TODO remove this temporary hack to take the room capacity from the last digit of the password
-            const roomCapacity = parseInt(this.metadata.password[this.metadata.password.length - 1]);
-            if (this.state.players.size === roomCapacity) {
-                this.startRound();
-            }
+            this.updateGameView(RiffleSchema_1.GameView.GameLobby);
         }
     }
     onLeave(client, consented) {
