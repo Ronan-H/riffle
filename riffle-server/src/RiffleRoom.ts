@@ -34,6 +34,15 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.setState(new RiffleState());
 
+    this.onMessage('start-game', (client) => {
+      if (
+        this.state.gameView === GameView.GameLobby &&
+        this.state.players.get(client.sessionId).isHost
+      ) {
+        this.startRound();
+      }
+    });
+
     this.onMessage('swap-cards', (client, message) => {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
@@ -185,17 +194,15 @@ export class RiffleRoom extends Room<RiffleState> {
       client.send('passcode-accepted');
       client.send('passcode', this.metadata.passcode)
 
-      this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
+      const player = new Player(
+        client.sessionId,
+        options.username,
+        this.state.players.size === 0
+      );
+      this.state.players.set(client.sessionId, player);
       this.syncClientState();
 
       this.updateGameView(GameView.GameLobby);
-
-      // TODO remove this temporary hack to take the room capacity from the last digit of the passcode
-      const roomCapacity = parseInt(this.metadata.passcode[this.metadata.passcode.length - 1]);
-
-      if (this.state.players.size === roomCapacity) {
-        this.startRound();
-      }
     }
   }
 

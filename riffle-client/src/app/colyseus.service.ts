@@ -12,6 +12,7 @@ export class ColyseusService {
   public room: Room;
   public room$: Observable<Room>;
   public gamePasscode: string;
+  public isHost: boolean;
 
   constructor() {
     this.initClient();
@@ -47,6 +48,7 @@ export class ColyseusService {
     ).pipe(
       tap(room => {
         this.room = room;
+        this.isHost = true;
 
         room.onMessage('passcode', (passcode) => {
           this.gamePasscode = passcode;
@@ -63,6 +65,7 @@ export class ColyseusService {
     ).pipe(
       tap(room => {
         this.room = room;
+        this.isHost = false;
 
         room.onMessage('passcode', (passcode) => {
           this.gamePasscode = passcode;
@@ -71,6 +74,10 @@ export class ColyseusService {
     );
 
     return this.room$;
+  }
+
+  public startGame(): void {
+    this.room.send('start-game');
   }
 
   public swapCards(commonIndex: number, handIndex: number): void {

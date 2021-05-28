@@ -71,10 +71,14 @@ export class Player extends Schema {
   @type('boolean')
   votedNextRound: boolean = false;
 
-  constructor(id: string, name: string) {
+  @type('boolean')
+  isHost: boolean = false;
+
+  constructor(id: string, name: string, isHost: boolean) {
     super();
     this.id = id;
     this.name = name;
+    this.isHost =  isHost;
   }
 }
 

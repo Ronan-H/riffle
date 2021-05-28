@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild }
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView } from '../../../../riffle-server/src/RiffleSchema';
+import { Card, GameConstants, RiffleState, GameView, Player } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
@@ -44,6 +44,12 @@ export class GameComponent implements OnInit, AfterViewInit {
     return this.state.players.get(this.colyseus.room.sessionId).cards;
   }
 
+  public get playersAsArray(): Player[] {
+    const arr = [];
+    this.state.players.forEach((player) => arr.push(player));
+    return arr;
+  }
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -51,6 +57,10 @@ export class GameComponent implements OnInit, AfterViewInit {
     public resourceService: ResourceService,
     private navbarService: NavbarService,
   ) { }
+
+  public startGame(): void {
+    this.colyseus.startGame();
+  }
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
