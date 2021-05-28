@@ -1,4 +1,15 @@
 
+ul.player-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0
+}
+
+ul.player-list li {
+    margin: 0;
+    padding: 0
+}
+
 .round-timer {
     width: 25em;
     margin: auto;

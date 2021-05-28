@@ -8,6 +8,10 @@ export class RiffleRoom extends Room<RiffleState> {
   // should be sent to each client during the next clock interval
   private isStateDirty: boolean;
 
+  private generateRandomPasscode(length: number): string {
+    return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
+  }
+
   onCreate (options: any) {
     // disable automatic patches
     this.setPatchRate(null);
@@ -24,14 +28,26 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.setMetadata({
       ...this.metadata,
-      ...options
+      ...options,
+      passcode: this.generateRandomPasscode(6)
     });
 
     this.setState(new RiffleState());
 
+    this.onMessage('start-game', (client) => {
+      if (
+        this.state.gameView === GameView.GameLobby &&
+        this.state.players.get(client.sessionId).isHost
+      ) {
+        this.startRound();
+      }
+    });
+
     this.onMessage('swap-cards', (client, message) => {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
+
+      this.broadcast('common-index-swapped', commonIndex);
 
       const common = this.state.commonCards;
       const hand = this.state.players.get(client.sessionId).cards;
@@ -125,32 +141,34 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private startShowdown(): void {
-    // build showdown sequence
-    const showdownSeq: ShowdownResult[] = [];
-    const playerHands: {}[] = [];
+    // solve hands
+    const playerHands: any[] = [];
     this.state.players.forEach(player => {
       const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
       // store the player reference in the hand object, so we can tell which player has won
       // just from the returned hand object from calling Hand.winners(...)
       hand.player = player;
-      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, hand.rank));
       playerHands.push(hand);
     });
 
-    // find showndown winner
-    let winnerHand = Hand.winners(playerHands);
-    if (winnerHand.length > 1) {
-      // it's a tie!
-      // TODO: handle ties properly, just picking a random player for now
-      const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
-      winnerHand = winnerHand[randomWinnerIndex];
-    }
-    else {
-      winnerHand = winnerHand[0];
-    }
-    this.state.showdownWinner = winnerHand.player.name;
+    const scoreModifier = (rank: number) => Math.pow(rank, 2);
 
-    showdownSeq.sort((a, b) => b.rank - a.rank);
+    playerHands.forEach((hand) => {
+      const player = hand.player as Player;
+      const handScore = scoreModifier(hand.rank);
+      player.score += handScore;
+      hand.score = handScore;
+    });
+
+    // populate round results
+    const showdownSeq: ShowdownResult[] = [];
+    this.state.players.forEach(player => {
+      // TODO optimise this
+      const hand = playerHands.find(hand => hand.player.id === player.id);
+      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, hand.score, player.score));
+    });
+
+    showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
     this.state.showdownResults = showdownSeq;
 
     this.state.numVotedNextRound = 0;
@@ -163,9 +181,9 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   onJoin (client: Client, options: any) {
-    // validate password
-    if (options.password !== this.metadata.password) {
-      client.send('password-rejected');
+    // validate passcode
+    if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
+      client.send('passcode-rejected');
 
       // server error if leave() is called straight away
       setTimeout(() => {
@@ -173,17 +191,18 @@ export class RiffleRoom extends Room<RiffleState> {
       }, 500);
     }
     else {
-      client.send('password-accepted');
+      client.send('passcode-accepted');
+      client.send('passcode', this.metadata.passcode)
 
-      this.state.players.set(client.sessionId, new Player(client.sessionId, options.username));
+      const player = new Player(
+        client.sessionId,
+        options.username,
+        this.state.players.size === 0
+      );
+      this.state.players.set(client.sessionId, player);
       this.syncClientState();
 
-      // TODO remove this temporary hack to take the room capacity from the last digit of the password
-      const roomCapacity = parseInt(this.metadata.password[this.metadata.password.length - 1]);
-
-      if (this.state.players.size === roomCapacity) {
-        this.startRound();
-      }
+      this.updateGameView(GameView.GameLobby);
     }
   }
 

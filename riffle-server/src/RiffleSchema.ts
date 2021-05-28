@@ -71,10 +71,14 @@ export class Player extends Schema {
   @type('boolean')
   votedNextRound: boolean = false;
 
-  constructor(id: string, name: string) {
+  @type('boolean')
+  isHost: boolean = false;
+
+  constructor(id: string, name: string, isHost: boolean) {
     super();
     this.id = id;
     this.name = name;
+    this.isHost =  isHost;
   }
 }
 
@@ -88,15 +92,19 @@ export class ShowdownResult extends Schema{
   @type('string')
   hand: string;
 
-  @type('uint8')
-  rank: number
+  @type('uint16')
+  handScore: number;
 
-  constructor(playerId: string, playerName: string, hand: string, rank: number) {
+  @type('uint16')
+  totalScore: number;
+
+  constructor(playerId: string, playerName: string, hand: string, handScore: number, totalScore: number) {
     super();
     this.playerId = playerId;
     this.playerName = playerName;
     this.hand = hand;
-    this.rank = rank;
+    this.handScore = handScore;
+    this.totalScore = totalScore;
   }
 }
 
@@ -115,9 +123,6 @@ export class RiffleState extends Schema {
 
   @type([ ShowdownResult ])
   showdownResults: ShowdownResult[];
-
-  @type('string')
-  showdownWinner: string;
 
   @type('uint8')
   numVotedNextRound: number;

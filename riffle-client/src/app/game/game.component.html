@@ -1,15 +1,44 @@
 <div class="container mt-3">
-    <div [hidden]="state.gameView !== GameView.Swapping">
-        <div
-            class="progress round-timer"
-            >
-            <div
-                class="progress-bar progress-bar-striped"
-                [ngClass]="roundTimeRemainingMS > (GameConstants.roundTimeMS / 5) ? 'bg-info' : 'bg-danger'"
-                role="progressbar"
-                [style.width]="(roundTimeRemainingMS / GameConstants.roundTimeMS * 100) + '%'">
+    <div [hidden]="state.gameView !== GameView.GameLobby">
+        <div class="text-center">
+            <h4>Passcode:</h4>
+        </div>
+        <div class="text-center">
+            <h3 [innerText]="colyseus.gamePasscode"></h3>
+        </div>
+        <div class="text-center">
+            <p [innerText]="
+                colyseus.isHost ?
+                'Press Start Game when all players have joined.' :
+                'Waiting for the host to start the game...'
+            "></p>
+            <div class="row justify-content-center">
+                <button
+                    class="btn btn-primary mb-3"
+                    type="button"
+                    *ngIf="colyseus.isHost"
+                    (click)="startGame()"
+                >Start Game</button>
             </div>
         </div>
+        <hr />
+        <div class="text-center">
+            <p>Players connected:</p>
+            <ul class="player-list">
+                <li *ngFor="let player of playersAsArray" [innerText]="player.name"></li>
+            </ul>
+        </div>
+        <hr />
+    </div> 
+
+    <div [hidden]="state.gameView !== GameView.Swapping">
+        <strong class="text-center">
+            <p [innerText]="
+                selectedCommonIndex === -1 ?
+                'Select a card to swap (top row)' :
+                'Select a card to swap (bottom row)'">
+            </p>
+        </strong>
         <div id="card-canvas-div">
             <canvas
                 id="card-canvas"
@@ -26,20 +55,20 @@
                         <tr>
                             <th class="fit" scope="col">Name</th>
                             <th class="fit" scope="col">Hand</th>
-                            <th class="fit" scope="col">Hand ranking</th>
+                            <th class="fit" scope="col">Hand Score</th>
+                            <th class="fit" scope="col">Total Score</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let result of state.showdownResults">
                             <th class="fit" scope="row">{{ result.playerName }}</th>
                             <td class="fit" >{{ result.hand }}</td>
-                            <td class="fit" >{{ result.rank }}</td>
+                            <td class="fit" >{{ result.handScore }}</td>
+                            <td class="fit" >{{ result.totalScore }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
-            <h3>{{ state.showdownWinner }} wins!</h3>
 
             <div class="fixed-bottom">
                 <button

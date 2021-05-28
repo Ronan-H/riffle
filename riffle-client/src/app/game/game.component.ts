@@ -1,8 +1,8 @@
-import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, startWith, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView, ShowdownResult, Player } from '../../../../riffle-server/src/RiffleSchema';
+import { map, take } from 'rxjs/operators';
+import { Card, GameConstants, RiffleState, GameView, Player } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
@@ -36,7 +36,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   public GameConstants = GameConstants;
   public roundTimeRemainingMS: number;
   private roundTimeInterval: any;
-  private roundTimeDeltaMS = 200;
+  private roundTimeDeltaMS = 25;
 
   public isNextRoundClicked: boolean;
 
@@ -44,13 +44,23 @@ export class GameComponent implements OnInit, AfterViewInit {
     return this.state.players.get(this.colyseus.room.sessionId).cards;
   }
 
+  public get playersAsArray(): Player[] {
+    const arr = [];
+    this.state.players.forEach((player) => arr.push(player));
+    return arr;
+  }
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private colyseus: ColyseusService,
+    public colyseus: ColyseusService,
     public resourceService: ResourceService,
     private navbarService: NavbarService,
   ) { }
+
+  public startGame(): void {
+    this.colyseus.startGame();
+  }
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
@@ -136,10 +146,11 @@ export class GameComponent implements OnInit, AfterViewInit {
 
             this.roundTimeInterval = setInterval(() => {
               this.roundTimeRemainingMS -= this.roundTimeDeltaMS;
+              this.drawRoundProgressBar();
             }, this.roundTimeDeltaMS);
 
             // set navbar message
-            this.navbarService.setMessage('Make the best hand you can!');
+            this.navbarService.setMessage('Swap for a good hand!');
             break;
           case GameView.Showdown:
             // reset
@@ -150,6 +161,13 @@ export class GameComponent implements OnInit, AfterViewInit {
 
             clearInterval(this.roundTimeInterval);
             break;
+        }
+      });
+
+      room.onMessage('common-index-swapped', (commonIndex) => {
+        if (this.selectedCommonIndex === commonIndex) {
+          // deselect selected common card, since it was swapped out by someone else
+          this.selectedCommonIndex = -1;
         }
       });
     });
@@ -277,7 +295,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     if (this.selectedCommonIndex !== -1) {
       // highlight this card as being selected
       const offsetX = this.cardWidth * this.selectedCommonIndex;
-      this.ctx.strokeStyle = '#00BB00';
+      this.ctx.strokeStyle = '#0000BB';
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
       this.ctx.rect(offsetX, 0, this.cardWidth, this.cardHeight);
@@ -304,12 +322,41 @@ export class GameComponent implements OnInit, AfterViewInit {
     if (this.selectedHandIndex !== -1) {
       // highlight this card as being selected
       const offsetX = this.cardWidth * this.selectedHandIndex;
-      this.ctx.strokeStyle = '#00BB00';
+      this.ctx.strokeStyle = '#0000BB';
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
       this.ctx.rect(offsetX, this.handStartY, this.cardWidth, this.cardHeight);
       this.ctx.stroke();
     }
+
+    // redraw round progress bar, since the canvas was cleared
+    this.drawRoundProgressBar();
+  }
+
+  private drawRoundProgressBar(): void {
+    const roundProgress = this.roundTimeRemainingMS / GameConstants.roundTimeMS;
+    const barWidth = this.canvas.width * roundProgress;
+
+    // calculate progress bar RGB (changes from green to red over time)
+    const compMax = 180;
+    const compLimit = 1200;
+    const exponent = 12;
+    const exponentMax = Math.pow(2, exponent);
+
+    let red = Math.floor(Math.pow(2, (1 - roundProgress) * exponent) / exponentMax * compLimit);
+
+    if (red < 0) red = 0;
+    if (red > compMax) red = compMax;
+
+    let green = compMax - red;
+
+    const redString = red < 16 ? '0' + red.toString(16) : red.toString(16);
+    const greenString = green < 16 ? '0' + green.toString(16) : green.toString(16);
+
+    this.ctx.fillStyle = `#${redString}${greenString}00`;
+
+    this.ctx.clearRect(0, this.cardHeight, this.canvas.width, this.cardHeight);
+    this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardHeight);
   }
 
   public selectCommonCard(index: number): void {
@@ -323,6 +370,11 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   public selectHandCard(index: number): void {
+    if (this.selectedCommonIndex === -1) {
+      // must select common card first
+      return;
+    }
+
     if (this.selectedHandIndex === index) {
       this.selectedHandIndex = -1;
     }

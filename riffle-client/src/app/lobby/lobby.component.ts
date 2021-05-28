@@ -18,7 +18,7 @@ export class LobbyComponent implements OnInit {
   public joinForm: FormGroup;
   public lobbyForm: FormGroup;
   private modalRef: NgbModalRef;
-  public wrongPassword: boolean;
+  public wrongPasscode: boolean;
   public isLoading: boolean;
 
   constructor(
@@ -36,12 +36,11 @@ export class LobbyComponent implements OnInit {
 
     this.createForm = this.fb.group({
       roomName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(20)]],
-      password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
     });
 
     this.joinForm = this.fb.group({
       roomId: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
+      passcode: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
     });
 
     this.lobbyForm = this.fb.group({
@@ -57,20 +56,19 @@ export class LobbyComponent implements OnInit {
     this.colyseus.createRoom({
       username: this.lobbyForm.get('username').value,
       roomName: this.lobbyForm.get(['createForm', 'roomName']).value,
-      password: this.lobbyForm.get(['createForm', 'password']).value
     }).pipe(take(1)).subscribe(room => {
       this.router.navigate(['game', room.id]);
     });
   }
 
-  public openPasswordModal(content: TemplateRef<any>, roomId: string): void {
+  public openPasscodeModal(content: TemplateRef<any>, roomId: string): void {
     this.joinForm.controls['roomId'].setValue(roomId);
 
     if (this.lobbyForm.get('username').valid) {
       this.modalRef = this.modalService.open(content);
 
       this.modalRef.dismissed.pipe(take(1)).subscribe(() => {
-        this.wrongPassword = false;
+        this.wrongPasscode = false;
         this.isLoading = false;
       });
     }
@@ -81,19 +79,19 @@ export class LobbyComponent implements OnInit {
 
     const username = this.lobbyForm.get('username').value;
     const roomId = this.joinForm.get('roomId').value;
-    const password = this.joinForm.get('password').value;
+    const passcode = this.joinForm.get('passcode').value;
 
     this.colyseus.joinGame(roomId, {
       username,
-      password,
+      passcode,
     }).pipe(take(1)).subscribe(room => {
-      room.onMessage('password-accepted', () => {
+      room.onMessage('passcode-accepted', () => {
         this.modalRef.close();
         this.router.navigate(['game', room.id]);
       });
 
-      room.onMessage('password-rejected', () => {
-        this.wrongPassword = true;
+      room.onMessage('passcode-rejected', () => {
+        this.wrongPasscode = true;
         this.isLoading = false;
       });
     });
