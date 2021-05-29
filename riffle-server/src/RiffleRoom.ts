@@ -49,13 +49,16 @@ export class RiffleRoom extends Room<RiffleState> {
 
       this.broadcast('common-index-swapped', commonIndex);
 
+      const player = this.state.players.get(client.sessionId);
       const common = this.state.commonCards;
-      const hand = this.state.players.get(client.sessionId).cards;
+      const hand = player.cards;
 
       // perform the swap
       const temp = common[commonIndex];
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
+
+      this.updateCurrentHand(player);
 
       this.syncClientState();
     });
@@ -84,6 +87,8 @@ export class RiffleRoom extends Room<RiffleState> {
     this.shuffle(this.state.deck);
     this.deal();
 
+    this.state.players.forEach(this.updateCurrentHand.bind(this));
+
     this.updateGameView(GameView.Swapping);
 
     this.syncClientState();
@@ -97,6 +102,16 @@ export class RiffleRoom extends Room<RiffleState> {
   private updateGameView(nextGameView: GameView): void {
     this.state.gameView = nextGameView;
     this.broadcast('game-view-changed', nextGameView);
+  }
+  
+  private updateCurrentHand(player: Player): void {
+    const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
+    player.currentHandName = hand.name;
+    player.currentHandScore = this.getScoreForHand(hand);
+  }
+
+  private getScoreForHand(hand: any): number {
+    return Math.pow(hand.rank, 2);
   }
 
   private populateDeck(): void {
@@ -151,11 +166,9 @@ export class RiffleRoom extends Room<RiffleState> {
       playerHands.push(hand);
     });
 
-    const scoreModifier = (rank: number) => Math.pow(rank, 2);
-
     playerHands.forEach((hand) => {
       const player = hand.player as Player;
-      const handScore = scoreModifier(hand.rank);
+      const handScore = this.getScoreForHand(hand);
       player.score += handScore;
       hand.score = handScore;
     });
