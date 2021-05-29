@@ -46,11 +46,20 @@
             ></canvas>
         </div>
         <strong class="text-center" #handInfo>
-            <p *ngIf="selfPlayer">
+            <p *ngIf="selfPlayer" class="mb-1">
                 Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandName"></span>
                 for <span class="text-success" [innerText]="selfPlayer.currentHandScore"></span> points
             </p>
         </strong>
+        <div class="row justify-content-center">
+            <button
+                class="btn btn-primary"
+                type="button"
+                (click)="sortHand()"
+            >
+                Sort Hand
+            </button>
+        </div>
     </div>
 
     <div *ngIf="state.gameView === GameView.Showdown">

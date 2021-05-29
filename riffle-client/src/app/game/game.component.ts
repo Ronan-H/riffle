@@ -417,4 +417,8 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.isNextRoundClicked = true;
     this.colyseus.room.send('next-round-vote');
   }
+
+  public sortHand(): void {
+    this.colyseus.sortHand();
+  }
 }
