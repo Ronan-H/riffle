@@ -45,6 +45,12 @@
                 #cardCanvas
             ></canvas>
         </div>
+        <strong class="text-center" #handInfo>
+            <p *ngIf="selfPlayer">
+                Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandName"></span>
+                for <span class="text-success" [innerText]="selfPlayer.currentHandScore"></span> points
+            </p>
+        </strong>
     </div>
 
     <div *ngIf="state.gameView === GameView.Showdown">

@@ -16,7 +16,10 @@ type MouseTouchEvent = MouseEvent & TouchEvent;
 })
 export class GameComponent implements OnInit, AfterViewInit {
   @ViewChild('cardCanvas')
-  myCanvas: ElementRef<HTMLCanvasElement>;
+  cardCanvas: ElementRef<HTMLCanvasElement>;
+
+  @ViewChild('handInfo')
+  handInfo: ElementRef<HTMLCanvasElement>;
 
   public ctx: CanvasRenderingContext2D;
   private canvas: HTMLCanvasElement;
@@ -44,8 +47,12 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   public isNextRoundClicked: boolean;
 
+  public get selfPlayer(): Player {
+    return this.state.players.get(this.colyseus.room.sessionId);
+  }
+
   public get stateHandCards(): Card[] {
-    return this.state.players.get(this.colyseus.room.sessionId).cards;
+    return this.selfPlayer.cards;
   }
 
   public get playersAsArray(): Player[] {
@@ -79,10 +86,14 @@ export class GameComponent implements OnInit, AfterViewInit {
   private autoAdjustCanvas(): void {
     const spritesheetCardWidth = 140;
     const defaultWidth = spritesheetCardWidth * 3;
-    const border = 5;
+    const border = 7;
 
     const availableWidth = window.innerWidth - (border * 2);
-    const availableHeight = window.innerHeight - this.canvas.offsetTop - (border * 2);
+    const availableHeight =
+      window.innerHeight
+      - this.canvas.offsetTop
+      - this.handInfo.nativeElement.getBoundingClientRect().height
+      - (border * 2);
 
     let chosenWidth: number;
     let chosenHeight: number;
@@ -184,8 +195,8 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   private initCanvas(): void {
-    this.canvas = this.myCanvas.nativeElement;
-    this.ctx = this.myCanvas.nativeElement.getContext('2d');
+    this.canvas = this.cardCanvas.nativeElement;
+    this.ctx = this.cardCanvas.nativeElement.getContext('2d');
 
     this.autoAdjustCanvas();
 

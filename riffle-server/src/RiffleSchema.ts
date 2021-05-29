@@ -65,6 +65,12 @@ export class Player extends Schema {
   @type([ Card ])
   cards = new ArraySchema<Card>();
 
+  @type('string')
+  currentHandName: string;
+
+  @type('number')
+  currentHandScore: number;
+
   @type('uint16')
   score = 0;
 
