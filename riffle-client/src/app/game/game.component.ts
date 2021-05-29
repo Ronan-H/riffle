@@ -86,7 +86,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   private autoAdjustCanvas(): void {
     const spritesheetCardWidth = 140;
     const defaultWidth = spritesheetCardWidth * 3;
-    const border = 7;
+    const border = 5;
 
     const availableWidth = window.innerWidth - (border * 2);
     const availableHeight =
@@ -416,5 +416,9 @@ export class GameComponent implements OnInit, AfterViewInit {
   public onNextRoundClicked(): void {
     this.isNextRoundClicked = true;
     this.colyseus.room.send('next-round-vote');
+  }
+
+  public sortHand(): void {
+    this.colyseus.sortHand();
   }
 }

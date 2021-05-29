@@ -89,4 +89,8 @@ export class ColyseusService {
       commonIndex
     });
   }
+
+  public sortHand(): void {
+    this.room.send('sort-hand');
+  }
 }

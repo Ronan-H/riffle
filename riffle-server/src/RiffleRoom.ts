@@ -75,6 +75,11 @@ export class RiffleRoom extends Room<RiffleState> {
         }
       }
     });
+
+    this.onMessage('sort-hand', (client) => {
+      this.sortPlayersHand(this.state.players.get(client.id));
+      this.syncClientState();
+    });
   }
 
   private syncClientState(): void {
@@ -88,6 +93,7 @@ export class RiffleRoom extends Room<RiffleState> {
     this.deal();
 
     this.state.players.forEach(this.updateCurrentHand.bind(this));
+    this.state.players.forEach(this.sortPlayersHand.bind(this));
 
     this.updateGameView(GameView.Swapping);
 
@@ -104,6 +110,10 @@ export class RiffleRoom extends Room<RiffleState> {
     this.broadcast('game-view-changed', nextGameView);
   }
   
+  private sortPlayersHand(player: Player): void {
+    player.cards = player.cards.sort((a, b) => a.num - b.num);
+  }
+
   private updateCurrentHand(player: Player): void {
     const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
     player.currentHandName = hand.name;

@@ -1,4 +1,4 @@
-<div class="container mt-3">
+<div class="container mt-1">
     <div [hidden]="state.gameView !== GameView.GameLobby">
         <div class="text-center">
             <h4>Passcode:</h4>
@@ -33,24 +33,33 @@
 
     <div [hidden]="state.gameView !== GameView.Swapping">
         <strong class="text-center">
-            <p [innerText]="
+            <p class="mb-1" [innerText]="
                 selectedCommonIndex === -1 ?
                 'Select a card to swap (top row)' :
                 'Select a card to swap (bottom row)'">
             </p>
         </strong>
-        <div id="card-canvas-div">
+        <div id="card-canvas-div" class="mt-0">
             <canvas
                 id="card-canvas"
                 #cardCanvas
             ></canvas>
         </div>
         <strong class="text-center" #handInfo>
-            <p *ngIf="selfPlayer">
+            <p *ngIf="selfPlayer" class="mb-1">
                 Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandName"></span>
                 for <span class="text-success" [innerText]="selfPlayer.currentHandScore"></span> points
             </p>
         </strong>
+        <div class="row justify-content-center">
+            <button
+                class="btn btn-primary"
+                type="button"
+                (click)="sortHand()"
+            >
+                Sort Hand
+            </button>
+        </div>
     </div>
 
     <div *ngIf="state.gameView === GameView.Showdown">
