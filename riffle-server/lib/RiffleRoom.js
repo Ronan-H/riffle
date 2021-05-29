@@ -53,6 +53,10 @@ class RiffleRoom extends colyseus_1.Room {
                 }
             }
         });
+        this.onMessage('sort-hand', (client) => {
+            this.sortPlayersHand(this.state.players.get(client.id));
+            this.syncClientState();
+        });
     }
     syncClientState() {
         this.isStateDirty = true;
@@ -63,6 +67,7 @@ class RiffleRoom extends colyseus_1.Room {
         this.shuffle(this.state.deck);
         this.deal();
         this.state.players.forEach(this.updateCurrentHand.bind(this));
+        this.state.players.forEach(this.sortPlayersHand.bind(this));
         this.updateGameView(RiffleSchema_1.GameView.Swapping);
         this.syncClientState();
         setTimeout(() => {
@@ -73,6 +78,9 @@ class RiffleRoom extends colyseus_1.Room {
     updateGameView(nextGameView) {
         this.state.gameView = nextGameView;
         this.broadcast('game-view-changed', nextGameView);
+    }
+    sortPlayersHand(player) {
+        player.cards = player.cards.sort((a, b) => a.num - b.num);
     }
     updateCurrentHand(player) {
         const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
