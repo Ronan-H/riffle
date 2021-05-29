@@ -23,8 +23,12 @@ export class GameComponent implements OnInit, AfterViewInit {
   private isMobile: boolean;
 
   // for drawing cards on the canvas, and to detect which card has been clicked on mouse down
+  private cardRatio = 140 / 90;
+  private cardsPerRow = 5;
+  private cardGapRatio = 0.5;
   private cardWidth: number;
   private cardHeight: number;
+  private cardGapHeight: number;
   private handStartY: number;
 
   public gameId: Observable<string>;
@@ -73,31 +77,33 @@ export class GameComponent implements OnInit, AfterViewInit {
    * Automatically adjust canvas size to fit nicely on the screen
    */
   private autoAdjustCanvas(): void {
-    const cardsPerRow = 5;
-    const cardsPerCol = 3;
-
-    const defaultWidth = 500;
-    const defaultHeight = 405;
-    const canvasRatio = defaultWidth / defaultHeight;
-
-    const border = 10;
+    const spritesheetCardWidth = 140;
+    const defaultWidth = spritesheetCardWidth * 3;
+    const border = 5;
 
     const availableWidth = window.innerWidth - (border * 2);
     const availableHeight = window.innerHeight - this.canvas.offsetTop - (border * 2);
 
+    let chosenWidth: number;
+    let chosenHeight: number;
+
     // try using all the available width
-    let chosenWidth = Math.min(availableWidth, defaultWidth);
-    let chosenHeight = Math.floor(chosenWidth / canvasRatio);
+    chosenWidth = Math.min(availableWidth, defaultWidth);
+    this.cardWidth = Math.round(chosenWidth / this.cardsPerRow);
+    this.cardHeight = Math.round(this.cardWidth * this.cardRatio);
+    this.cardGapHeight = this.cardHeight * this.cardGapRatio;
+    chosenHeight = Math.floor((this.cardHeight * 2) + this.cardGapHeight);
 
     if (chosenHeight > availableHeight) {
       // canvas is too big for the height; scale to fill the height instead
       chosenHeight = availableHeight;
-      chosenWidth = canvasRatio * chosenHeight;
+      this.cardHeight = Math.round(chosenHeight / (2 + this.cardGapRatio));
+      this.cardWidth = Math.round(this.cardHeight / this.cardRatio);
+      chosenWidth = this.cardWidth * this.cardsPerRow;
+      this.cardGapHeight = chosenHeight - (this.cardHeight * 2);
     }
 
-    this.cardWidth = Math.floor(chosenWidth / cardsPerRow);
-    this.cardHeight = Math.floor(chosenHeight / cardsPerCol);
-    this.handStartY = this.cardHeight * 2;
+    this.handStartY = this.cardHeight + this.cardGapHeight;
 
     this.canvas.width = chosenWidth;
     this.canvas.height = chosenHeight;
@@ -355,8 +361,8 @@ export class GameComponent implements OnInit, AfterViewInit {
 
     this.ctx.fillStyle = `#${redString}${greenString}00`;
 
-    this.ctx.clearRect(0, this.cardHeight, this.canvas.width, this.cardHeight);
-    this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardHeight);
+    this.ctx.clearRect(0, this.cardHeight, this.canvas.width, this.cardGapHeight);
+    this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardGapHeight);
   }
 
   public selectCommonCard(index: number): void {
