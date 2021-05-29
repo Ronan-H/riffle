@@ -32,12 +32,14 @@ class RiffleRoom extends colyseus_1.Room {
             const commonIndex = message.commonIndex;
             const handIndex = message.handIndex;
             this.broadcast('common-index-swapped', commonIndex);
+            const player = this.state.players.get(client.sessionId);
             const common = this.state.commonCards;
-            const hand = this.state.players.get(client.sessionId).cards;
+            const hand = player.cards;
             // perform the swap
             const temp = common[commonIndex];
             common[commonIndex] = hand[handIndex];
             hand[handIndex] = temp;
+            this.updateCurrentHand(player);
             this.syncClientState();
         });
         this.onMessage('next-round-vote', (client, message) => {
@@ -60,6 +62,7 @@ class RiffleRoom extends colyseus_1.Room {
         this.populateDeck();
         this.shuffle(this.state.deck);
         this.deal();
+        this.state.players.forEach(this.updateCurrentHand.bind(this));
         this.updateGameView(RiffleSchema_1.GameView.Swapping);
         this.syncClientState();
         setTimeout(() => {
@@ -70,6 +73,14 @@ class RiffleRoom extends colyseus_1.Room {
     updateGameView(nextGameView) {
         this.state.gameView = nextGameView;
         this.broadcast('game-view-changed', nextGameView);
+    }
+    updateCurrentHand(player) {
+        const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
+        player.currentHandName = hand.name;
+        player.currentHandScore = this.getScoreForHand(hand);
+    }
+    getScoreForHand(hand) {
+        return Math.pow(hand.rank, 2);
     }
     populateDeck() {
         for (let suit = 0; suit < 4; suit++) {
@@ -115,10 +126,9 @@ class RiffleRoom extends colyseus_1.Room {
             hand.player = player;
             playerHands.push(hand);
         });
-        const scoreModifier = (rank) => Math.pow(rank, 2);
         playerHands.forEach((hand) => {
             const player = hand.player;
-            const handScore = scoreModifier(hand.rank);
+            const handScore = this.getScoreForHand(hand);
             player.score += handScore;
             hand.score = handScore;
         });

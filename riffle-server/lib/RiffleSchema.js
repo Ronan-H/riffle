@@ -86,6 +86,12 @@ __decorate([
     schema_1.type([Card])
 ], Player.prototype, "cards", void 0);
 __decorate([
+    schema_1.type('string')
+], Player.prototype, "currentHandName", void 0);
+__decorate([
+    schema_1.type('number')
+], Player.prototype, "currentHandScore", void 0);
+__decorate([
     schema_1.type('uint16')
 ], Player.prototype, "score", void 0);
 __decorate([
