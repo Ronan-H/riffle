@@ -58,7 +58,7 @@ export class RiffleRoom extends Room<RiffleState> {
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
 
-      this.updateCurrentHand(player);
+      this.updateCurrentHands(player);
 
       this.syncClientState();
     });
@@ -92,7 +92,7 @@ export class RiffleRoom extends Room<RiffleState> {
     this.shuffle(this.state.deck);
     this.deal();
 
-    this.state.players.forEach(this.updateCurrentHand.bind(this));
+    this.state.players.forEach(this.updateCurrentHands.bind(this));
     this.state.players.forEach(this.sortPlayersHand.bind(this));
 
     this.updateGameView(GameView.Swapping);
@@ -114,10 +114,14 @@ export class RiffleRoom extends Room<RiffleState> {
     player.cards = player.cards.sort((a, b) => a.num - b.num);
   }
 
-  private updateCurrentHand(player: Player): void {
+  private updateCurrentHands(player: Player): void {
     const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
-    player.currentHandName = hand.name;
+    player.currentHandDesc = hand.descr;
     player.currentHandScore = this.getScoreForHand(hand);
+    
+    this.state.players.forEach((player) => {
+      player.isCurrentlyWinning = (this.solveHands().winnerHand.player.id === player.id);
+    });
   }
 
   private getScoreForHand(hand: any): number {
@@ -165,8 +169,10 @@ export class RiffleRoom extends Room<RiffleState> {
     });
   }
 
-  private startShowdown(): void {
-    // solve hands
+  private solveHands(): {
+    playerHands: any[],
+    winnerHand: any,
+  } {
     const playerHands: any[] = [];
     this.state.players.forEach(player => {
       const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
@@ -176,19 +182,47 @@ export class RiffleRoom extends Room<RiffleState> {
       playerHands.push(hand);
     });
 
-    playerHands.forEach((hand) => {
-      const player = hand.player as Player;
-      const handScore = this.getScoreForHand(hand);
-      player.score += handScore;
-      hand.score = handScore;
-    });
+    // find winning hand
+    let winnerHand = Hand.winners(playerHands);
+    if (winnerHand.length > 1) {
+      // it's a tie!
+      this.broadcast('debug', 'Showdown tie between ' + winnerHand.length + ' players');
+      // TODO: handle ties properly, just picking a random player for now
+      const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
+      this.broadcast('debug', '...randomly chose hand at index ' + randomWinnerIndex + ' as the winner');
+      winnerHand = winnerHand[randomWinnerIndex];
+    }
+    else {
+      winnerHand = winnerHand[0];
+    }
+
+    return {
+      playerHands,
+      winnerHand
+    };
+  }
+
+  private startShowdown(): void {
+    const {playerHands, winnerHand} = this.solveHands();
+
+    const player = winnerHand.player as Player;
+    const handScore = this.getScoreForHand(winnerHand);
+    player.score += handScore;
+    winnerHand.score = handScore;
 
     // populate round results
     const showdownSeq: ShowdownResult[] = [];
     this.state.players.forEach(player => {
       // TODO optimise this
       const hand = playerHands.find(hand => hand.player.id === player.id);
-      showdownSeq.push(new ShowdownResult(player.id, player.name, hand.descr, hand.score, player.score));
+      showdownSeq.push(new ShowdownResult(
+        player.id,
+        player.name,
+        hand.descr,
+        hand.score,
+        player.score,
+        player.id === winnerHand.player.id
+      ));
     });
 
     showdownSeq.sort((a, b) => b.totalScore - a.totalScore);

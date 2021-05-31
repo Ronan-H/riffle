@@ -66,10 +66,13 @@ export class Player extends Schema {
   cards = new ArraySchema<Card>();
 
   @type('string')
-  currentHandName: string;
+  currentHandDesc: string;
 
   @type('number')
   currentHandScore: number;
+
+  @type('boolean')
+  isCurrentlyWinning: boolean;
 
   @type('uint16')
   score = 0;
@@ -104,13 +107,24 @@ export class ShowdownResult extends Schema{
   @type('uint16')
   totalScore: number;
 
-  constructor(playerId: string, playerName: string, hand: string, handScore: number, totalScore: number) {
+  @type('boolean')
+  isWinningHand: boolean;
+
+  constructor(
+    playerId: string,
+    playerName: string,
+    hand: string,
+    handScore: number,
+    totalScore: number,
+    isWinningHand: boolean,
+  ) {
     super();
     this.playerId = playerId;
     this.playerName = playerName;
     this.hand = hand;
     this.handScore = handScore;
     this.totalScore = totalScore;
+    this.isWinningHand = isWinningHand;
   }
 }
 
