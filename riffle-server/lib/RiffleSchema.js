@@ -87,10 +87,13 @@ __decorate([
 ], Player.prototype, "cards", void 0);
 __decorate([
     schema_1.type('string')
-], Player.prototype, "currentHandName", void 0);
+], Player.prototype, "currentHandDesc", void 0);
 __decorate([
     schema_1.type('number')
 ], Player.prototype, "currentHandScore", void 0);
+__decorate([
+    schema_1.type('boolean')
+], Player.prototype, "isCurrentlyWinning", void 0);
 __decorate([
     schema_1.type('uint16')
 ], Player.prototype, "score", void 0);
@@ -102,13 +105,14 @@ __decorate([
 ], Player.prototype, "isHost", void 0);
 exports.Player = Player;
 class ShowdownResult extends schema_1.Schema {
-    constructor(playerId, playerName, hand, handScore, totalScore) {
+    constructor(playerId, playerName, hand, handScore, totalScore, isWinningHand) {
         super();
         this.playerId = playerId;
         this.playerName = playerName;
         this.hand = hand;
         this.handScore = handScore;
         this.totalScore = totalScore;
+        this.isWinningHand = isWinningHand;
     }
 }
 __decorate([
@@ -126,6 +130,9 @@ __decorate([
 __decorate([
     schema_1.type('uint16')
 ], ShowdownResult.prototype, "totalScore", void 0);
+__decorate([
+    schema_1.type('boolean')
+], ShowdownResult.prototype, "isWinningHand", void 0);
 exports.ShowdownResult = ShowdownResult;
 class RiffleState extends schema_1.Schema {
     constructor() {

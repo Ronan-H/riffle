@@ -39,7 +39,7 @@ class RiffleRoom extends colyseus_1.Room {
             const temp = common[commonIndex];
             common[commonIndex] = hand[handIndex];
             hand[handIndex] = temp;
-            this.updateCurrentHand(player);
+            this.updateCurrentHands(player);
             this.syncClientState();
         });
         this.onMessage('next-round-vote', (client, message) => {
@@ -66,7 +66,7 @@ class RiffleRoom extends colyseus_1.Room {
         this.populateDeck();
         this.shuffle(this.state.deck);
         this.deal();
-        this.state.players.forEach(this.updateCurrentHand.bind(this));
+        this.state.players.forEach(this.updateCurrentHands.bind(this));
         this.state.players.forEach(this.sortPlayersHand.bind(this));
         this.updateGameView(RiffleSchema_1.GameView.Swapping);
         this.syncClientState();
@@ -82,10 +82,13 @@ class RiffleRoom extends colyseus_1.Room {
     sortPlayersHand(player) {
         player.cards = player.cards.sort((a, b) => a.num - b.num);
     }
-    updateCurrentHand(player) {
+    updateCurrentHands(player) {
         const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
-        player.currentHandName = hand.name;
+        player.currentHandDesc = hand.descr;
         player.currentHandScore = this.getScoreForHand(hand);
+        this.state.players.forEach((player) => {
+            player.isCurrentlyWinning = (this.solveHands().winnerHand.player.id === player.id);
+        });
     }
     getScoreForHand(hand) {
         return Math.pow(hand.rank, 2);
@@ -124,8 +127,7 @@ class RiffleRoom extends colyseus_1.Room {
             }
         });
     }
-    startShowdown() {
-        // solve hands
+    solveHands() {
         const playerHands = [];
         this.state.players.forEach(player => {
             const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
@@ -134,18 +136,36 @@ class RiffleRoom extends colyseus_1.Room {
             hand.player = player;
             playerHands.push(hand);
         });
-        playerHands.forEach((hand) => {
-            const player = hand.player;
-            const handScore = this.getScoreForHand(hand);
-            player.score += handScore;
-            hand.score = handScore;
-        });
+        // find winning hand
+        let winnerHand = Hand.winners(playerHands);
+        if (winnerHand.length > 1) {
+            // it's a tie!
+            this.broadcast('debug', 'Showdown tie between ' + winnerHand.length + ' players');
+            // TODO: handle ties properly, just picking a random player for now
+            const randomWinnerIndex = Math.floor(Math.random() * winnerHand.length);
+            this.broadcast('debug', '...randomly chose hand at index ' + randomWinnerIndex + ' as the winner');
+            winnerHand = winnerHand[randomWinnerIndex];
+        }
+        else {
+            winnerHand = winnerHand[0];
+        }
+        return {
+            playerHands,
+            winnerHand
+        };
+    }
+    startShowdown() {
+        const { playerHands, winnerHand } = this.solveHands();
+        const player = winnerHand.player;
+        const handScore = this.getScoreForHand(winnerHand);
+        player.score += handScore;
+        winnerHand.score = handScore;
         // populate round results
         const showdownSeq = [];
         this.state.players.forEach(player => {
             // TODO optimise this
             const hand = playerHands.find(hand => hand.player.id === player.id);
-            showdownSeq.push(new RiffleSchema_1.ShowdownResult(player.id, player.name, hand.descr, hand.score, player.score));
+            showdownSeq.push(new RiffleSchema_1.ShowdownResult(player.id, player.name, hand.descr, hand.score, player.score, player.id === winnerHand.player.id));
         });
         showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
         this.state.showdownResults = showdownSeq;
