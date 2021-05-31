@@ -47,8 +47,11 @@
         </div>
         <strong class="text-center" #handInfo>
             <p *ngIf="selfPlayer" class="mb-1">
-                Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandName"></span>
-                for <span class="text-success" [innerText]="selfPlayer.currentHandScore"></span> points
+                Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandDesc"></span>
+                for <span class="text-primary" [innerText]="selfPlayer.currentHandScore"></span> points
+                <br />
+                <span *ngIf="selfPlayer.isCurrentlyWinning" class="text-success">Currently winning</span>
+                <span *ngIf="!selfPlayer.isCurrentlyWinning" class="text-danger">Currently losing</span>
             </p>
         </strong>
         <div class="row justify-content-center">
@@ -70,16 +73,24 @@
                         <tr>
                             <th class="fit" scope="col">Name</th>
                             <th class="fit" scope="col">Hand</th>
-                            <th class="fit" scope="col">Hand Score</th>
                             <th class="fit" scope="col">Total Score</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let result of state.showdownResults">
                             <th class="fit" scope="row">{{ result.playerName }}</th>
-                            <td class="fit" >{{ result.hand }}</td>
-                            <td class="fit" >{{ result.handScore }}</td>
-                            <td class="fit" >{{ result.totalScore }}</td>
+                            <td class="fit" >
+                                {{ result.hand }}
+                                <ng-container *ngIf="result.isWinningHand">
+                                    <span class="text-success">(WINNER)</span>
+                                </ng-container>
+                            </td>
+                            <td class="fit" >
+                                {{ result.totalScore }}
+                                <ng-container *ngIf="result.isWinningHand">
+                                    <span class="text-success">(+ {{ result.handScore }})</span>
+                                </ng-container>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
