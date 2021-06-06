@@ -290,7 +290,18 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   onLeave(client: Client, consented: boolean) {
-    this.deletePlayer(client.sessionId);
+    const playerId = client.sessionId;
+    const wasHost = this.state.players.get(playerId).isHost;
+
+    this.deletePlayer(playerId);
+
+    if (wasHost && this.state.players.size > 0) {
+      // transfer host status to the next player
+      const nextHost = this.state.players.values().next().value as Player;
+      nextHost.isHost = true;
+    }
+
+    this.syncClientState();
   }
 
   private deletePlayer(playerId: string): void {
@@ -309,10 +320,9 @@ export class RiffleRoom extends Room<RiffleState> {
         }
       });
     }
-
-    this.state.players.forEach(this.updateCurrentHands.bind(this));
-
-    this.syncClientState();
+    else if(this.state.gameView === GameView.Swapping) {
+      this.state.players.forEach(this.updateCurrentHands.bind(this));
+    }
   }
 
   private clearTimers(): void {

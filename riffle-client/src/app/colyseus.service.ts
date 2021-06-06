@@ -12,7 +12,6 @@ export class ColyseusService {
   public room: Room;
   public room$: Observable<Room>;
   public gamePasscode: string;
-  public isHost: boolean;
 
   constructor() {
     this.initClient();
@@ -48,7 +47,10 @@ export class ColyseusService {
     ).pipe(
       tap(room => {
         this.room = room;
-        this.isHost = true;
+
+        room.onMessage('debug', (debugInfo) => {
+          console.log('DEBUG:', debugInfo);
+        });
 
         room.onMessage('passcode', (passcode) => {
           this.gamePasscode = passcode;
@@ -65,7 +67,10 @@ export class ColyseusService {
     ).pipe(
       tap(room => {
         this.room = room;
-        this.isHost = false;
+
+        room.onMessage('debug', (debugInfo) => {
+          console.log('DEBUG:', debugInfo);
+        });
 
         room.onMessage('passcode', (passcode) => {
           this.gamePasscode = passcode;

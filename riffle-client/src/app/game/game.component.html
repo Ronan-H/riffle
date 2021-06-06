@@ -8,7 +8,7 @@
         </div>
         <div class="text-center">
             <p [innerText]="
-                colyseus.isHost ?
+                selfPlayer.isHost ?
                 'Press Start Game when all players have joined.' :
                 'Waiting for the host to start the game...'
             "></p>
@@ -16,7 +16,7 @@
                 <button
                     class="btn btn-primary mb-3"
                     type="button"
-                    *ngIf="colyseus.isHost"
+                    *ngIf="selfPlayer.isHost"
                     (click)="startGame()"
                 >Start Game</button>
             </div>
