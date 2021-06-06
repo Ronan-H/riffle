@@ -8,7 +8,7 @@ export class RiffleRoom extends Room<RiffleState> {
   // should be sent to each client during the next clock interval
   private isStateDirty: boolean;
 
-  private leaveTimeout: NodeJS.Timeout;
+  private rejectTimeout: NodeJS.Timeout;
   private showdownTimeout: NodeJS.Timeout;
 
   private generateRandomPasscode(length: number): string {
@@ -32,7 +32,7 @@ export class RiffleRoom extends Room<RiffleState> {
     this.setMetadata({
       ...this.metadata,
       ...options,
-      passcode: this.generateRandomPasscode(6)
+      passcode: this.generateRandomPasscode(4)
     });
 
     this.setState(new RiffleState());
@@ -247,12 +247,11 @@ export class RiffleRoom extends Room<RiffleState> {
   onJoin (client: Client, options: any) {
     // validate passcode
     if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
-      client.send('passcode-rejected');
-
       // server error if leave() is called straight away
-      this.leaveTimeout = setTimeout(() => {
+      this.rejectTimeout = setTimeout(() => {
+        client.send('passcode-rejected');
         client.leave();
-      }, 500);
+      }, 1000);
     }
     else {
       client.send('passcode-accepted');
@@ -298,7 +297,7 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private clearTimers(): void {
-    if (this.leaveTimeout) clearTimeout(this.leaveTimeout);
+    if (this.rejectTimeout) clearTimeout(this.rejectTimeout);
     if (this.showdownTimeout) clearTimeout(this.showdownTimeout);
   }
 
