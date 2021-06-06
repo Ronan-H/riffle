@@ -8,6 +8,9 @@ export class RiffleRoom extends Room<RiffleState> {
   // should be sent to each client during the next clock interval
   private isStateDirty: boolean;
 
+  private leaveTimeout: NodeJS.Timeout;
+  private showdownTimeout: NodeJS.Timeout;
+
   private generateRandomPasscode(length: number): string {
     return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
   }
@@ -99,7 +102,7 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.syncClientState();
 
-    setTimeout(() => {
+    this.showdownTimeout = setTimeout(() => {
       this.updateGameView(GameView.Showdown);
       this.startShowdown();
     }, GameConstants.roundTimeMS);
@@ -232,9 +235,13 @@ export class RiffleRoom extends Room<RiffleState> {
     this.state.players.forEach(player => {
       player.votedNextRound = false;
     });
-    this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
+    this.calcNextRoundVotesRequired();
 
     this.syncClientState();
+  }
+
+  private calcNextRoundVotesRequired(): void {
+    this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
   }
 
   onJoin (client: Client, options: any) {
@@ -243,7 +250,7 @@ export class RiffleRoom extends Room<RiffleState> {
       client.send('passcode-rejected');
 
       // server error if leave() is called straight away
-      setTimeout(() => {
+      this.leaveTimeout = setTimeout(() => {
         client.leave();
       }, 500);
     }
@@ -263,9 +270,39 @@ export class RiffleRoom extends Room<RiffleState> {
     }
   }
 
-  onLeave (client: Client, consented: boolean) {
+  onLeave(client: Client, consented: boolean) {
+    this.deletePlayer(client.sessionId);
+  }
+
+  private deletePlayer(playerId: string): void {
+    this.state.players.delete(playerId);
+
+    if (this.state.gameView === GameView.Showdown) {
+      // delete player's showdown result
+      const deleteIndex = this.state.showdownResults.findIndex((result) => result.playerId === playerId);
+      this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
+
+      // recalculate next round votes
+      this.calcNextRoundVotesRequired();
+      this.state.numVotedNextRound = 0;
+      this.state.players.forEach((player) => {
+        if (player.votedNextRound) {
+          this.state.numVotedNextRound++;
+        }
+      });
+    }
+
+    this.state.players.forEach(this.updateCurrentHands.bind(this));
+
+    this.syncClientState();
+  }
+
+  private clearTimers(): void {
+    if (this.leaveTimeout) clearTimeout(this.leaveTimeout);
+    if (this.showdownTimeout) clearTimeout(this.showdownTimeout);
   }
 
   onDispose() {
+    this.clearTimers();
   }
 }
