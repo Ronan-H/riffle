@@ -154,6 +154,9 @@ __decorate([
     schema_1.type([Card])
 ], RiffleState.prototype, "deck", void 0);
 __decorate([
+    schema_1.type('uint16')
+], RiffleState.prototype, "roundTimeRemainingMS", void 0);
+__decorate([
     schema_1.type([ShowdownResult])
 ], RiffleState.prototype, "showdownResults", void 0);
 __decorate([

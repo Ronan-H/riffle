@@ -10,8 +10,7 @@ class RiffleRoom extends colyseus_1.Room {
         return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
     }
     onCreate(options) {
-        // disable automatic patches
-        this.setPatchRate(null);
+        this.setPatchRate(1000);
         // ensure clock timers are enabled
         this.setSimulationInterval(() => { });
         this.clock.setInterval(() => {
@@ -20,8 +19,9 @@ class RiffleRoom extends colyseus_1.Room {
                 this.isStateDirty = false;
             }
         }, 100);
-        this.setMetadata(Object.assign(Object.assign(Object.assign({}, this.metadata), options), { passcode: this.generateRandomPasscode(6) }));
+        this.setMetadata(Object.assign(Object.assign(Object.assign({}, this.metadata), options), { passcode: this.generateRandomPasscode(4) }));
         this.setState(new RiffleSchema_1.RiffleState());
+        this.updateGameView(RiffleSchema_1.GameView.GameLobby);
         this.onMessage('start-game', (client) => {
             if (this.state.gameView === RiffleSchema_1.GameView.GameLobby &&
                 this.state.players.get(client.sessionId).isHost) {
@@ -39,10 +39,10 @@ class RiffleRoom extends colyseus_1.Room {
             const temp = common[commonIndex];
             common[commonIndex] = hand[handIndex];
             hand[handIndex] = temp;
-            this.updateCurrentHands(player);
+            this.updateCurrentHand(player);
             this.syncClientState();
         });
-        this.onMessage('next-round-vote', (client, message) => {
+        this.onMessage('next-round-vote', (client) => {
             if (!this.state.players.get(client.sessionId).votedNextRound) {
                 this.state.players.get(client.sessionId).votedNextRound = true;
                 this.state.numVotedNextRound++;
@@ -66,23 +66,31 @@ class RiffleRoom extends colyseus_1.Room {
         this.populateDeck();
         this.shuffle(this.state.deck);
         this.deal();
-        this.state.players.forEach(this.updateCurrentHands.bind(this));
+        this.state.players.forEach(this.updateCurrentHand.bind(this));
         this.state.players.forEach(this.sortPlayersHand.bind(this));
         this.updateGameView(RiffleSchema_1.GameView.Swapping);
         this.syncClientState();
-        setTimeout(() => {
-            this.updateGameView(RiffleSchema_1.GameView.Showdown);
-            this.startShowdown();
-        }, RiffleSchema_1.GameConstants.roundTimeMS);
+        this.state.roundTimeRemainingMS = RiffleSchema_1.GameConstants.roundTimeMS;
+        this.showdownInterval = setInterval(() => {
+            this.state.roundTimeRemainingMS -= 1000;
+            if (this.state.roundTimeRemainingMS <= 0) {
+                clearTimeout(this.showdownInterval);
+                this.updateGameView(RiffleSchema_1.GameView.Showdown);
+                this.startShowdown();
+            }
+            else {
+                this.syncClientState();
+            }
+        }, 1000);
     }
     updateGameView(nextGameView) {
         this.state.gameView = nextGameView;
-        this.broadcast('game-view-changed', nextGameView);
+        this.syncClientState();
     }
     sortPlayersHand(player) {
         player.cards = player.cards.sort((a, b) => a.num - b.num);
     }
-    updateCurrentHands(player) {
+    updateCurrentHand(player) {
         const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
         player.currentHandDesc = hand.descr;
         player.currentHandScore = this.getScoreForHand(hand);
@@ -117,14 +125,17 @@ class RiffleRoom extends colyseus_1.Room {
             cards[i] = t;
         }
     }
+    dealHand(player) {
+        for (let i = 0; i < 5; i++) {
+            player.cards.push(this.state.deck.pop());
+        }
+    }
     deal() {
         for (let i = 0; i < 5; i++) {
             this.state.commonCards.push(this.state.deck.pop());
         }
         this.state.players.forEach((player) => {
-            for (let i = 0; i < 5; i++) {
-                player.cards.push(this.state.deck.pop());
-            }
+            this.dealHand(player);
         });
     }
     solveHands() {
@@ -173,30 +184,73 @@ class RiffleRoom extends colyseus_1.Room {
         this.state.players.forEach(player => {
             player.votedNextRound = false;
         });
-        this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
+        this.calcNextRoundVotesRequired();
         this.syncClientState();
+    }
+    calcNextRoundVotesRequired() {
+        this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
     }
     onJoin(client, options) {
         // validate passcode
         if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
-            client.send('passcode-rejected');
             // server error if leave() is called straight away
-            setTimeout(() => {
+            this.rejectTimeout = setTimeout(() => {
+                client.send('passcode-rejected');
                 client.leave();
-            }, 500);
+            }, 1000);
         }
         else {
             client.send('passcode-accepted');
             client.send('passcode', this.metadata.passcode);
             const player = new RiffleSchema_1.Player(client.sessionId, options.username, this.state.players.size === 0);
             this.state.players.set(client.sessionId, player);
+            if (this.state.gameView === RiffleSchema_1.GameView.Swapping) {
+                this.dealHand(player);
+                this.updateCurrentHand(player);
+            }
+            else if (this.state.gameView === RiffleSchema_1.GameView.Showdown) {
+                this.calcNextRoundVotesRequired();
+            }
             this.syncClientState();
-            this.updateGameView(RiffleSchema_1.GameView.GameLobby);
         }
     }
     onLeave(client, consented) {
+        const playerId = client.sessionId;
+        const wasHost = this.state.players.get(playerId).isHost;
+        this.deletePlayer(playerId);
+        if (wasHost && this.state.players.size > 0) {
+            // transfer host status to the next player
+            const nextHost = this.state.players.values().next().value;
+            nextHost.isHost = true;
+        }
+        this.syncClientState();
+    }
+    deletePlayer(playerId) {
+        this.state.players.delete(playerId);
+        if (this.state.gameView === RiffleSchema_1.GameView.Showdown) {
+            // delete player's showdown result
+            this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
+            // recalculate next round votes
+            this.calcNextRoundVotesRequired();
+            this.state.numVotedNextRound = 0;
+            this.state.players.forEach((player) => {
+                if (player.votedNextRound) {
+                    this.state.numVotedNextRound++;
+                }
+            });
+        }
+        else if (this.state.gameView === RiffleSchema_1.GameView.Swapping) {
+            this.state.players.forEach(this.updateCurrentHand.bind(this));
+        }
+    }
+    clearTimers() {
+        if (this.rejectTimeout)
+            clearTimeout(this.rejectTimeout);
+        if (this.showdownInterval)
+            clearTimeout(this.showdownInterval);
     }
     onDispose() {
+        this.clearTimers();
     }
 }
 exports.RiffleRoom = RiffleRoom;
