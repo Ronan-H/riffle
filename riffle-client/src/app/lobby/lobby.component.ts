@@ -94,7 +94,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     });
   }
 
-  public openPasscodeModal(content: TemplateRef<any>, roomId: string): void {
+  public tryOpenPasscodeModal(content: TemplateRef<any>, roomId: string): void {
     this.joinForm.controls['roomId'].setValue(roomId);
 
     if (this.lobbyForm.get('username').valid) {
@@ -104,6 +104,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.wrongPasscode = false;
         this.isLoading = false;
       });
+    }
+    else {
+      // trigger field validation prompts (E.g. "Please enter a valid username")
+      this.lobbyForm.markAllAsTouched();
     }
   }
 
