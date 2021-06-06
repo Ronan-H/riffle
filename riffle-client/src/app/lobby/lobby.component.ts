@@ -1,13 +1,13 @@
 import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { debounce, take, tap } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
 import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { ResourceService } from '../resource.service';
 import { NavbarService } from '../navbar/navbar.service';
-import { Subscription } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 
 @Component({
   selector: 'app-lobby',
@@ -47,14 +47,22 @@ export class LobbyComponent implements OnInit, OnDestroy {
     });
 
     this.lobbyForm = this.fb.group({
-      username:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(16)]],
+      username:  [localStorage.getItem('username') || '', [Validators.required, Validators.minLength(2), Validators.maxLength(16)]],
       createForm: this.createForm,
       joinForm: this.joinForm,
     })
 
     this.subs.add(
-      this.lobbyForm.valueChanges.subscribe(_ => {
+      this.joinForm.get('passcode').valueChanges.subscribe(() => {
         this.wrongPasscode = false;
+      })
+    );
+
+    this.subs.add(
+      this.lobbyForm.get('username').valueChanges.pipe(
+        debounce(()  => timer(1000)),
+      ).subscribe((username) => {
+        localStorage.setItem('username', username);
       })
     );
 
