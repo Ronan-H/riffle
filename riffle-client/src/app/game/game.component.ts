@@ -28,7 +28,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   // for drawing cards on the canvas, and to detect which card has been clicked on mouse down
   private cardRatio = 140 / 90;
   private cardsPerRow = 5;
-  private cardGapRatio = 0.5;
+  private cardGapRatio = 0.25;
   private cardWidth: number;
   private cardHeight: number;
   private cardGapHeight: number;
@@ -42,9 +42,8 @@ export class GameComponent implements OnInit, AfterViewInit {
   public GameView = GameView;
 
   public GameConstants = GameConstants;
-  public roundTimeRemainingMS: number;
   private roundTimeInterval: any;
-  private roundTimeDeltaMS = 25;
+  private roundTimeDeltaMS = 50;
 
   public isNextRoundClicked: boolean;
 
@@ -74,8 +73,8 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.colyseus.startGame();
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event) {
+  @HostListener('window:resize')
+  onResize() {
     this.autoAdjustCanvas();
     // TODO possiblity of cards being undefined here?
     this.drawCards();
@@ -174,11 +173,8 @@ export class GameComponent implements OnInit, AfterViewInit {
         this.selectedCommonIndex = -1;
         this.selectedHandIndex = -1;
 
-        // start the round timer
-        this.roundTimeRemainingMS = GameConstants.roundTimeMS;
-
         this.roundTimeInterval = setInterval(() => {
-          this.roundTimeRemainingMS -= this.roundTimeDeltaMS;
+          this.state.roundTimeRemainingMS -= this.roundTimeDeltaMS;
           this.drawRoundProgressBar();
         }, this.roundTimeDeltaMS);
 
@@ -358,7 +354,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   private drawRoundProgressBar(): void {
-    const roundProgress = this.roundTimeRemainingMS / GameConstants.roundTimeMS;
+    const roundProgress = this.state.roundTimeRemainingMS / GameConstants.roundTimeMS;
     const barWidth = this.canvas.width * roundProgress;
 
     // calculate progress bar RGB (changes from green to red over time)

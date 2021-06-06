@@ -9,7 +9,7 @@ export class RiffleRoom extends Room<RiffleState> {
   private isStateDirty: boolean;
 
   private rejectTimeout: NodeJS.Timeout;
-  private showdownTimeout: NodeJS.Timeout;
+  private showdownInterval: NodeJS.Timeout;
 
   private generateRandomPasscode(length: number): string {
     return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
@@ -67,7 +67,7 @@ export class RiffleRoom extends Room<RiffleState> {
       this.syncClientState();
     });
 
-    this.onMessage('next-round-vote', (client, message) => {
+    this.onMessage('next-round-vote', (client) => {
       if (!this.state.players.get(client.sessionId).votedNextRound) {
         this.state.players.get(client.sessionId).votedNextRound = true;
         this.state.numVotedNextRound++;
@@ -103,10 +103,19 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.syncClientState();
 
-    this.showdownTimeout = setTimeout(() => {
-      this.updateGameView(GameView.Showdown);
-      this.startShowdown();
-    }, GameConstants.roundTimeMS);
+    this.state.roundTimeRemainingMS = GameConstants.roundTimeMS;
+    this.showdownInterval = setInterval(() => {
+      this.state.roundTimeRemainingMS -= 1000;
+
+      if (this.state.roundTimeRemainingMS <= 0) {
+        clearTimeout(this.showdownInterval);
+        this.updateGameView(GameView.Showdown);
+        this.startShowdown();
+      }
+      else {
+        this.syncClientState();
+      }
+    }, 1000);
   }
 
   private updateGameView(nextGameView: GameView): void {
@@ -308,7 +317,7 @@ export class RiffleRoom extends Room<RiffleState> {
 
   private clearTimers(): void {
     if (this.rejectTimeout) clearTimeout(this.rejectTimeout);
-    if (this.showdownTimeout) clearTimeout(this.showdownTimeout);
+    if (this.showdownInterval) clearTimeout(this.showdownInterval);
   }
 
   onDispose() {
