@@ -28,7 +28,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   // for drawing cards on the canvas, and to detect which card has been clicked on mouse down
   private cardRatio = 140 / 90;
   private cardsPerRow = 5;
-  private cardGapRatio = 0.5;
+  private cardGapRatio = 0.25;
   private cardWidth: number;
   private cardHeight: number;
   private cardGapHeight: number;
@@ -38,12 +38,12 @@ export class GameComponent implements OnInit, AfterViewInit {
   public selectedCommonIndex;
   public selectedHandIndex;
   public state: RiffleState;
+  private prevGameView: GameView;
   public GameView = GameView;
 
   public GameConstants = GameConstants;
-  public roundTimeRemainingMS: number;
   private roundTimeInterval: any;
-  private roundTimeDeltaMS = 25;
+  private roundTimeDeltaMS = 50;
 
   public isNextRoundClicked: boolean;
 
@@ -73,8 +73,8 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.colyseus.startGame();
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event) {
+  @HostListener('window:resize')
+  onResize() {
     this.autoAdjustCanvas();
     // TODO possiblity of cards being undefined here?
     this.drawCards();
@@ -139,6 +139,7 @@ export class GameComponent implements OnInit, AfterViewInit {
 
     // start with default state to prevent undefined errors before the state is downloaded initially
     this.state = new RiffleState();
+    this.prevGameView = undefined;
 
     this.colyseus.room$.pipe(
       take(1)
@@ -146,38 +147,13 @@ export class GameComponent implements OnInit, AfterViewInit {
       room.onStateChange((state: RiffleState) => {
         this.state = state;
 
+        if (this.prevGameView !== state.gameView) {
+          this.onGameViewChanged(state.gameView);
+          this.prevGameView = state.gameView;
+        }
+
         if (state.gameView === GameView.Swapping) {
           this.drawCards();
-        }
-      });
-
-      room.onMessage('game-view-changed', (newGameView: GameView) => {
-        switch (newGameView) {
-          case GameView.Swapping:
-            // reset
-            this.selectedCommonIndex = -1;
-            this.selectedHandIndex = -1;
-
-            // start the round timer
-            this.roundTimeRemainingMS = GameConstants.roundTimeMS;
-
-            this.roundTimeInterval = setInterval(() => {
-              this.roundTimeRemainingMS -= this.roundTimeDeltaMS;
-              this.drawRoundProgressBar();
-            }, this.roundTimeDeltaMS);
-
-            // set navbar message
-            this.navbarService.setMessage('Swap for a good hand!');
-            break;
-          case GameView.Showdown:
-            // reset
-            this.isNextRoundClicked = false;
-
-            // set navbar message
-            this.navbarService.setMessage('Showdown!');
-
-            clearInterval(this.roundTimeInterval);
-            break;
         }
       });
 
@@ -188,6 +164,33 @@ export class GameComponent implements OnInit, AfterViewInit {
         }
       });
     });
+  }
+
+  private onGameViewChanged(newGameView: GameView): void {
+    switch (newGameView) {
+      case GameView.Swapping:
+        // reset
+        this.selectedCommonIndex = -1;
+        this.selectedHandIndex = -1;
+
+        this.roundTimeInterval = setInterval(() => {
+          this.state.roundTimeRemainingMS -= this.roundTimeDeltaMS;
+          this.drawRoundProgressBar();
+        }, this.roundTimeDeltaMS);
+
+        // set navbar message
+        this.navbarService.setMessage('Swap for a good hand!');
+        break;
+      case GameView.Showdown:
+        // reset
+        this.isNextRoundClicked = false;
+
+        // set navbar message
+        this.navbarService.setMessage('Showdown!');
+
+        clearInterval(this.roundTimeInterval);
+        break;
+    }
   }
 
   ngAfterViewInit() {
@@ -351,7 +354,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   private drawRoundProgressBar(): void {
-    const roundProgress = this.roundTimeRemainingMS / GameConstants.roundTimeMS;
+    const roundProgress = this.state.roundTimeRemainingMS / GameConstants.roundTimeMS;
     const barWidth = this.canvas.width * roundProgress;
 
     // calculate progress bar RGB (changes from green to red over time)

@@ -8,13 +8,15 @@ export class RiffleRoom extends Room<RiffleState> {
   // should be sent to each client during the next clock interval
   private isStateDirty: boolean;
 
+  private rejectTimeout: NodeJS.Timeout;
+  private showdownInterval: NodeJS.Timeout;
+
   private generateRandomPasscode(length: number): string {
     return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
   }
 
   onCreate (options: any) {
-    // disable automatic patches
-    this.setPatchRate(null);
+    this.setPatchRate(1000);
 
     // ensure clock timers are enabled
     this.setSimulationInterval(() => {});
@@ -29,10 +31,11 @@ export class RiffleRoom extends Room<RiffleState> {
     this.setMetadata({
       ...this.metadata,
       ...options,
-      passcode: this.generateRandomPasscode(6)
+      passcode: this.generateRandomPasscode(4)
     });
 
     this.setState(new RiffleState());
+    this.updateGameView(GameView.GameLobby);
 
     this.onMessage('start-game', (client) => {
       if (
@@ -58,12 +61,12 @@ export class RiffleRoom extends Room<RiffleState> {
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
 
-      this.updateCurrentHands(player);
+      this.updateCurrentHand(player);
 
       this.syncClientState();
     });
 
-    this.onMessage('next-round-vote', (client, message) => {
+    this.onMessage('next-round-vote', (client) => {
       if (!this.state.players.get(client.sessionId).votedNextRound) {
         this.state.players.get(client.sessionId).votedNextRound = true;
         this.state.numVotedNextRound++;
@@ -92,29 +95,38 @@ export class RiffleRoom extends Room<RiffleState> {
     this.shuffle(this.state.deck);
     this.deal();
 
-    this.state.players.forEach(this.updateCurrentHands.bind(this));
+    this.state.players.forEach(this.updateCurrentHand.bind(this));
     this.state.players.forEach(this.sortPlayersHand.bind(this));
 
     this.updateGameView(GameView.Swapping);
 
     this.syncClientState();
 
-    setTimeout(() => {
-      this.updateGameView(GameView.Showdown);
-      this.startShowdown();
-    }, GameConstants.roundTimeMS);
+    this.state.roundTimeRemainingMS = GameConstants.roundTimeMS;
+    this.showdownInterval = setInterval(() => {
+      this.state.roundTimeRemainingMS -= 1000;
+
+      if (this.state.roundTimeRemainingMS <= 0) {
+        clearTimeout(this.showdownInterval);
+        this.updateGameView(GameView.Showdown);
+        this.startShowdown();
+      }
+      else {
+        this.syncClientState();
+      }
+    }, 1000);
   }
 
   private updateGameView(nextGameView: GameView): void {
     this.state.gameView = nextGameView;
-    this.broadcast('game-view-changed', nextGameView);
+    this.syncClientState();
   }
   
   private sortPlayersHand(player: Player): void {
     player.cards = player.cards.sort((a, b) => a.num - b.num);
   }
 
-  private updateCurrentHands(player: Player): void {
+  private updateCurrentHand(player: Player): void {
     const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
     player.currentHandDesc = hand.descr;
     player.currentHandScore = this.getScoreForHand(hand);
@@ -157,15 +169,19 @@ export class RiffleRoom extends Room<RiffleState> {
     }
   }
 
+  private dealHand(player: Player): void {
+    for (let i = 0; i < 5; i++) {
+      player.cards.push(this.state.deck.pop());
+    }
+  }
+
   private deal(): void {
     for (let i = 0; i < 5; i++) {
       this.state.commonCards.push(this.state.deck.pop());
     }
 
     this.state.players.forEach((player: Player) => {
-      for (let i = 0; i < 5; i++) {
-        player.cards.push(this.state.deck.pop());
-      }
+      this.dealHand(player);
     });
   }
 
@@ -232,20 +248,23 @@ export class RiffleRoom extends Room<RiffleState> {
     this.state.players.forEach(player => {
       player.votedNextRound = false;
     });
-    this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
+    this.calcNextRoundVotesRequired();
 
     this.syncClientState();
+  }
+
+  private calcNextRoundVotesRequired(): void {
+    this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
   }
 
   onJoin (client: Client, options: any) {
     // validate passcode
     if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
-      client.send('passcode-rejected');
-
       // server error if leave() is called straight away
-      setTimeout(() => {
+      this.rejectTimeout = setTimeout(() => {
+        client.send('passcode-rejected');
         client.leave();
-      }, 500);
+      }, 1000);
     }
     else {
       client.send('passcode-accepted');
@@ -257,15 +276,61 @@ export class RiffleRoom extends Room<RiffleState> {
         this.state.players.size === 0
       );
       this.state.players.set(client.sessionId, player);
-      this.syncClientState();
 
-      this.updateGameView(GameView.GameLobby);
+      if (this.state.gameView === GameView.Swapping) {
+        this.dealHand(player);
+        this.updateCurrentHand(player);
+      }
+      else if (this.state.gameView === GameView.Showdown) {
+        this.calcNextRoundVotesRequired();
+      }
+
+      this.syncClientState();
     }
   }
 
-  onLeave (client: Client, consented: boolean) {
+  onLeave(client: Client, consented: boolean) {
+    const playerId = client.sessionId;
+    const wasHost = this.state.players.get(playerId).isHost;
+
+    this.deletePlayer(playerId);
+
+    if (wasHost && this.state.players.size > 0) {
+      // transfer host status to the next player
+      const nextHost = this.state.players.values().next().value as Player;
+      nextHost.isHost = true;
+    }
+
+    this.syncClientState();
+  }
+
+  private deletePlayer(playerId: string): void {
+    this.state.players.delete(playerId);
+
+    if (this.state.gameView === GameView.Showdown) {
+      // delete player's showdown result
+      this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
+
+      // recalculate next round votes
+      this.calcNextRoundVotesRequired();
+      this.state.numVotedNextRound = 0;
+      this.state.players.forEach((player) => {
+        if (player.votedNextRound) {
+          this.state.numVotedNextRound++;
+        }
+      });
+    }
+    else if(this.state.gameView === GameView.Swapping) {
+      this.state.players.forEach(this.updateCurrentHand.bind(this));
+    }
+  }
+
+  private clearTimers(): void {
+    if (this.rejectTimeout) clearTimeout(this.rejectTimeout);
+    if (this.showdownInterval) clearTimeout(this.showdownInterval);
   }
 
   onDispose() {
+    this.clearTimers();
   }
 }

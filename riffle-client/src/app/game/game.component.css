@@ -15,39 +15,6 @@ ul.player-list li {
     margin: auto;
 }
 
-.card-row {
-    width: -webkit-fit-content;
-    height: -webkit-fit-content;
-    width: -moz-fit-content;
-    height: -moz-fit-content;
-    margin: 1em auto;
-}
-
-.card {
-    display: inline-block;
-    border: 5px outset lightblue;
-    border-radius: 8px;
-
-    /* disable click and drag */
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-    user-drag: none;
-
-    /* disable highlighting */
-    khtml-user-select: none;
-    -o-user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-.selected-card {
-    border-style: inset;
-    border-color: lightcoral;
-}
-
 #card-canvas-div {
     width: 100%;
     text-align: center;
