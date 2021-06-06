@@ -16,8 +16,7 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   onCreate (options: any) {
-    // disable automatic patches
-    this.setPatchRate(null);
+    this.setPatchRate(1000);
 
     // ensure clock timers are enabled
     this.setSimulationInterval(() => {});
