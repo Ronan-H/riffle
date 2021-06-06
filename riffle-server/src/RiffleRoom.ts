@@ -61,7 +61,7 @@ export class RiffleRoom extends Room<RiffleState> {
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
 
-      this.updateCurrentHands(player);
+      this.updateCurrentHand(player);
 
       this.syncClientState();
     });
@@ -95,7 +95,7 @@ export class RiffleRoom extends Room<RiffleState> {
     this.shuffle(this.state.deck);
     this.deal();
 
-    this.state.players.forEach(this.updateCurrentHands.bind(this));
+    this.state.players.forEach(this.updateCurrentHand.bind(this));
     this.state.players.forEach(this.sortPlayersHand.bind(this));
 
     this.updateGameView(GameView.Swapping);
@@ -126,7 +126,7 @@ export class RiffleRoom extends Room<RiffleState> {
     player.cards = player.cards.sort((a, b) => a.num - b.num);
   }
 
-  private updateCurrentHands(player: Player): void {
+  private updateCurrentHand(player: Player): void {
     const hand = Hand.solve(player.cards.map(card => card.asPokersolverString()));
     player.currentHandDesc = hand.descr;
     player.currentHandScore = this.getScoreForHand(hand);
@@ -279,6 +279,7 @@ export class RiffleRoom extends Room<RiffleState> {
 
       if (this.state.gameView === GameView.Swapping) {
         this.dealHand(player);
+        this.updateCurrentHand(player);
       }
       else if (this.state.gameView === GameView.Showdown) {
         this.calcNextRoundVotesRequired();
@@ -320,7 +321,7 @@ export class RiffleRoom extends Room<RiffleState> {
       });
     }
     else if(this.state.gameView === GameView.Swapping) {
-      this.state.players.forEach(this.updateCurrentHands.bind(this));
+      this.state.players.forEach(this.updateCurrentHand.bind(this));
     }
   }
 
