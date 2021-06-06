@@ -36,6 +36,7 @@ export class RiffleRoom extends Room<RiffleState> {
     });
 
     this.setState(new RiffleState());
+    this.updateGameView(GameView.GameLobby);
 
     this.onMessage('start-game', (client) => {
       if (
@@ -110,7 +111,7 @@ export class RiffleRoom extends Room<RiffleState> {
 
   private updateGameView(nextGameView: GameView): void {
     this.state.gameView = nextGameView;
-    this.broadcast('game-view-changed', nextGameView);
+    this.syncClientState();
   }
   
   private sortPlayersHand(player: Player): void {
@@ -160,15 +161,19 @@ export class RiffleRoom extends Room<RiffleState> {
     }
   }
 
+  private dealHand(player: Player): void {
+    for (let i = 0; i < 5; i++) {
+      player.cards.push(this.state.deck.pop());
+    }
+  }
+
   private deal(): void {
     for (let i = 0; i < 5; i++) {
       this.state.commonCards.push(this.state.deck.pop());
     }
 
     this.state.players.forEach((player: Player) => {
-      for (let i = 0; i < 5; i++) {
-        player.cards.push(this.state.deck.pop());
-      }
+      this.dealHand(player);
     });
   }
 
@@ -263,9 +268,15 @@ export class RiffleRoom extends Room<RiffleState> {
         this.state.players.size === 0
       );
       this.state.players.set(client.sessionId, player);
-      this.syncClientState();
 
-      this.updateGameView(GameView.GameLobby);
+      if (this.state.gameView === GameView.Swapping) {
+        this.dealHand(player);
+      }
+      else if (this.state.gameView === GameView.Showdown) {
+        this.calcNextRoundVotesRequired();
+      }
+
+      this.syncClientState();
     }
   }
 
@@ -278,7 +289,6 @@ export class RiffleRoom extends Room<RiffleState> {
 
     if (this.state.gameView === GameView.Showdown) {
       // delete player's showdown result
-      const deleteIndex = this.state.showdownResults.findIndex((result) => result.playerId === playerId);
       this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
 
       // recalculate next round votes

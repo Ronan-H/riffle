@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
@@ -7,19 +7,21 @@ import { ColyseusService } from '../colyseus.service';
 import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { ResourceService } from '../resource.service';
 import { NavbarService } from '../navbar/navbar.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-lobby',
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.css']
 })
-export class LobbyComponent implements OnInit {
+export class LobbyComponent implements OnInit, OnDestroy {
   public createForm: FormGroup;
   public joinForm: FormGroup;
   public lobbyForm: FormGroup;
   private modalRef: NgbModalRef;
   public wrongPasscode: boolean;
   public isLoading: boolean;
+  private subs: Subscription;
 
   constructor(
     private router: Router,
@@ -31,6 +33,7 @@ export class LobbyComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.subs = new Subscription();
     this.isLoading = false;
     this.navbarService.setMessage('Lobby');
 
@@ -40,7 +43,7 @@ export class LobbyComponent implements OnInit {
 
     this.joinForm = this.fb.group({
       roomId: ['', [Validators.required]],
-      passcode: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(16)]]
+      passcode: ['', [Validators.required, Validators.pattern(/^[0-9]{4}$/)]]
     });
 
     this.lobbyForm = this.fb.group({
@@ -48,6 +51,12 @@ export class LobbyComponent implements OnInit {
       createForm: this.createForm,
       joinForm: this.joinForm,
     })
+
+    this.subs.add(
+      this.lobbyForm.valueChanges.subscribe(_ => {
+        this.wrongPasscode = false;
+      })
+    );
 
     // TODO remove this, temporary while debugging
     this.lobbyForm.setValue({
@@ -60,6 +69,10 @@ export class LobbyComponent implements OnInit {
         passcode: ''
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   public createRoom(): void {
@@ -87,6 +100,12 @@ export class LobbyComponent implements OnInit {
   }
 
   public tryJoinRoom(): void {
+    if (this.joinForm.invalid) {
+      this.wrongPasscode = true;
+      this.isLoading = false;
+      return;
+    }
+
     this.isLoading = true;
 
     const username = this.lobbyForm.get('username').value;

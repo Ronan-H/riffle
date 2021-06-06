@@ -100,12 +100,11 @@
             aria-label="Large"
             placeholder="Passcode"
             autofocus
-            required
           />
           <button
             class="btn btn-primary"
             type="submit"
-            [disabled]="isLoading"
+            [disabled]="isLoading || joinForm.invalid"
             (click)="tryJoinRoom()"
           >
             Join
