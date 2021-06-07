@@ -128,7 +128,7 @@ __decorate([
     schema_1.type('uint16')
 ], ShowdownResult.prototype, "handScore", void 0);
 __decorate([
-    schema_1.type('uint16')
+    schema_1.type('uint32')
 ], ShowdownResult.prototype, "totalScore", void 0);
 __decorate([
     schema_1.type('boolean')

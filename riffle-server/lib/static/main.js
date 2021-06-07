@@ -203,7 +203,7 @@ Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
     Object(_colyseus_schema__WEBPACK_IMPORTED_MODULE_1__["type"])('uint16')
 ], ShowdownResult.prototype, "handScore", void 0);
 Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
-    Object(_colyseus_schema__WEBPACK_IMPORTED_MODULE_1__["type"])('uint16')
+    Object(_colyseus_schema__WEBPACK_IMPORTED_MODULE_1__["type"])('uint32')
 ], ShowdownResult.prototype, "totalScore", void 0);
 Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"])([
     Object(_colyseus_schema__WEBPACK_IMPORTED_MODULE_1__["type"])('boolean')
@@ -1294,17 +1294,16 @@ class GameComponent {
         this.gameId = this.route.params.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_0__["map"])((params => params['id'])));
         // start with default state to prevent undefined errors before the state is downloaded initially
         this.state = new _riffle_server_src_RiffleSchema__WEBPACK_IMPORTED_MODULE_1__["RiffleState"]();
-        this.prevGameView = undefined;
         this.colyseus.room$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_0__["take"])(1)).subscribe(room => {
             room.onStateChange((state) => {
                 this.state = state;
-                if (this.prevGameView !== state.gameView) {
-                    this.onGameViewChanged(state.gameView);
-                    this.prevGameView = state.gameView;
-                }
                 if (state.gameView === _riffle_server_src_RiffleSchema__WEBPACK_IMPORTED_MODULE_1__["GameView"].Swapping) {
                     this.drawCards();
                 }
+            });
+            this.removeGameViewChangedListener = room.state.listen('gameView', (updatedGameView, prevGameView) => {
+                console.log(`Game view changed from ${prevGameView} to ${updatedGameView}`);
+                this.onGameViewChanged(updatedGameView);
             });
             room.onMessage('common-index-swapped', (commonIndex) => {
                 if (this.selectedCommonIndex === commonIndex) {
@@ -1313,6 +1312,10 @@ class GameComponent {
                 }
             });
         });
+    }
+    ngOnDestroy() {
+        if (this.removeGameViewChangedListener)
+            this.removeGameViewChangedListener();
     }
     onGameViewChanged(newGameView) {
         switch (newGameView) {

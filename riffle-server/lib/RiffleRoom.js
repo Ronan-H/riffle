@@ -4,6 +4,7 @@ exports.RiffleRoom = void 0;
 const colyseus_1 = require("colyseus");
 const RiffleSchema_1 = require("./RiffleSchema");
 const schema_1 = require("@colyseus/schema");
+const hand_odds_1 = require("./hand-odds");
 var Hand = require('pokersolver').Hand;
 class RiffleRoom extends colyseus_1.Room {
     generateRandomPasscode(length) {
@@ -18,7 +19,7 @@ class RiffleRoom extends colyseus_1.Room {
                 this.broadcastPatch();
                 this.isStateDirty = false;
             }
-        }, 100);
+        }, 50);
         this.setMetadata(Object.assign(Object.assign(Object.assign({}, this.metadata), options), { passcode: this.generateRandomPasscode(4) }));
         this.setState(new RiffleSchema_1.RiffleState());
         this.updateGameView(RiffleSchema_1.GameView.GameLobby);
@@ -99,7 +100,8 @@ class RiffleRoom extends colyseus_1.Room {
         });
     }
     getScoreForHand(hand) {
-        return Math.pow(hand.rank, 2);
+        const modifier = 2;
+        return Math.round(hand_odds_1.HandOdds[hand.rank] * modifier);
     }
     populateDeck() {
         for (let suit = 0; suit < 4; suit++) {
