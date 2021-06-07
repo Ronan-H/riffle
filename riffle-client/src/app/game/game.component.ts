@@ -6,6 +6,7 @@ import { Card, GameConstants, RiffleState, GameView, Player } from '../../../../
 import { ColyseusService } from '../colyseus.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
+import { AnimtatedCard as AnimatedCard } from '../types/animated-card';
 
 type MouseTouchEvent = MouseEvent & TouchEvent;
 
@@ -47,6 +48,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   public isNextRoundClicked: boolean;
 
   private removeGameViewChangedListener: Function;
+  private animationInterval: any;
+
+  private animatedCards: AnimatedCard[];
+  private animationIntervalMS = 50;
+  private cardSwapAnimationTimeMS = 1000;
 
   public get selfPlayer(): Player {
     return this.state.players.get(this.colyseus.room.sessionId);
@@ -138,6 +144,16 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       map((params => params['id'])),
     );
 
+    this.animatedCards = [];
+    this.animationInterval = setInterval(() => {
+      this.animatedCards.forEach((animatedCard) => {
+        animatedCard.update();
+      });
+      this.animatedCards = this.animatedCards.filter((animatedCard) => !animatedCard.isFinished);
+
+      this.drawCards();
+    }, this.animationInterval);
+
     // start with default state to prevent undefined errors before the state is downloaded initially
     this.state = new RiffleState();
 
@@ -168,6 +184,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.removeGameViewChangedListener) this.removeGameViewChangedListener();
+    clearInterval(this.animationInterval);
   }
 
   private onGameViewChanged(newGameView: GameView): void {
@@ -298,6 +315,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     // clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // redraw round progress bar
+    this.drawRoundProgressBar();
+
     const spritesheet = this.resourceService.spritesheet;
     this.state.commonCards.forEach((card, index) => {
       const metadata = this.resourceService.getCardSpritesheetMedata(card);
@@ -353,8 +373,21 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       this.ctx.stroke();
     }
 
-    // redraw round progress bar, since the canvas was cleared
-    this.drawRoundProgressBar();
+    // draw card swap animations (if any)
+    this.animatedCards.forEach((animatedCard) => {
+      const metadata = this.resourceService.getCardSpritesheetMedata(animatedCard.card);
+      this.ctx.drawImage(
+        spritesheet,
+        metadata.x,
+        metadata.y,
+        metadata.width,
+        metadata.height,
+        animatedCard.roundX,
+        animatedCard.roundY,
+        this.cardWidth,
+        this.cardHeight
+      );
+    });
   }
 
   private drawRoundProgressBar(): void {
@@ -410,6 +443,24 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private swapIfBothSelected(): void {
     if (this.selectedCommonIndex !== -1 && this.selectedHandIndex !== -1) {
+      this.animatedCards.push(new AnimatedCard(
+        this.stateHandCards[this.selectedHandIndex],
+        this.selectedHandIndex * this.cardWidth,
+        this.handStartY,
+        this.selectedCommonIndex * this.cardWidth,
+        0,
+        this.cardSwapAnimationTimeMS / this.animationIntervalMS,
+      ));
+
+      this.animatedCards.push(new AnimatedCard(
+        this.state.commonCards[this.selectedCommonIndex],
+        this.selectedCommonIndex * this.cardWidth,
+        0,
+        this.selectedHandIndex * this.cardWidth,
+        this.handStartY,
+        this.cardSwapAnimationTimeMS / this.animationIntervalMS,
+      ));
+
       this.colyseus.swapCards(this.selectedCommonIndex, this.selectedHandIndex);
       this.deselectAllCards();
     }
