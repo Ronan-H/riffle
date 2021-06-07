@@ -267,11 +267,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (anyCardClicked) {
             if (commonCardClicked) {
-              this.selectCommonCard(cardIndex);
+              this.onCommonCardClicked(cardIndex);
             }
             else {
               // hand card clicked
-              this.selectHandCard(cardIndex);
+              this.onHandCardClicked(cardIndex);
             }
           }
           else {
@@ -383,7 +383,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardGapHeight);
   }
 
-  public selectCommonCard(index: number): void {
+  public onCommonCardClicked(index: number): void {
     if (this.selectedCommonIndex === index) {
       this.selectedCommonIndex = -1;
     }
@@ -393,9 +393,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  public selectHandCard(index: number): void {
+  public onHandCardClicked(index: number): void {
     if (this.selectedCommonIndex === -1) {
-      // must select common card first
+      this.sortHand();
       return;
     }
 
