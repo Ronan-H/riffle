@@ -26,7 +26,7 @@ export class RiffleRoom extends Room<RiffleState> {
             this.broadcastPatch();
             this.isStateDirty = false;
         }
-    }, 100);
+    }, 50);
 
     this.setMetadata({
       ...this.metadata,
