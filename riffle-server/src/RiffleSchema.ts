@@ -104,7 +104,7 @@ export class ShowdownResult extends Schema{
   @type('uint16')
   handScore: number;
 
-  @type('uint16')
+  @type('uint32')
   totalScore: number;
 
   @type('boolean')
