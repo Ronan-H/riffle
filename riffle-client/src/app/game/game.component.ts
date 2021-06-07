@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -14,7 +14,7 @@ type MouseTouchEvent = MouseEvent & TouchEvent;
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css']
 })
-export class GameComponent implements OnInit, AfterViewInit {
+export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('cardCanvas')
   cardCanvas: ElementRef<HTMLCanvasElement>;
 
@@ -38,7 +38,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   public selectedCommonIndex;
   public selectedHandIndex;
   public state: RiffleState;
-  private prevGameView: GameView;
   public GameView = GameView;
 
   public GameConstants = GameConstants;
@@ -46,6 +45,8 @@ export class GameComponent implements OnInit, AfterViewInit {
   private roundTimeDeltaMS = 50;
 
   public isNextRoundClicked: boolean;
+
+  private removeGameViewChangedListener: Function;
 
   public get selfPlayer(): Player {
     return this.state.players.get(this.colyseus.room.sessionId);
@@ -139,7 +140,6 @@ export class GameComponent implements OnInit, AfterViewInit {
 
     // start with default state to prevent undefined errors before the state is downloaded initially
     this.state = new RiffleState();
-    this.prevGameView = undefined;
 
     this.colyseus.room$.pipe(
       take(1)
@@ -147,14 +147,14 @@ export class GameComponent implements OnInit, AfterViewInit {
       room.onStateChange((state: RiffleState) => {
         this.state = state;
 
-        if (this.prevGameView !== state.gameView) {
-          this.onGameViewChanged(state.gameView);
-          this.prevGameView = state.gameView;
-        }
-
         if (state.gameView === GameView.Swapping) {
           this.drawCards();
         }
+      });
+
+      this.removeGameViewChangedListener = (room.state as RiffleState).listen('gameView', (updatedGameView, prevGameView) => {
+        console.log(`Game view changed from ${prevGameView} to ${updatedGameView}`);
+        this.onGameViewChanged(updatedGameView);
       });
 
       room.onMessage('common-index-swapped', (commonIndex) => {
@@ -164,6 +164,10 @@ export class GameComponent implements OnInit, AfterViewInit {
         }
       });
     });
+  }
+
+  ngOnDestroy() {
+    if (this.removeGameViewChangedListener) this.removeGameViewChangedListener();
   }
 
   private onGameViewChanged(newGameView: GameView): void {
