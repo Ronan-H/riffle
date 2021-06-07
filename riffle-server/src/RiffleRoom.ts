@@ -1,7 +1,7 @@
 import { Room, Client } from "colyseus";
 import { RiffleState, Card, Player, GameView, GameConstants, ShowdownResult } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
-import { HandOdds } from "./hand-odds";
+import { BaseHandScores } from "./base-hand-scores";
 var Hand = require('pokersolver').Hand;
 
 export class RiffleRoom extends Room<RiffleState> {
@@ -138,8 +138,7 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private getScoreForHand(hand: any): number {
-    const modifier = 2;
-    return Math.round(HandOdds[hand.rank] * modifier);
+    return Math.round(BaseHandScores[hand.rank]);
   }
 
   private populateDeck(): void {
@@ -221,7 +220,7 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private startShowdown(): void {
-    const {playerHands, winnerHand} = this.solveHands();
+    const { playerHands, winnerHand } = this.solveHands();
 
     const player = winnerHand.player as Player;
     const handScore = this.getScoreForHand(winnerHand);
