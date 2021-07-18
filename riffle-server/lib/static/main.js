@@ -1057,6 +1057,7 @@ class LobbyComponent {
     }
     openTutorialModal(content) {
         this.modalService.open(content);
+        window.scrollTo(0, 0);
     }
     tryOpenPasscodeModal(content, roomId) {
         this.joinForm.controls['roomId'].setValue(roomId);
