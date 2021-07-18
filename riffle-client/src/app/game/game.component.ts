@@ -443,16 +443,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private swapIfBothSelected(): void {
     if (this.selectedCommonIndex !== -1 && this.selectedHandIndex !== -1) {
-      // animate hand card -> common card
-      // this.animatedCards.push(new AnimatedCard(
-      //   this.stateHandCards[this.selectedHandIndex],
-      //   this.selectedHandIndex * this.cardWidth,
-      //   this.handStartY,
-      //   this.selectedCommonIndex * this.cardWidth,
-      //   0,
-      //   this.cardSwapAnimationTimeMS / this.animationIntervalMS,
-      // ));
-
       // animated common card -> hand card
       this.animatedCards.push(new AnimatedCard(
         this.state.commonCards[this.selectedCommonIndex],
