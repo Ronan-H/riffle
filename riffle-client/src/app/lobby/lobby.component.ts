@@ -83,8 +83,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   public openTutorialModal(content: TemplateRef<any>) {
-    this.modalService.open(content);
-    window.scrollTo(0, 0);
+    this.subs.add(
+      this.modalService.open(content).shown.subscribe(() =>
+        document.getElementById('tutorial-heading').scrollIntoView()
+      )
+    );
   }
 
   public tryOpenPasscodeModal(content: TemplateRef<any>, roomId: string): void {
