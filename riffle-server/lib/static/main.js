@@ -946,11 +946,11 @@ function LobbyComponent_ng_template_32_Template(rf, ctx) { if (rf & 1) {
 } }
 function LobbyComponent_ng_template_34_Template(rf, ctx) { if (rf & 1) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 20);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](1, "h4", 21);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](1, "h4", 29);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](2, " Tutorial ");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](3, "div", 29);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](3, "div", 30);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](4, "ul");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](5, "li");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](6, " The game is split up into rounds. ");
@@ -963,7 +963,7 @@ function LobbyComponent_ng_template_34_Template(rf, ctx) { if (rf & 1) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](10, "h3");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](11, "Example round:");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](12, "img", 30);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](12, "img", 31);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](13, "ul");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](14, "ul");
@@ -999,11 +999,11 @@ function LobbyComponent_ng_template_34_Template(rf, ctx) { if (rf & 1) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](33, "h3");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](34, "Hands:");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](35, "img", 31);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](35, "img", 32);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](36, "hr");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](37, "div", 2);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](38, "button", 32);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](38, "button", 33);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function LobbyComponent_ng_template_34_Template_button_click_38_listener() { const modal_r18 = ctx.$implicit; return modal_r18.dismiss(); });
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](39, " Close ");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
@@ -1056,8 +1056,7 @@ class LobbyComponent {
         });
     }
     openTutorialModal(content) {
-        this.modalService.open(content);
-        window.scrollTo(0, 0);
+        this.subs.add(this.modalService.open(content).shown.subscribe(() => document.getElementById('tutorial-heading').scrollIntoView()));
     }
     tryOpenPasscodeModal(content, roomId) {
         this.joinForm.controls['roomId'].setValue(roomId);
@@ -1099,7 +1098,7 @@ class LobbyComponent {
     }
 }
 LobbyComponent.ɵfac = function LobbyComponent_Factory(t) { return new (t || LobbyComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_angular_router__WEBPACK_IMPORTED_MODULE_4__["Router"]), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_colyseus_service__WEBPACK_IMPORTED_MODULE_5__["ColyseusService"]), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_resource_service__WEBPACK_IMPORTED_MODULE_6__["ResourceService"]), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_angular_forms__WEBPACK_IMPORTED_MODULE_0__["FormBuilder"]), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_ng_bootstrap_ng_bootstrap__WEBPACK_IMPORTED_MODULE_7__["NgbModal"]), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_navbar_navbar_service__WEBPACK_IMPORTED_MODULE_8__["NavbarService"])); };
-LobbyComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdefineComponent"]({ type: LobbyComponent, selectors: [["app-lobby"]], decls: 36, vars: 7, consts: [[3, "formGroup"], [1, "container", "mt-3"], [1, "row", "justify-content-center"], [1, "btn", "btn-success", "mt-1", 3, "click"], [1, "col-xs-6"], ["id", "username-input", "formControlName", "username", "type", "text", "placeholder", "Username", "required", "", 1, "form-control"], ["class", "row justify-content-center", 4, "ngIf"], ["noRooms", ""], [4, "ngIf", "ngIfElse"], ["formControlName", "roomName", "type", "text", "aria-label", "Large", "placeholder", "Game Name", "required", "", 1, "form-control"], ["type", "submit", "autofocus", "", 1, "btn", "btn-primary", "mt-1", 3, "disabled", "click"], ["passcodeModal", ""], ["class", "tutorial-modal"], ["tutorialModal", ""], [1, "text-danger"], [1, "table", "table-striped", "table-bordered", "table-hover"], ["scope", "col"], [3, "click", 4, "ngFor", "ngForOf"], [3, "click"], ["scope", "row"], [1, "modal-header"], ["id", "modal-basic-title", 1, "modal-title"], [1, "modal-body"], ["class", "alert alert-danger", "role", "alert", 4, "ngIf"], [1, "input-group", "input-group-lg"], ["formControlName", "passcode", "type", "text", "aria-label", "Large", "placeholder", "Passcode", "autofocus", "", 1, "form-control", 3, "keydown.enter"], ["type", "submit", 1, "btn", "btn-primary", 3, "disabled", "click"], ["aria-label", "Close", 1, "btn", "btn-outline-secondary", 3, "click"], ["role", "alert", 1, "alert", "alert-danger"], [1, "modal-body", "tutorial"], ["src", "assets/example-round.png"], ["src", "assets/poker-hands.png"], ["aria-label", "Close", 1, "btn", "btn-primary", 3, "click"]], template: function LobbyComponent_Template(rf, ctx) { if (rf & 1) {
+LobbyComponent.ɵcmp = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdefineComponent"]({ type: LobbyComponent, selectors: [["app-lobby"]], decls: 36, vars: 7, consts: [[3, "formGroup"], [1, "container", "mt-3"], [1, "row", "justify-content-center"], [1, "btn", "btn-success", "mt-1", 3, "click"], [1, "col-xs-6"], ["id", "username-input", "formControlName", "username", "type", "text", "placeholder", "Username", "required", "", 1, "form-control"], ["class", "row justify-content-center", 4, "ngIf"], ["noRooms", ""], [4, "ngIf", "ngIfElse"], ["formControlName", "roomName", "type", "text", "aria-label", "Large", "placeholder", "Game Name", "required", "", 1, "form-control"], ["type", "submit", "autofocus", "", 1, "btn", "btn-primary", "mt-1", 3, "disabled", "click"], ["passcodeModal", ""], ["class", "tutorial-modal"], ["tutorialModal", ""], [1, "text-danger"], [1, "table", "table-striped", "table-bordered", "table-hover"], ["scope", "col"], [3, "click", 4, "ngFor", "ngForOf"], [3, "click"], ["scope", "row"], [1, "modal-header"], ["id", "modal-basic-title", 1, "modal-title"], [1, "modal-body"], ["class", "alert alert-danger", "role", "alert", 4, "ngIf"], [1, "input-group", "input-group-lg"], ["formControlName", "passcode", "type", "text", "aria-label", "Large", "placeholder", "Passcode", "autofocus", "", 1, "form-control", 3, "keydown.enter"], ["type", "submit", 1, "btn", "btn-primary", 3, "disabled", "click"], ["aria-label", "Close", 1, "btn", "btn-outline-secondary", 3, "click"], ["role", "alert", 1, "alert", "alert-danger"], ["id", "tutorial-heading", 1, "modal-title"], [1, "modal-body", "tutorial"], ["src", "assets/example-round.png"], ["src", "assets/poker-hands.png"], ["aria-label", "Close", 1, "btn", "btn-primary", 3, "click"]], template: function LobbyComponent_Template(rf, ctx) { if (rf & 1) {
         const _r20 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵgetCurrentView"]();
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "form", 0);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](1, "div", 1);
