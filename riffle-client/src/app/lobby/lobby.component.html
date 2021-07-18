@@ -1,6 +1,17 @@
 <form [formGroup]="lobbyForm">
   <div class="container mt-3">
     <div class="row justify-content-center">
+      <button
+        class="btn btn-success mt-1"
+        (click)="openTutorialModal(tutorialModal)"
+      >
+        Open Tutorial
+      </button>
+    </div>
+
+    <hr />
+
+    <div class="row justify-content-center">
       <div class="col-xs-6">
         <h4>Choose a Username</h4>
         <input
@@ -133,5 +144,17 @@
         </div>
       </ng-template>
     </form>
+
+    <!-- Tutorial Modal -->
+    <ng-template #tutorialModal let-modal>
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">
+          Tutorial
+        </h4>
+      </div>
+      <div class="modal-body">
+        Test body
+      </div>
+    </ng-template>
   </div>
 </form>
