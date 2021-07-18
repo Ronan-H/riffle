@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, TemplateRef, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { debounce, take, tap } from 'rxjs/operators';
+import { debounce, delay, take, tap } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
 import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
@@ -84,7 +84,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   public openTutorialModal(content: TemplateRef<any>) {
     this.subs.add(
-      this.modalService.open(content).shown.subscribe(() =>
+      this.modalService.open(content).shown.pipe(delay(250)).subscribe(() =>
         document.getElementById('tutorial-heading').scrollIntoView()
       )
     );
