@@ -54,15 +54,6 @@
                 <span *ngIf="!selfPlayer.isCurrentlyWinning" class="text-danger">Currently losing</span>
             </p>
         </strong>
-        <div class="row justify-content-center">
-            <button
-                class="btn btn-primary"
-                type="button"
-                (click)="sortHand()"
-            >
-                Sort Hand
-            </button>
-        </div>
     </div>
 
     <div *ngIf="state.gameView === GameView.Showdown">
