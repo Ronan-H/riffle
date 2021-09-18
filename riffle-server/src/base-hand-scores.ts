@@ -2,14 +2,14 @@
 export const BaseHandScores = [
     0, // rank 0 - N/a
     0, // rank 1 - High card
-    5, // rank 2 - One pair
-    20, // rank 3 - Two pair
-    50, // rank 4 - Three of a kind
-    250, // rank 5 - Straight
-    300, // rank 6 - Flush
-    700, // rank 7 - Full house
-    2500, // rank 8 - Four of a kind
-    50000, // rank 9 - Straight flush
+    1, // rank 2 - One pair
+    3, // rank 3 - Two pair
+    5, // rank 4 - Three of a kind
+    10, // rank 5 - Straight
+    12, // rank 6 - Flush
+    15, // rank 7 - Full house
+    25, // rank 8 - Four of a kind
+    100, // rank 9 - Straight flush
 ]
 
 // Hand probabilities
