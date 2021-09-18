@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -54,6 +55,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   private animationIntervalMS = 50;
   private cardSwapAnimationTimeMS = 2000;
 
+  public optionsForm: FormGroup;
+
   public get selfPlayer(): Player {
     return this.state.players.get(this.colyseus.room.sessionId);
   }
@@ -74,7 +77,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     public colyseus: ColyseusService,
     public resourceService: ResourceService,
     private navbarService: NavbarService,
-  ) { }
+    private fb: FormBuilder,
+    ) { }
 
   public startGame(): void {
     this.colyseus.startGame();
@@ -143,6 +147,10 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.gameId = this.route.params.pipe(
       map((params => params['id'])),
     );
+
+    this.optionsForm = this.fb.group({
+      numRounds:  [10],
+    });
 
     this.animatedCards = [];
     this.animationInterval = setInterval(() => {
