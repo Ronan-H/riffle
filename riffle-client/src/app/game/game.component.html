@@ -24,9 +24,18 @@
         <hr />
         <div class="text-center" [formGroup]="optionsForm">
             <h4>Options:</h4>
-            <span *ngIf="!this.selfPlayer?.isHost" class="text-danger font-italic">
-                Only the host can edit these options
-            </span>
+
+            <div class="font-italic font-weight-bold mb-3">
+                <span *ngIf="!this.selfPlayer?.isHost; else notHostSubtext" class="text-danger">
+                    Only the host can edit these options
+                </span>
+                <ng-template #notHostSubtext>
+                    <span class="text-success">
+                        You are the host - only you can edit these options
+                    </span>
+                </ng-template>
+            </div>
+
             <div class="row justify-content-center input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text" id="basic-addon1">Number of Rounds</span>
@@ -39,6 +48,8 @@
                         max="100"
                         class="form-control"
                         aria-describedby="basic-addon1"
+                        (focusout)="onOptionsInputFocusOut()"
+                        required
                     >
                 </div>
 

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView, Player } from '../../../../riffle-server/src/RiffleSchema';
+import { Card, GameConstants, RiffleState, GameView, Player, RoundOptions } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
@@ -87,7 +87,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:resize')
   onResize() {
     this.autoAdjustCanvas();
-    // TODO possiblity of cards being undefined here?
     this.drawCards();
   }
 
@@ -149,7 +148,28 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     );
 
     this.optionsForm = this.fb.group({
-      numRounds:  [10],
+      numRounds:  [GameConstants.defaultNumRounds],
+    });
+
+    this.optionsForm.valueChanges.subscribe((roundOptions: Partial<RoundOptions>) => {
+      // enforce min/max round number as 1/100, if out of bounds
+      if (roundOptions.numRounds !== null) {
+        if (roundOptions.numRounds < 1) {
+          this.optionsForm.controls['numRounds'].setValue(1, { emitEvent: false });
+          roundOptions.numRounds = 1;
+        }
+        if (roundOptions.numRounds > 100) {
+          this.optionsForm.controls['numRounds'].setValue(100, { emitEvent: false });
+          roundOptions.numRounds = 100;
+        }
+
+        this.colyseus.updateRoundOptions(roundOptions);
+      }
+      else {
+        this.colyseus.updateRoundOptions({
+          numRounds: 1
+        });
+      }
     });
 
     this.animatedCards = [];
@@ -173,6 +193,10 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (state.gameView === GameView.Swapping) {
           this.drawCards();
+        }
+
+        if (!this.selfPlayer.isHost) {
+          this.optionsForm.controls['numRounds'].setValue(state.roundOptions.numRounds);
         }
       });
 
@@ -320,6 +344,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private drawCards(): void {
+    // TODO fix this antipattern
+    if (this.state.gameView !== GameView.Swapping) {
+      return;
+    }
+
     // clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -478,5 +507,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public sortHand(): void {
     this.colyseus.sortHand();
+  }
+
+  public onOptionsInputFocusOut(): void {
+    if (this.optionsForm.controls['numRounds'].value === null) {
+      this.optionsForm.controls['numRounds'].setValue(1);
+    }
   }
 }

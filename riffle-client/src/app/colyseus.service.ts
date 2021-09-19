@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Client as ColyseusClient, Room, RoomAvailable } from 'colyseus.js';
 import { from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { RoundOptions } from '../../../riffle-server/src/RiffleSchema';
 
 @Injectable({
   providedIn: 'root'
@@ -94,5 +95,9 @@ export class ColyseusService {
 
   public sortHand(): void {
     this.room.send('sort-hand');
+  }
+
+  public updateRoundOptions(roundOptions: Partial<RoundOptions>): void {
+    this.room.send('update-round-options', roundOptions);
   }
 }

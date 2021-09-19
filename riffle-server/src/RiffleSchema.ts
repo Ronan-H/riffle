@@ -8,6 +8,7 @@ export enum GameView {
 
 export const GameConstants = {
   roundTimeMS: 30 * 1000,
+  defaultNumRounds: 15,
 };
 
 export class Card extends Schema {
@@ -128,6 +129,16 @@ export class ShowdownResult extends Schema{
   }
 }
 
+export class RoundOptions extends Schema {
+  @type('number')
+  numRounds: number;
+
+  constructor(numRounds = GameConstants.defaultNumRounds) {
+    super();
+    this.numRounds = numRounds;
+  }
+}
+
 export class RiffleState extends Schema {
   @type('uint8')
   gameView: GameView;
@@ -152,4 +163,7 @@ export class RiffleState extends Schema {
 
   @type('uint8')
   nextRoundVotesRequired: number;
+
+  @type(RoundOptions)
+  roundOptions: RoundOptions = new RoundOptions();
 }

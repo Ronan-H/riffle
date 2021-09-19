@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { RiffleState, Card, Player, GameView, GameConstants, ShowdownResult } from "./RiffleSchema";
+import { RiffleState, Card, Player, GameView, GameConstants, ShowdownResult, RoundOptions } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 import { BaseHandScores } from "./base-hand-scores";
 var Hand = require('pokersolver').Hand;
@@ -82,6 +82,18 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.onMessage('sort-hand', (client) => {
       this.sortPlayersHand(this.state.players.get(client.id));
+      this.syncClientState();
+    });
+
+    this.onMessage('update-round-options', (client, roundOptions: Partial<RoundOptions>) => {
+      const isHost = this.state.players.get(client.sessionId).isHost;
+      if (!isHost) {
+        return;
+      }
+
+      this.state.roundOptions = new RoundOptions(
+        roundOptions.numRounds
+      );
       this.syncClientState();
     });
   }
