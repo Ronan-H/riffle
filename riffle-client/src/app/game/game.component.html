@@ -99,8 +99,9 @@
 
     <div *ngIf="state.gameView === GameView.Showdown">
         <div class="text-center">
+            <h2 class="mt-3">Showdown!</h2>
             <div class="row justify-content-center">
-                <table class="table table-bordered">
+                <table class="table table-bordered mt-3">
                     <thead class="thead-dark">
                         <tr>
                             <th class="fit" scope="col">Name</th>
@@ -129,7 +130,7 @@
             </div>
 
             <div *ngIf="state.roundsRemaining === 0">
-                <h1>Game Over!</h1>
+                <h1>Game Over</h1>
                 <h3 *ngIf="state.gameWinners.length === 1; else multipleWinners">
                     {{ state.gameWinners[0] }} Wins!
                 </h3>
@@ -141,26 +142,57 @@
             </div>
 
             <div class="fixed-bottom">
-                <button
-                    *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
-                    class="btn btn-primary mb-3"
-                    type="button"
-                    [disabled]="isNextRoundClicked"
-                    (click)="onNextRoundClicked()"
-                >
-                    {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
-                </button>
+                <div *ngIf="state.roundsRemaining > 0">
+                    <div class="row justify-content-center">
+                        <p class="text-primary font-weight-bold">
+                            This game is still open to new players!
+                        </p>
+                    </div>
+    
+                    <div class="row justify-content-center">
+                        <div>
+                            <table class="table table-responsive table-sm table-bordered">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Room Name</th>
+                                    <th scope="col">Room ID</th>
+                                    <th scope="col">Passcode</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>{{ state.roomName }}</td>
+                                    <td>{{ colyseus.room.id }}</td>
+                                    <td>{{ colyseus.gamePasscode }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-                <ng-template #returnToLobbyButton>
+                <div class="row justify-content-center">
                     <button
-                        class="btn btn-success mb-3"
+                        *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
+                        class="btn btn-primary mb-3"
                         type="button"
                         [disabled]="isNextRoundClicked"
-                        (click)="onReturnToLobbyClicked()"
+                        (click)="onNextRoundClicked()"
                     >
-                        Return to Lobby
+                        {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
                     </button>
-                </ng-template>
+
+                    <ng-template #returnToLobbyButton>
+                        <button
+                            class="btn btn-success mb-3"
+                            type="button"
+                            [disabled]="isNextRoundClicked"
+                            (click)="onReturnToLobbyClicked()"
+                        >
+                            Return to Lobby
+                        </button>
+                    </ng-template>
+                </div>
             </div>
         </div>
     </div>

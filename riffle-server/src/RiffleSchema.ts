@@ -175,4 +175,7 @@ export class RiffleState extends Schema {
 
   @type([ 'string' ])
   gameWinners: ArraySchema<string>;
+
+  @type('string')
+  roomName: string;
 }

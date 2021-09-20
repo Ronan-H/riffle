@@ -239,7 +239,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isNextRoundClicked = false;
 
         // set navbar message
-        this.navbarService.setMessage('Showdown!');
+        this.navbarService.setMessage('Showdown');
 
         clearInterval(this.roundTimeInterval);
         break;

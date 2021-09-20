@@ -36,6 +36,9 @@ export class RiffleRoom extends Room<RiffleState> {
     });
 
     this.setState(new RiffleState());
+    // copy room metadata into the state
+    this.state.roomName = this.metadata.roomName;
+
     this.updateGameView(GameView.GameLobby);
 
     this.onMessage('start-game', (client) => {
