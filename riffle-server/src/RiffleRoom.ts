@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { RiffleState, Card, Player, GameView, GameConstants, ShowdownResult } from "./RiffleSchema";
+import { RiffleState, Card, Player, GameView, GameConstants, ShowdownResult, RoundOptions } from "./RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
 import { BaseHandScores } from "./base-hand-scores";
 var Hand = require('pokersolver').Hand;
@@ -36,6 +36,9 @@ export class RiffleRoom extends Room<RiffleState> {
     });
 
     this.setState(new RiffleState());
+    // copy room metadata into the state
+    this.state.roomName = this.metadata.roomName;
+
     this.updateGameView(GameView.GameLobby);
 
     this.onMessage('start-game', (client) => {
@@ -43,6 +46,9 @@ export class RiffleRoom extends Room<RiffleState> {
         this.state.gameView === GameView.GameLobby &&
         this.state.players.get(client.sessionId).isHost
       ) {
+        this.state.roundNum = 0;
+        this.state.roundsRemaining = this.state.roundOptions.numRounds;
+
         this.startRound();
       }
     });
@@ -84,6 +90,19 @@ export class RiffleRoom extends Room<RiffleState> {
       this.sortPlayersHand(this.state.players.get(client.id));
       this.syncClientState();
     });
+
+    this.onMessage('update-round-options', (client, roundOptions: Partial<RoundOptions>) => {
+      const isHost = this.state.players.get(client.sessionId).isHost;
+      if (!isHost) {
+        return;
+      }
+
+      this.state.roundOptions = new RoundOptions(
+        roundOptions.numRounds
+      );
+
+      this.syncClientState();
+    });
   }
 
   private syncClientState(): void {
@@ -91,6 +110,9 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private startRound() {
+    ++this.state.roundNum;
+    --this.state.roundsRemaining;
+
     this.resetCards();
     this.populateDeck();
     this.shuffle(this.state.deck);
@@ -245,11 +267,22 @@ export class RiffleRoom extends Room<RiffleState> {
     showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
     this.state.showdownResults = showdownSeq;
 
-    this.state.numVotedNextRound = 0;
-    this.state.players.forEach(player => {
-      player.votedNextRound = false;
-    });
-    this.calcNextRoundVotesRequired();
+    if (this.state.roundsRemaining > 0) {
+      // prepare for next round
+      this.state.numVotedNextRound = 0;
+      this.state.players.forEach(player => {
+        player.votedNextRound = false;
+      });
+      this.calcNextRoundVotesRequired();
+    }
+    else {
+      // game over, record winner(s)
+      this.state.gameWinners = new ArraySchema<string>();
+      const highestScore = showdownSeq[0].totalScore;
+      for (let i = 0; i < showdownSeq.length && showdownSeq[i].totalScore === highestScore; ++i) {
+        this.state.gameWinners.push(showdownSeq[i].playerName);
+      }
+    }
 
     this.syncClientState();
   }
@@ -308,7 +341,7 @@ export class RiffleRoom extends Room<RiffleState> {
   private deletePlayer(playerId: string): void {
     this.state.players.delete(playerId);
 
-    if (this.state.gameView === GameView.Showdown) {
+    if (this.state.gameView === GameView.Showdown && this.state.roundsRemaining > 0) {
       // delete player's showdown result
       this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
 

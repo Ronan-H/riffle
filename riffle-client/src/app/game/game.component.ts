@@ -1,8 +1,9 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Card, GameConstants, RiffleState, GameView, Player } from '../../../../riffle-server/src/RiffleSchema';
+import { Card, GameConstants, RiffleState, GameView, Player, RoundOptions } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { ResourceService } from '../resource.service';
@@ -54,6 +55,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   private animationIntervalMS = 50;
   private cardSwapAnimationTimeMS = 2000;
 
+  public optionsForm: FormGroup;
+
   public get selfPlayer(): Player {
     return this.state.players.get(this.colyseus.room.sessionId);
   }
@@ -74,7 +77,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     public colyseus: ColyseusService,
     public resourceService: ResourceService,
     private navbarService: NavbarService,
-  ) { }
+    private fb: FormBuilder,
+    ) { }
 
   public startGame(): void {
     this.colyseus.startGame();
@@ -83,7 +87,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:resize')
   onResize() {
     this.autoAdjustCanvas();
-    // TODO possiblity of cards being undefined here?
     this.drawCards();
   }
 
@@ -144,6 +147,31 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
       map((params => params['id'])),
     );
 
+    this.optionsForm = this.fb.group({
+      numRounds:  [GameConstants.defaultNumRounds],
+    });
+
+    this.optionsForm.valueChanges.subscribe((roundOptions: Partial<RoundOptions>) => {
+      // enforce min/max round number as 1/100, if out of bounds
+      if (roundOptions.numRounds !== null) {
+        if (roundOptions.numRounds < 1) {
+          this.optionsForm.controls['numRounds'].setValue(1, { emitEvent: false });
+          roundOptions.numRounds = 1;
+        }
+        if (roundOptions.numRounds > 100) {
+          this.optionsForm.controls['numRounds'].setValue(100, { emitEvent: false });
+          roundOptions.numRounds = 100;
+        }
+
+        this.colyseus.updateRoundOptions(roundOptions);
+      }
+      else {
+        this.colyseus.updateRoundOptions({
+          numRounds: 1
+        });
+      }
+    });
+
     this.animatedCards = [];
     this.animationInterval = setInterval(() => {
       this.animatedCards.forEach((animatedCard) => {
@@ -165,6 +193,10 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (state.gameView === GameView.Swapping) {
           this.drawCards();
+        }
+
+        if (!this.selfPlayer.isHost) {
+          this.optionsForm.controls['numRounds'].setValue(state.roundOptions.numRounds);
         }
       });
 
@@ -200,14 +232,14 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         }, this.roundTimeDeltaMS);
 
         // set navbar message
-        this.navbarService.setMessage('Swap for a good hand!');
+        this.navbarService.setMessage(`Round ${this.state.roundNum} of ${this.state.roundOptions.numRounds}`);
         break;
       case GameView.Showdown:
         // reset
         this.isNextRoundClicked = false;
 
         // set navbar message
-        this.navbarService.setMessage('Showdown!');
+        this.navbarService.setMessage('Showdown');
 
         clearInterval(this.roundTimeInterval);
         break;
@@ -312,6 +344,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private drawCards(): void {
+    // TODO fix this antipattern
+    if (this.state.gameView !== GameView.Swapping) {
+      return;
+    }
+
     // clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -468,7 +505,18 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.colyseus.room.send('next-round-vote');
   }
 
+  public onReturnToLobbyClicked(): void {
+    this.colyseus.leaveGame();
+    this.router.navigate(['']);
+  }
+
   public sortHand(): void {
     this.colyseus.sortHand();
+  }
+
+  public onOptionsInputFocusOut(): void {
+    if (this.optionsForm.controls['numRounds'].value === null) {
+      this.optionsForm.controls['numRounds'].setValue(1);
+    }
   }
 }
