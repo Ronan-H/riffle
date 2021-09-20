@@ -4,14 +4,14 @@ exports.BaseHandScores = void 0;
 exports.BaseHandScores = [
     0,
     0,
+    1,
+    3,
     5,
-    20,
-    50,
-    250,
-    300,
-    700,
-    2500,
-    50000, // rank 9 - Straight flush
+    10,
+    12,
+    15,
+    25,
+    100, // rank 9 - Straight flush
 ];
 // Hand probabilities
 // Based on: https://en.wikipedia.org/wiki/Poker_probability

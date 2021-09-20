@@ -22,10 +22,14 @@ class RiffleRoom extends colyseus_1.Room {
         }, 50);
         this.setMetadata(Object.assign(Object.assign(Object.assign({}, this.metadata), options), { passcode: this.generateRandomPasscode(4) }));
         this.setState(new RiffleSchema_1.RiffleState());
+        // copy room metadata into the state
+        this.state.roomName = this.metadata.roomName;
         this.updateGameView(RiffleSchema_1.GameView.GameLobby);
         this.onMessage('start-game', (client) => {
             if (this.state.gameView === RiffleSchema_1.GameView.GameLobby &&
                 this.state.players.get(client.sessionId).isHost) {
+                this.state.roundNum = 0;
+                this.state.roundsRemaining = this.state.roundOptions.numRounds;
                 this.startRound();
             }
         });
@@ -58,11 +62,21 @@ class RiffleRoom extends colyseus_1.Room {
             this.sortPlayersHand(this.state.players.get(client.id));
             this.syncClientState();
         });
+        this.onMessage('update-round-options', (client, roundOptions) => {
+            const isHost = this.state.players.get(client.sessionId).isHost;
+            if (!isHost) {
+                return;
+            }
+            this.state.roundOptions = new RiffleSchema_1.RoundOptions(roundOptions.numRounds);
+            this.syncClientState();
+        });
     }
     syncClientState() {
         this.isStateDirty = true;
     }
     startRound() {
+        ++this.state.roundNum;
+        --this.state.roundsRemaining;
         this.resetCards();
         this.populateDeck();
         this.shuffle(this.state.deck);
@@ -181,11 +195,22 @@ class RiffleRoom extends colyseus_1.Room {
         });
         showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
         this.state.showdownResults = showdownSeq;
-        this.state.numVotedNextRound = 0;
-        this.state.players.forEach(player => {
-            player.votedNextRound = false;
-        });
-        this.calcNextRoundVotesRequired();
+        if (this.state.roundsRemaining > 0) {
+            // prepare for next round
+            this.state.numVotedNextRound = 0;
+            this.state.players.forEach(player => {
+                player.votedNextRound = false;
+            });
+            this.calcNextRoundVotesRequired();
+        }
+        else {
+            // game over, record winner(s)
+            this.state.gameWinners = new schema_1.ArraySchema();
+            const highestScore = showdownSeq[0].totalScore;
+            for (let i = 0; i < showdownSeq.length && showdownSeq[i].totalScore === highestScore; ++i) {
+                this.state.gameWinners.push(showdownSeq[i].playerName);
+            }
+        }
         this.syncClientState();
     }
     calcNextRoundVotesRequired() {
@@ -228,7 +253,7 @@ class RiffleRoom extends colyseus_1.Room {
     }
     deletePlayer(playerId) {
         this.state.players.delete(playerId);
-        if (this.state.gameView === RiffleSchema_1.GameView.Showdown) {
+        if (this.state.gameView === RiffleSchema_1.GameView.Showdown && this.state.roundsRemaining > 0) {
             // delete player's showdown result
             this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
             // recalculate next round votes

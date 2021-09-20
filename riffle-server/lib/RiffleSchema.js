@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RiffleState = exports.ShowdownResult = exports.Player = exports.Card = exports.GameConstants = exports.GameView = void 0;
+exports.RiffleState = exports.RoundOptions = exports.ShowdownResult = exports.Player = exports.Card = exports.GameConstants = exports.GameView = void 0;
 const schema_1 = require("@colyseus/schema");
 var GameView;
 (function (GameView) {
@@ -16,6 +16,7 @@ var GameView;
 })(GameView = exports.GameView || (exports.GameView = {}));
 exports.GameConstants = {
     roundTimeMS: 30 * 1000,
+    defaultNumRounds: 15,
 };
 class Card extends schema_1.Schema {
     constructor(num, suit) {
@@ -134,11 +135,22 @@ __decorate([
     schema_1.type('boolean')
 ], ShowdownResult.prototype, "isWinningHand", void 0);
 exports.ShowdownResult = ShowdownResult;
+class RoundOptions extends schema_1.Schema {
+    constructor(numRounds = exports.GameConstants.defaultNumRounds) {
+        super();
+        this.numRounds = numRounds;
+    }
+}
+__decorate([
+    schema_1.type('number')
+], RoundOptions.prototype, "numRounds", void 0);
+exports.RoundOptions = RoundOptions;
 class RiffleState extends schema_1.Schema {
     constructor() {
         super(...arguments);
         this.players = new schema_1.MapSchema();
         this.commonCards = new schema_1.ArraySchema();
+        this.roundOptions = new RoundOptions();
     }
 }
 __decorate([
@@ -161,8 +173,23 @@ __decorate([
 ], RiffleState.prototype, "showdownResults", void 0);
 __decorate([
     schema_1.type('uint8')
+], RiffleState.prototype, "roundNum", void 0);
+__decorate([
+    schema_1.type('uint8')
+], RiffleState.prototype, "roundsRemaining", void 0);
+__decorate([
+    schema_1.type('uint8')
 ], RiffleState.prototype, "numVotedNextRound", void 0);
 __decorate([
     schema_1.type('uint8')
 ], RiffleState.prototype, "nextRoundVotesRequired", void 0);
+__decorate([
+    schema_1.type(RoundOptions)
+], RiffleState.prototype, "roundOptions", void 0);
+__decorate([
+    schema_1.type(['string'])
+], RiffleState.prototype, "gameWinners", void 0);
+__decorate([
+    schema_1.type('string')
+], RiffleState.prototype, "roomName", void 0);
 exports.RiffleState = RiffleState;
