@@ -141,57 +141,53 @@
                 </ng-template>
             </div>
 
-            <div class="fixed-bottom">
-                <div *ngIf="state.roundsRemaining > 0">
-                    <div class="row justify-content-center">
-                        <p class="text-primary font-weight-bold">
-                            This game is still open to new players!
-                        </p>
-                    </div>
-    
-                    <div class="row justify-content-center">
-                        <div>
-                            <table class="table table-responsive table-sm table-bordered">
-                                <thead>
-                                <tr>
-                                    <th scope="col">Room Name</th>
-                                    <th scope="col">Room ID</th>
-                                    <th scope="col">Passcode</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>{{ state.roomName }}</td>
-                                    <td>{{ colyseus.room.id }}</td>
-                                    <td>{{ colyseus.gamePasscode }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
+            <div class="row justify-content-center">
+                <button
+                    *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
+                    class="btn btn-primary mb-3"
+                    type="button"
+                    [disabled]="isNextRoundClicked"
+                    (click)="onNextRoundClicked()"
+                >
+                    {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
+                </button>
+
+                <ng-template #returnToLobbyButton>
+                    <button
+                        class="btn btn-success mb-3"
+                        type="button"
+                        [disabled]="isNextRoundClicked"
+                        (click)="onReturnToLobbyClicked()"
+                    >
+                        Return to Lobby
+                    </button>
+                </ng-template>
+            </div>
+
+            <div *ngIf="state.roundsRemaining > 0" class="border">
+                <div class="row justify-content-center mt-3">
+                    <div>
+                        <table class="table table-responsive table-sm table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col">Room Name</th>
+                                <th scope="col">Room ID</th>
+                                <th scope="col">Passcode</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>{{ state.roomName }}</td>
+                                <td>{{ colyseus.room.id }}</td>
+                                <td>{{ colyseus.gamePasscode }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <div class="row justify-content-center">
-                    <button
-                        *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
-                        class="btn btn-primary mb-3"
-                        type="button"
-                        [disabled]="isNextRoundClicked"
-                        (click)="onNextRoundClicked()"
-                    >
-                        {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
-                    </button>
-
-                    <ng-template #returnToLobbyButton>
-                        <button
-                            class="btn btn-success mb-3"
-                            type="button"
-                            [disabled]="isNextRoundClicked"
-                            (click)="onReturnToLobbyClicked()"
-                        >
-                            Return to Lobby
-                        </button>
-                    </ng-template>
+                    <p>This game is still open to new players!</p>
                 </div>
             </div>
         </div>
