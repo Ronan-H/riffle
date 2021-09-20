@@ -232,7 +232,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         }, this.roundTimeDeltaMS);
 
         // set navbar message
-        this.navbarService.setMessage('Swap for a good hand!');
+        this.navbarService.setMessage(`Round ${this.state.roundNum} of ${this.state.roundOptions.numRounds}`);
         break;
       case GameView.Showdown:
         // reset
@@ -503,6 +503,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   public onNextRoundClicked(): void {
     this.isNextRoundClicked = true;
     this.colyseus.room.send('next-round-vote');
+  }
+
+  public onReturnToLobbyClicked(): void {
+    this.colyseus.leaveGame();
+    this.router.navigate(['']);
   }
 
   public sortHand(): void {

@@ -43,6 +43,9 @@ export class RiffleRoom extends Room<RiffleState> {
         this.state.gameView === GameView.GameLobby &&
         this.state.players.get(client.sessionId).isHost
       ) {
+        this.state.roundNum = 0;
+        this.state.roundsRemaining = this.state.roundOptions.numRounds;
+
         this.startRound();
       }
     });
@@ -94,6 +97,7 @@ export class RiffleRoom extends Room<RiffleState> {
       this.state.roundOptions = new RoundOptions(
         roundOptions.numRounds
       );
+
       this.syncClientState();
     });
   }
@@ -103,6 +107,9 @@ export class RiffleRoom extends Room<RiffleState> {
   }
 
   private startRound() {
+    ++this.state.roundNum;
+    --this.state.roundsRemaining;
+
     this.resetCards();
     this.populateDeck();
     this.shuffle(this.state.deck);
@@ -257,11 +264,22 @@ export class RiffleRoom extends Room<RiffleState> {
     showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
     this.state.showdownResults = showdownSeq;
 
-    this.state.numVotedNextRound = 0;
-    this.state.players.forEach(player => {
-      player.votedNextRound = false;
-    });
-    this.calcNextRoundVotesRequired();
+    if (this.state.roundsRemaining > 0) {
+      // prepare for next round
+      this.state.numVotedNextRound = 0;
+      this.state.players.forEach(player => {
+        player.votedNextRound = false;
+      });
+      this.calcNextRoundVotesRequired();
+    }
+    else {
+      // game over, record winner(s)
+      this.state.gameWinners = new ArraySchema<string>();
+      const highestScore = showdownSeq[0].totalScore;
+      for (let i = 0; i < showdownSeq.length && showdownSeq[i].totalScore === highestScore; ++i) {
+        this.state.gameWinners.push(showdownSeq[i].playerName);
+      }
+    }
 
     this.syncClientState();
   }
@@ -320,7 +338,7 @@ export class RiffleRoom extends Room<RiffleState> {
   private deletePlayer(playerId: string): void {
     this.state.players.delete(playerId);
 
-    if (this.state.gameView === GameView.Showdown) {
+    if (this.state.gameView === GameView.Showdown && this.state.roundsRemaining > 0) {
       // delete player's showdown result
       this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
 

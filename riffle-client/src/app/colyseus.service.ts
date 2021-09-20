@@ -86,6 +86,10 @@ export class ColyseusService {
     this.room.send('start-game');
   }
 
+  public leaveGame(): void {
+    this.room.leave();
+  }
+
   public swapCards(commonIndex: number, handIndex: number): void {
     this.room.send('swap-cards', {
       handIndex,

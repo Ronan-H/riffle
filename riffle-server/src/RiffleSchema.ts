@@ -159,6 +159,12 @@ export class RiffleState extends Schema {
   showdownResults: ShowdownResult[];
 
   @type('uint8')
+  roundNum: number;
+
+  @type('uint8')
+  roundsRemaining: number;
+
+  @type('uint8')
   numVotedNextRound: number;
 
   @type('uint8')
@@ -166,4 +172,7 @@ export class RiffleState extends Schema {
 
   @type(RoundOptions)
   roundOptions: RoundOptions = new RoundOptions();
+
+  @type([ 'string' ])
+  gameWinners: ArraySchema<string>;
 }

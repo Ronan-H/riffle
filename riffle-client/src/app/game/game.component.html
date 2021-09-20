@@ -128,8 +128,21 @@
                 </table>
             </div>
 
+            <div *ngIf="state.roundsRemaining === 0">
+                <h1>Game Over!</h1>
+                <h3 *ngIf="state.gameWinners.length === 1; else multipleWinners">
+                    {{ state.gameWinners[0] }} Wins!
+                </h3>
+
+                <ng-template #multipleWinners>
+                    <h3>Joint Winners:</h3>
+                    <h3>{{ state.gameWinners.join(', ') }}</h3>
+                </ng-template>
+            </div>
+
             <div class="fixed-bottom">
                 <button
+                    *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
                     class="btn btn-primary mb-3"
                     type="button"
                     [disabled]="isNextRoundClicked"
@@ -137,6 +150,17 @@
                 >
                     {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
                 </button>
+
+                <ng-template #returnToLobbyButton>
+                    <button
+                        class="btn btn-success mb-3"
+                        type="button"
+                        [disabled]="isNextRoundClicked"
+                        (click)="onReturnToLobbyClicked()"
+                    >
+                        Return to Lobby
+                    </button>
+                </ng-template>
             </div>
         </div>
     </div>
