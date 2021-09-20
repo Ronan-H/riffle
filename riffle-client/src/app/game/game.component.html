@@ -132,7 +132,7 @@
             <div *ngIf="state.roundsRemaining === 0">
                 <h1>Game Over</h1>
                 <h3 *ngIf="state.gameWinners.length === 1; else multipleWinners">
-                    {{ state.gameWinners[0] }} Wins!
+                    <span class="text-primary" [textContent]="state.gameWinners[0]"></span> Wins!
                 </h3>
 
                 <ng-template #multipleWinners>
