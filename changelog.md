@@ -11,3 +11,6 @@
   - Just the round limit for now, more options to be added later.
 - Added room details to the Showdown screen, so that players can easily join ongoing games.
 - Added a link to this changelog to the Lobby screen.
+
+### 1.1.1
+- Fixed an issue where the next round/return to lobby button overlapped with the rest of the page content on smaller screens (#28).
