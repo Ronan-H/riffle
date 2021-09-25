@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { take } from 'rxjs/operators';
+import { ColyseusService } from 'src/app/colyseus.service';
+import { NavbarService } from 'src/app/navbar/navbar.service';
+import { ResourceService } from 'src/app/resource.service';
+import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 
 @Component({
   selector: 'app-showdown',
@@ -6,10 +12,42 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./showdown.component.css']
 })
 export class ShowdownComponent implements OnInit {
+  @Input()
+  public state: RiffleState;
 
-  constructor() { }
+  public isNextRoundClicked: boolean;
 
-  ngOnInit(): void {
+  public get selfPlayer(): Player {
+    return this.state.players.get(this.colyseus.room.sessionId);
   }
 
+  constructor(
+    private router: Router,
+    public colyseus: ColyseusService,
+    public resourceService: ResourceService,
+    private navbarService: NavbarService,
+  ) { }
+
+  ngOnInit(): void {
+    this.isNextRoundClicked = false;
+    this.navbarService.setMessage('Showdown!');
+
+    this.colyseus.room$.pipe(
+      take(1)
+    ).subscribe(room => {
+      room.onStateChange((state: RiffleState) => {
+        this.state = state;
+      });
+    });
+  }
+
+  public onNextRoundClicked(): void {
+    this.isNextRoundClicked = true;
+    this.colyseus.room.send('next-round-vote');
+  }
+
+  public onReturnToLobbyClicked(): void {
+    this.colyseus.leaveGame();
+    this.router.navigate(['']);
+  }
 }

@@ -46,8 +46,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   private roundTimeInterval: any;
   private roundTimeDeltaMS = 50;
 
-  public isNextRoundClicked: boolean;
-
   private removeGameViewChangedListener: Function;
   private animationInterval: any;
 
@@ -235,11 +233,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         this.navbarService.setMessage(`Round ${this.state.roundNum} of ${this.state.roundOptions.numRounds}`);
         break;
       case GameView.Showdown:
-        // reset
-        this.isNextRoundClicked = false;
-
-        // set navbar message
-        this.navbarService.setMessage('Showdown');
+        // the showdown component is rendered in the template, with *ngIf on gameView
 
         clearInterval(this.roundTimeInterval);
         break;
@@ -498,16 +492,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   private deselectAllCards(): void {
     this.selectedCommonIndex = -1;
     this.selectedHandIndex = -1;
-  }
-
-  public onNextRoundClicked(): void {
-    this.isNextRoundClicked = true;
-    this.colyseus.room.send('next-round-vote');
-  }
-
-  public onReturnToLobbyClicked(): void {
-    this.colyseus.leaveGame();
-    this.router.navigate(['']);
   }
 
   public sortHand(): void {
