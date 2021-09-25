@@ -12,14 +12,9 @@ import { ResourceService } from '../resource.service';
   styleUrls: ['./game.component.css']
 })
 export class GameComponent {
-  public gameId: Observable<string>;
   public state: RiffleState;
   public GameView = GameView;
   public GameConstants = GameConstants;
-
-  public get selfPlayer(): Player {
-    return this.state.players.get(this.colyseus.room.sessionId);
-  }
 
   constructor(
     private router: Router,

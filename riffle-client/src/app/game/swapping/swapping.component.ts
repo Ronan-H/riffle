@@ -21,10 +21,6 @@ export class SwappingComponent implements OnInit, OnDestroy {
     return this.state.players.get(this.colyseus.room.sessionId);
   }
 
-  public get stateHandCards(): ArraySchema<Card> {
-    return this.selfPlayer.cards;
-  }
-
   public get selectedCommonIndex(): number {
     return this.swapService.selectedCommonIndex.getValue();
   }

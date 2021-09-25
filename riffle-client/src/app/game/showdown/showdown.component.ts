@@ -17,10 +17,6 @@ export class ShowdownComponent implements OnInit {
 
   public isNextRoundClicked: boolean;
 
-  public get selfPlayer(): Player {
-    return this.state.players.get(this.colyseus.room.sessionId);
-  }
-
   constructor(
     private router: Router,
     public colyseus: ColyseusService,
