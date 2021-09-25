@@ -10,6 +10,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GameLobbyComponent } from './game/game-lobby/game-lobby.component';
 import { SwappingComponent } from './game/swapping/swapping.component';
 import { ShowdownComponent } from './game/showdown/showdown.component';
+import { SwappingCanvasComponent } from './game/swapping/swapping-canvas/swapping-canvas.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { ShowdownComponent } from './game/showdown/showdown.component';
     GameComponent,
     GameLobbyComponent,
     SwappingComponent,
-    ShowdownComponent
+    ShowdownComponent,
+    SwappingCanvasComponent
   ],
   imports: [
     BrowserModule,

@@ -6,13 +6,8 @@
             'Select a card to swap (bottom row)'">
         </p>
     </strong>
-    <div id="card-canvas-div" class="mt-0">
-        <canvas
-            id="card-canvas"
-            #cardCanvas
-        ></canvas>
-    </div>
-    <strong class="text-center" #handInfo>
+    <app-swapping-canvas [state]="state"></app-swapping-canvas>
+    <strong class="text-center">
         <p *ngIf="selfPlayer" class="mb-1">
             Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandDesc"></span>
             for <span class="text-primary" [innerText]="selfPlayer.currentHandScore"></span> points
