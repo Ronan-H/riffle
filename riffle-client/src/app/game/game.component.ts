@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { GameConstants, RiffleState, GameView, Player } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { ResourceService } from '../resource.service';
@@ -23,7 +23,6 @@ export class GameComponent {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
     public colyseus: ColyseusService,
     public resourceService: ResourceService,
   ) { }
@@ -34,12 +33,9 @@ export class GameComponent {
       this.router.navigate(['lobby']);
     }
 
-    this.gameId = this.route.params.pipe(
-      map((params => params['id'])),
-    );
-
     // start with default state to prevent undefined errors before the state is downloaded initially
     this.state = new RiffleState();
+    this.state.gameView = GameView.GameLobby;
 
     this.colyseus.room$.pipe(
       take(1)

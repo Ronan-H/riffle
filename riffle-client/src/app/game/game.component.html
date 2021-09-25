@@ -1,5 +1,5 @@
 <div class="container mt-1">
-    <div *ngIf="state.gameView === GameView.GameLobby">
+    <div *ngIf="state.gameView === GameView.GameLobby || state.gameView === undefined">
         <app-game-lobby [state]="state"></app-game-lobby>
     </div> 
 

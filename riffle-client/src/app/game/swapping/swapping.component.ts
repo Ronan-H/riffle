@@ -1,4 +1,5 @@
 import { Component, ElementRef, HostListener, Input, OnInit, ViewChild } from '@angular/core';
+import { ArraySchema } from '@colyseus/schema';
 import { take } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
@@ -52,14 +53,14 @@ export class SwappingComponent implements OnInit {
     return this.state.players.get(this.colyseus.room.sessionId);
   }
 
-  public get stateHandCards(): Card[] {
+  public get stateHandCards(): ArraySchema<Card> {
     return this.selfPlayer.cards;
   }
 
   @HostListener('window:resize')
   onResize() {
     this.autoAdjustCanvas();
-    this.drawCards();
+    this.drawAll();
   }
 
   constructor(
@@ -74,7 +75,7 @@ export class SwappingComponent implements OnInit {
     ).subscribe(room => {
       room.onStateChange((state: RiffleState) => {
         this.state = state;
-        this.drawCards();
+        this.drawAll();
       });
 
       room.onMessage('common-index-swapped', (commonIndex) => {
@@ -110,7 +111,7 @@ export class SwappingComponent implements OnInit {
       });
       this.animatedCards = this.animatedCards.filter((animatedCard) => !animatedCard.isFinished);
 
-      this.drawCards();
+      this.drawAll();
     }, this.animationInterval);
   }
 
@@ -165,53 +166,46 @@ export class SwappingComponent implements OnInit {
     this.autoAdjustCanvas();
 
     // register mouse event listeners
-    this.canvas.addEventListener('mousedown', e => {
-      this.onMouseEvent('mousedown', e as MouseTouchEvent);
-    });
-    this.canvas.addEventListener('mouseup', e => {
-      this.onMouseEvent('mouseup', e as MouseTouchEvent);
-    });
-    this.canvas.addEventListener('mousemove', e => {
-      this.onMouseEvent('mousemove', e as MouseTouchEvent);
-    });
-    this.canvas.addEventListener('mouseout', e => {
-      this.onMouseEvent('mouseout', e as MouseTouchEvent);
-    });
-
-    // register event listeners for touch devices
-    this.canvas.addEventListener('touchstart', e => {
-      this.onMouseEvent('touchstart', e as MouseTouchEvent);
-    });
-    this.canvas.addEventListener('touchend', e => {
-      this.onMouseEvent('touchend', e as MouseTouchEvent);
-    });
-    this.canvas.addEventListener('touchmove', e => {
-      this.onMouseEvent('touchmove', e as MouseTouchEvent);
-    });
-    this.canvas.addEventListener('touchcancel', e => {
-        this.onMouseEvent('touchcancel', e as MouseTouchEvent);
-    });
+    [
+      'mousedown',
+      'mouseup',
+      'mousemove',
+      'mouseout',
+      // touch devices
+      'touchstart',
+      'touchend',
+      'touchmove',
+      'touchcancel',
+    ]
+      .forEach(event => {
+        this.canvas.addEventListener(event, e => {
+          this.onMouseEvent(event, e as MouseTouchEvent);
+        });
+      });
   }
 
-  private onMouseEvent(action, e: MouseTouchEvent): void {
+  // extract mouse position based on event vars
+  // (different on mobile devices)
+  private extractMousePosition(event: MouseTouchEvent) {
     if (this.isMobile) {
-        // prevent back/forward swipes etc. in the browser on mobile devices
-        e.preventDefault();
-    }
-    
-    // extract mouse position based on event vars
-    // (different on mobile devices)
-    // TODO: extract this outside this function
-    let cursorX: number;
-    let cursorY: number;
-    if (this.isMobile) {
-      cursorX = e.touches[0].clientX - this.canvas.getBoundingClientRect().left;
-      cursorY = e.touches[0].clientY - this.canvas.getBoundingClientRect().top;
+      return [
+        event.touches[0].clientX - this.canvas.getBoundingClientRect().left,
+        event.touches[0].clientY - this.canvas.getBoundingClientRect().top
+      ];
     }
     else {
-      cursorX = e.clientX - this.canvas.getBoundingClientRect().left;
-      cursorY = e.clientY - this.canvas.getBoundingClientRect().top;
+      return [
+        event.clientX - this.canvas.getBoundingClientRect().left,
+        event.clientY - this.canvas.getBoundingClientRect().top
+      ];
     }
+  }
+
+  private onMouseEvent(action: string, event: MouseTouchEvent): void {
+    // prevent back/forward swipes etc.
+    event.preventDefault();
+    
+    const [cursorX, cursorY] = this.extractMousePosition(event);
 
     switch (action) {
         case 'mousedown':
@@ -236,124 +230,10 @@ export class SwappingComponent implements OnInit {
             this.deselectAllCards();
           }
           
-          // re-draw cards to render the card(s) highlight
-          this.drawCards();
+          // re-draw to render the card(s) highlight
+          this.drawAll();
           break;
-        case 'mouseup':
-        case 'touchend':
-        case 'mouseout':
-            //
-            break;
-        case 'mousemove':
-        case 'touchmove':
-            //
-            break;
     }
-  }
-
-  private drawCards(): void {
-    // clear canvas
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // redraw round progress bar
-    this.drawRoundProgressBar();
-
-    const spritesheet = this.resourceService.spritesheet;
-    this.state.commonCards.forEach((card, index) => {
-      const metadata = this.resourceService.getCardSpritesheetMedata(card);
-      const offsetX = this.cardWidth * index;
-      const offsetY = 0;
-      this.ctx.drawImage(
-        spritesheet,
-        metadata.x,
-        metadata.y,
-        metadata.width,
-        metadata.height,
-        offsetX,
-        offsetY,
-        this.cardWidth,
-        this.cardHeight
-      );
-    });
-
-    if (this.selectedCommonIndex !== -1) {
-      // highlight this card as being selected
-      const offsetX = this.cardWidth * this.selectedCommonIndex;
-      this.ctx.strokeStyle = '#0000BB';
-      this.ctx.lineWidth = 3;
-      this.ctx.beginPath();
-      this.ctx.rect(offsetX, 0, this.cardWidth, this.cardHeight);
-      this.ctx.stroke();
-    }
-
-    this.stateHandCards.forEach((card, index) => {
-      const metadata = this.resourceService.getCardSpritesheetMedata(card);
-      const offsetX = this.cardWidth * index;
-      const offsetY = this.handStartY;
-      this.ctx.drawImage(
-        spritesheet,
-        metadata.x,
-        metadata.y,
-        metadata.width,
-        metadata.height,
-        offsetX,
-        offsetY,
-        this.cardWidth,
-        this.cardHeight
-      );
-    });
-
-    if (this.selectedHandIndex !== -1) {
-      // highlight this card as being selected
-      const offsetX = this.cardWidth * this.selectedHandIndex;
-      this.ctx.strokeStyle = '#0000BB';
-      this.ctx.lineWidth = 3;
-      this.ctx.beginPath();
-      this.ctx.rect(offsetX, this.handStartY, this.cardWidth, this.cardHeight);
-      this.ctx.stroke();
-    }
-
-    // draw card swap animations (if any)
-    this.animatedCards.forEach((animatedCard) => {
-      const metadata = this.resourceService.getCardSpritesheetMedata(animatedCard.card);
-      this.ctx.drawImage(
-        spritesheet,
-        metadata.x,
-        metadata.y,
-        metadata.width,
-        metadata.height,
-        animatedCard.roundX,
-        animatedCard.roundY,
-        this.cardWidth,
-        this.cardHeight
-      );
-    });
-  }
-
-  private drawRoundProgressBar(): void {
-    const roundProgress = this.state.roundTimeRemainingMS / GameConstants.roundTimeMS;
-    const barWidth = this.canvas.width * roundProgress;
-
-    // calculate progress bar RGB (changes from green to red over time)
-    const compMax = 180;
-    const compLimit = 1200;
-    const exponent = 12;
-    const exponentMax = Math.pow(2, exponent);
-
-    let red = Math.floor(Math.pow(2, (1 - roundProgress) * exponent) / exponentMax * compLimit);
-
-    if (red < 0) red = 0;
-    if (red > compMax) red = compMax;
-
-    let green = compMax - red;
-
-    const redString = red < 16 ? '0' + red.toString(16) : red.toString(16);
-    const greenString = green < 16 ? '0' + green.toString(16) : green.toString(16);
-
-    this.ctx.fillStyle = `#${redString}${greenString}00`;
-
-    this.ctx.clearRect(0, this.cardHeight, this.canvas.width, this.cardGapHeight);
-    this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardGapHeight);
   }
 
   public onCommonCardClicked(index: number): void {
@@ -405,6 +285,90 @@ export class SwappingComponent implements OnInit {
 
   public sortHand(): void {
     this.colyseus.sortHand();
+  }
+
+  private drawAll(): void {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawRoundProgressBar();
+    this.drawCards(this.state.commonCards, 0);
+    this.drawCards(this.stateHandCards, this.handStartY);
+
+    if (this.selectedCommonIndex !== -1) {
+      this.drawCommonCardHighlight(this.selectedCommonIndex);
+    }
+
+    this.drawCardSwapAnimations();
+  }
+
+  private drawCards(cards: ArraySchema<Card>, offsetY: number): void {
+    cards.forEach((card, index) => {
+      const metadata = this.resourceService.getCardSpritesheetMedata(card);
+      const offsetX = this.cardWidth * index;
+      this.ctx.drawImage(
+        this.resourceService.spritesheet,
+        metadata.x,
+        metadata.y,
+        metadata.width,
+        metadata.height,
+        offsetX,
+        offsetY,
+        this.cardWidth,
+        this.cardHeight
+      );
+    });
+  }
+
+
+  private drawCommonCardHighlight(index: number) {
+    const offsetX = this.cardWidth * index;
+    this.ctx.strokeStyle = '#0000BB';
+    this.ctx.lineWidth = 3;
+    this.ctx.beginPath();
+    this.ctx.rect(offsetX, 0, this.cardWidth, this.cardHeight);
+    this.ctx.stroke();
+  }
+
+  private drawCardSwapAnimations(): void {
+    this.animatedCards.forEach((animatedCard) => {
+      const metadata = this.resourceService.getCardSpritesheetMedata(animatedCard.card);
+      this.ctx.drawImage(
+        this.resourceService.spritesheet,
+        metadata.x,
+        metadata.y,
+        metadata.width,
+        metadata.height,
+        animatedCard.roundX,
+        animatedCard.roundY,
+        this.cardWidth,
+        this.cardHeight
+      );
+    });
+  }
+
+  private drawRoundProgressBar(): void {
+    const roundProgress = this.state.roundTimeRemainingMS / GameConstants.roundTimeMS;
+    const barWidth = this.canvas.width * roundProgress;
+
+    // calculate progress bar RGB (changes from green to red over time)
+    const compMax = 180;
+    const compLimit = 1200;
+    const exponent = 12;
+    const exponentMax = Math.pow(2, exponent);
+
+    let red = Math.floor(Math.pow(2, (1 - roundProgress) * exponent) / exponentMax * compLimit);
+
+    if (red < 0) red = 0;
+    if (red > compMax) red = compMax;
+
+    let green = compMax - red;
+
+    const redString = red < 16 ? '0' + red.toString(16) : red.toString(16);
+    const greenString = green < 16 ? '0' + green.toString(16) : green.toString(16);
+
+    this.ctx.fillStyle = `#${redString}${greenString}00`;
+
+    this.ctx.clearRect(0, this.cardHeight, this.canvas.width, this.cardGapHeight);
+    this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardGapHeight);
   }
 
   ngOnDestroy() {
