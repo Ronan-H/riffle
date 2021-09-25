@@ -1,31 +1,10 @@
 <div class="container mt-1">
-    <div [hidden]="state.gameView !== GameView.GameLobby">
+    <div *ngIf="state.gameView === GameView.GameLobby">
         <app-game-lobby [state]="state"></app-game-lobby>
     </div> 
 
-    <div [hidden]="state.gameView !== GameView.Swapping">
-        <strong class="text-center">
-            <p class="mb-1" [innerText]="
-                selectedCommonIndex === -1 ?
-                'Select a card to swap (top row)' :
-                'Select a card to swap (bottom row)'">
-            </p>
-        </strong>
-        <div id="card-canvas-div" class="mt-0">
-            <canvas
-                id="card-canvas"
-                #cardCanvas
-            ></canvas>
-        </div>
-        <strong class="text-center" #handInfo>
-            <p *ngIf="selfPlayer" class="mb-1">
-                Your hand: <span class="text-primary" [innerText]="selfPlayer.currentHandDesc"></span>
-                for <span class="text-primary" [innerText]="selfPlayer.currentHandScore"></span> points
-                <br />
-                <span *ngIf="selfPlayer.isCurrentlyWinning" class="text-success">Currently winning</span>
-                <span *ngIf="!selfPlayer.isCurrentlyWinning" class="text-danger">Currently losing</span>
-            </p>
-        </strong>
+    <div *ngIf="state.gameView === GameView.Swapping">
+        <app-swapping [state]="state"></app-swapping>
     </div>
 
     <div *ngIf="state.gameView === GameView.Showdown">
