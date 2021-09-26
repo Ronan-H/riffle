@@ -125,7 +125,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     this.isMobile = this.isMobileTest();
 
     this.roundTimeInterval = setInterval(() => {
-      this.drawRoundProgressBar();
+      this.drawAll();
     }, this.roundTimeDeltaMS);
 
     this.animationInterval = setInterval(() => {
@@ -152,7 +152,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     const defaultWidth = spritesheetCardWidth * 3;
     const border = 5;
 
-    const availableWidth = window.innerWidth - (border * 2);
+    const availableWidth = this.cardCanvas.nativeElement.parentElement.clientWidth;
     const availableHeight =
       window.innerHeight
       - this.canvas.offsetTop
@@ -356,8 +356,6 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     const greenString = green < 16 ? '0' + green.toString(16) : green.toString(16);
 
     this.ctx.fillStyle = `#${redString}${greenString}00`;
-
-    this.ctx.clearRect(0, this.cardHeight, this.canvas.width, this.cardGapHeight);
     this.ctx.fillRect(0, this.cardHeight, barWidth, this.cardGapHeight);
   }
 
