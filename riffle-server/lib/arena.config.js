@@ -16,7 +16,7 @@ function requireHTTPS(req, res, next) {
     }
     next();
 }
-exports.default = arena_1.default({
+exports.default = (0, arena_1.default)({
     getId: () => "Riffle",
     initializeGameServer: (gameServer) => {
         gameServer.define("lobby", colyseus_1.LobbyRoom);

@@ -52,10 +52,7 @@ class RiffleRoom extends colyseus_1.Room {
                 this.state.players.get(client.sessionId).votedNextRound = true;
                 this.state.numVotedNextRound++;
                 this.syncClientState();
-                if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
-                    // enough players voted to continue; start new round
-                    this.startRound();
-                }
+                this.startNextRoundIfEnoughVotes();
             }
         });
         this.onMessage('sort-hand', (client) => {
@@ -84,19 +81,13 @@ class RiffleRoom extends colyseus_1.Room {
         this.state.players.forEach(this.updateCurrentHand.bind(this));
         this.state.players.forEach(this.sortPlayersHand.bind(this));
         this.updateGameView(RiffleSchema_1.GameView.Swapping);
+        this.roundStartTimeMS = Date.now();
         this.syncClientState();
-        this.state.roundTimeRemainingMS = RiffleSchema_1.GameConstants.roundTimeMS;
-        this.showdownInterval = setInterval(() => {
-            this.state.roundTimeRemainingMS -= 1000;
-            if (this.state.roundTimeRemainingMS <= 0) {
-                clearTimeout(this.showdownInterval);
-                this.updateGameView(RiffleSchema_1.GameView.Showdown);
-                this.startShowdown();
-            }
-            else {
-                this.syncClientState();
-            }
-        }, 1000);
+        this.showdownInterval = setTimeout(() => {
+            clearTimeout(this.showdownInterval);
+            this.updateGameView(RiffleSchema_1.GameView.Showdown);
+            this.startShowdown();
+        }, RiffleSchema_1.GameConstants.roundTimeMS);
     }
     updateGameView(nextGameView) {
         this.state.gameView = nextGameView;
@@ -216,6 +207,11 @@ class RiffleRoom extends colyseus_1.Room {
     calcNextRoundVotesRequired() {
         this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
     }
+    startNextRoundIfEnoughVotes() {
+        if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
+            this.startRound();
+        }
+    }
     onJoin(client, options) {
         // validate passcode
         if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
@@ -233,6 +229,7 @@ class RiffleRoom extends colyseus_1.Room {
             if (this.state.gameView === RiffleSchema_1.GameView.Swapping) {
                 this.dealHand(player);
                 this.updateCurrentHand(player);
+                client.send('round-time-elapsed-ms', Date.now() - this.roundStartTimeMS);
             }
             else if (this.state.gameView === RiffleSchema_1.GameView.Showdown) {
                 this.calcNextRoundVotesRequired();
@@ -264,6 +261,7 @@ class RiffleRoom extends colyseus_1.Room {
                     this.state.numVotedNextRound++;
                 }
             });
+            this.startNextRoundIfEnoughVotes();
         }
         else if (this.state.gameView === RiffleSchema_1.GameView.Swapping) {
             this.state.players.forEach(this.updateCurrentHand.bind(this));

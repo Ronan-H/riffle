@@ -15,4 +15,4 @@ const arena_1 = require("@colyseus/arena");
 // Import arena config
 const arena_config_1 = __importDefault(require("./arena.config"));
 // Create and listen on 2567 (or PORT environment variable.)
-arena_1.listen(arena_config_1.default);
+(0, arena_1.listen)(arena_config_1.default);

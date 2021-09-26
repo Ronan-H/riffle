@@ -15,7 +15,7 @@ var GameView;
     GameView[GameView["Showdown"] = 2] = "Showdown";
 })(GameView = exports.GameView || (exports.GameView = {}));
 exports.GameConstants = {
-    roundTimeMS: 30 * 1000,
+    roundTimeMS: 25 * 1000,
     defaultNumRounds: 15,
 };
 class Card extends schema_1.Schema {
@@ -59,10 +59,10 @@ class Card extends schema_1.Schema {
     }
 }
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], Card.prototype, "num", void 0);
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], Card.prototype, "suit", void 0);
 exports.Card = Card;
 class Player extends schema_1.Schema {
@@ -78,31 +78,31 @@ class Player extends schema_1.Schema {
     }
 }
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], Player.prototype, "id", void 0);
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], Player.prototype, "name", void 0);
 __decorate([
-    schema_1.type([Card])
+    (0, schema_1.type)([Card])
 ], Player.prototype, "cards", void 0);
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], Player.prototype, "currentHandDesc", void 0);
 __decorate([
-    schema_1.type('number')
+    (0, schema_1.type)('number')
 ], Player.prototype, "currentHandScore", void 0);
 __decorate([
-    schema_1.type('boolean')
+    (0, schema_1.type)('boolean')
 ], Player.prototype, "isCurrentlyWinning", void 0);
 __decorate([
-    schema_1.type('uint16')
+    (0, schema_1.type)('uint16')
 ], Player.prototype, "score", void 0);
 __decorate([
-    schema_1.type('boolean')
+    (0, schema_1.type)('boolean')
 ], Player.prototype, "votedNextRound", void 0);
 __decorate([
-    schema_1.type('boolean')
+    (0, schema_1.type)('boolean')
 ], Player.prototype, "isHost", void 0);
 exports.Player = Player;
 class ShowdownResult extends schema_1.Schema {
@@ -117,22 +117,22 @@ class ShowdownResult extends schema_1.Schema {
     }
 }
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], ShowdownResult.prototype, "playerId", void 0);
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], ShowdownResult.prototype, "playerName", void 0);
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], ShowdownResult.prototype, "hand", void 0);
 __decorate([
-    schema_1.type('uint16')
+    (0, schema_1.type)('uint16')
 ], ShowdownResult.prototype, "handScore", void 0);
 __decorate([
-    schema_1.type('uint32')
+    (0, schema_1.type)('uint32')
 ], ShowdownResult.prototype, "totalScore", void 0);
 __decorate([
-    schema_1.type('boolean')
+    (0, schema_1.type)('boolean')
 ], ShowdownResult.prototype, "isWinningHand", void 0);
 exports.ShowdownResult = ShowdownResult;
 class RoundOptions extends schema_1.Schema {
@@ -142,7 +142,7 @@ class RoundOptions extends schema_1.Schema {
     }
 }
 __decorate([
-    schema_1.type('number')
+    (0, schema_1.type)('number')
 ], RoundOptions.prototype, "numRounds", void 0);
 exports.RoundOptions = RoundOptions;
 class RiffleState extends schema_1.Schema {
@@ -154,42 +154,39 @@ class RiffleState extends schema_1.Schema {
     }
 }
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], RiffleState.prototype, "gameView", void 0);
 __decorate([
-    schema_1.type({ map: Player })
+    (0, schema_1.type)({ map: Player })
 ], RiffleState.prototype, "players", void 0);
 __decorate([
-    schema_1.type([Card])
+    (0, schema_1.type)([Card])
 ], RiffleState.prototype, "commonCards", void 0);
 __decorate([
-    schema_1.type([Card])
+    (0, schema_1.type)([Card])
 ], RiffleState.prototype, "deck", void 0);
 __decorate([
-    schema_1.type('uint16')
-], RiffleState.prototype, "roundTimeRemainingMS", void 0);
-__decorate([
-    schema_1.type([ShowdownResult])
+    (0, schema_1.type)([ShowdownResult])
 ], RiffleState.prototype, "showdownResults", void 0);
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], RiffleState.prototype, "roundNum", void 0);
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], RiffleState.prototype, "roundsRemaining", void 0);
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], RiffleState.prototype, "numVotedNextRound", void 0);
 __decorate([
-    schema_1.type('uint8')
+    (0, schema_1.type)('uint8')
 ], RiffleState.prototype, "nextRoundVotesRequired", void 0);
 __decorate([
-    schema_1.type(RoundOptions)
+    (0, schema_1.type)(RoundOptions)
 ], RiffleState.prototype, "roundOptions", void 0);
 __decorate([
-    schema_1.type(['string'])
+    (0, schema_1.type)(['string'])
 ], RiffleState.prototype, "gameWinners", void 0);
 __decorate([
-    schema_1.type('string')
+    (0, schema_1.type)('string')
 ], RiffleState.prototype, "roomName", void 0);
 exports.RiffleState = RiffleState;
