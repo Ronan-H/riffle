@@ -50,6 +50,12 @@
             [disabled]="isNextRoundClicked"
             (click)="onNextRoundClicked()"
         >
+            <span
+                *ngIf="isNextRoundClicked"
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
             {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
         </button>
 
