@@ -1,10 +1,8 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { take } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { ResourceService } from 'src/app/resource.service';
-import { Card, GameConstants, Player, RiffleState } from '../../../../../../riffle-server/src/RiffleSchema';
+import { GameConstants, Player, RiffleState } from '../../../../../../riffle-server/src/RiffleSchema';
 import { AnimatedCard } from '../../../types/animated-card';
-import { ArraySchema } from '@colyseus/schema';
 import { SwappingCanvasService } from '../swapping-canvas.service';
 import { Subscription } from 'rxjs';
 
@@ -51,7 +49,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     return this.state.players.get(this.colyseus.room.sessionId);
   }
 
-  public get stateHandCards(): ArraySchema<Card> {
+  public get stateHandCards() {
     return this.selfPlayer.cards;
   }
 
@@ -86,6 +84,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   ngOnInit(): void {
     this.colyseus.room$.subscribe(room => {
       this.state = room.state;
+      this.drawAll();
       room.onStateChange((state: RiffleState) => {
         this.state = state;
         this.drawAll();
@@ -124,12 +123,14 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     }, this.roundTimeDeltaMS);
 
     this.animationInterval = setInterval(() => {
-      this.animatedCards.forEach((animatedCard) => {
-        animatedCard.update();
-      });
-      this.animatedCards = this.animatedCards.filter((animatedCard) => !animatedCard.isFinished);
-
-      this.drawAll();
+      if (this.animatedCards.length > 0) {
+        this.animatedCards.forEach((animatedCard) => {
+          animatedCard.update();
+        });
+        this.animatedCards = this.animatedCards.filter((animatedCard) => !animatedCard.isFinished);
+  
+        this.drawAll();
+      }
     }, this.animationInterval);
   }
 
@@ -256,7 +257,8 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private drawAll(): void {
-    if (!this.ctx) {
+    // TODO: figure out why "this" is sometimes falsy here
+    if (!this?.ctx) {
       // canvas hasn't been initialised yet
       return;
     }
@@ -273,7 +275,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     this.drawCardSwapAnimations();
   }
 
-  private drawCards(cards: ArraySchema<Card>, offsetY: number): void {
+  private drawCards(cards, offsetY: number): void {
     cards.forEach((card, index) => {
       const metadata = this.resourceService.getCardSpritesheetMedata(card);
       const offsetX = this.cardWidth * index;
