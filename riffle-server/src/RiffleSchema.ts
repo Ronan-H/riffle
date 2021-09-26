@@ -7,7 +7,7 @@ export enum GameView {
 }
 
 export const GameConstants = {
-  roundTimeMS: 30 * 1000,
+  roundTimeMS: 25 * 1000,
   defaultNumRounds: 15,
 };
 
