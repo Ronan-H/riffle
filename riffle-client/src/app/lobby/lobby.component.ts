@@ -25,9 +25,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
   private subs: Subscription;
 
   constructor(
+    private resourceService: ResourceService, // eagerly load card spritesheet
     private router: Router,
     public colyseus: ColyseusService,
-    private resourceService: ResourceService, // eagerly load card spritesheet
     private fb: FormBuilder,
     private modalService: NgbModal,
     private navbarService: NavbarService,
@@ -117,6 +117,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   public tryJoinRoom(): void {
+    if (this.isLoading) {
+      return;
+    }
+
     if (this.joinForm.invalid) {
       this.wrongPasscode = true;
       this.isLoading = false;

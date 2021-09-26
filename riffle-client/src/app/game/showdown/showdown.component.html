@@ -1,7 +1,7 @@
 <div class="container mt-1">
     <div class="text-center">
         <div class="row justify-content-center">
-            <table class="table table-bordered mt-3">
+            <table id="showdown-table" class="table table-bordered mt-3">
                 <thead class="thead-dark">
                     <tr>
                         <th class="fit" scope="col">Name</th>
@@ -14,8 +14,9 @@
                         <th class="fit" scope="row">{{ result.playerName }}</th>
                         <td class="fit" >
                             {{ result.hand }}
+                            <br />
                             <ng-container *ngIf="result.isWinningHand">
-                                <span class="text-success">(WINNER)</span>
+                                <span class="text-success">(ROUND WINNER)</span>
                             </ng-container>
                         </td>
                         <td class="fit" >
