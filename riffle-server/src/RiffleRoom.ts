@@ -79,10 +79,7 @@ export class RiffleRoom extends Room<RiffleState> {
         this.state.numVotedNextRound++;
         this.syncClientState();
 
-        if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
-          // enough players voted to continue; start new round
-          this.startRound();
-        }
+        this.startNextRoundIfEnoughVotes();
       }
     });
 
@@ -291,6 +288,12 @@ export class RiffleRoom extends Room<RiffleState> {
     this.state.nextRoundVotesRequired = (Math.floor(this.state.players.size / 2) + 1);
   }
 
+  private startNextRoundIfEnoughVotes(): void {
+    if (this.state.numVotedNextRound >= this.state.nextRoundVotesRequired) {
+      this.startRound();
+    }
+  }
+
   onJoin (client: Client, options: any) {
     // validate passcode
     if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
@@ -353,6 +356,8 @@ export class RiffleRoom extends Room<RiffleState> {
           this.state.numVotedNextRound++;
         }
       });
+      
+      this.startNextRoundIfEnoughVotes();
     }
     else if(this.state.gameView === GameView.Swapping) {
       this.state.players.forEach(this.updateCurrentHand.bind(this));

@@ -105,7 +105,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     if (this.lobbyForm.get('username').valid) {
       this.modalRef = this.modalService.open(content);
 
-      this.modalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.modalRef.dismissed.subscribe(() => {
         this.wrongPasscode = false;
         this.isLoading = false;
       });
@@ -136,7 +136,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.colyseus.joinGame(roomId, {
       username,
       passcode,
-    }).pipe(take(1)).subscribe(room => {
+    }).subscribe(room => {
       room.onMessage('passcode-accepted', () => {
         this.modalRef.close();
         this.router.navigate(['game', room.id]);

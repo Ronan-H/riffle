@@ -80,9 +80,8 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   ) { }
 
   ngOnInit(): void {
-    this.colyseus.room$.pipe(
-      take(1)
-    ).subscribe(room => {
+    this.colyseus.room$.subscribe(room => {
+      this.state = room.state;
       room.onStateChange((state: RiffleState) => {
         this.state = state;
         this.drawAll();

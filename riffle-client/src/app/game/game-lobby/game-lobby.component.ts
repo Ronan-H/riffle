@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { take } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { ResourceService } from 'src/app/resource.service';
 import { GameConstants, Player, RiffleState, RoundOptions } from '../../../../../riffle-server/src/RiffleSchema';
@@ -33,9 +32,8 @@ export class GameLobbyComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.colyseus.room$.pipe(
-      take(1)
-    ).subscribe(room => {
+    this.colyseus.room$.subscribe(room => {
+      this.state = room.state;
       room.onStateChange((state: RiffleState) => {
         this.state = state;
 

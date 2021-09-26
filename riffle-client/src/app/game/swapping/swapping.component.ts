@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
-import { skip, take } from 'rxjs/operators';
+import { skip } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
@@ -49,9 +49,8 @@ export class SwappingComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.colyseus.room$.pipe(
-      take(1)
-    ).subscribe(room => {
+    this.colyseus.room$.subscribe(room => {
+      this.state = room.state;
       room.onStateChange((state: RiffleState) => {
         this.state = state;
       });

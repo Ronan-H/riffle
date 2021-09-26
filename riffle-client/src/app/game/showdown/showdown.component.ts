@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
@@ -28,9 +27,8 @@ export class ShowdownComponent implements OnInit {
     this.isNextRoundClicked = false;
     this.navbarService.setMessage('Showdown!');
 
-    this.colyseus.room$.pipe(
-      take(1)
-    ).subscribe(room => {
+    this.colyseus.room$.subscribe(room => {
+      this.state = room.state;
       room.onStateChange((state: RiffleState) => {
         this.state = state;
       });
