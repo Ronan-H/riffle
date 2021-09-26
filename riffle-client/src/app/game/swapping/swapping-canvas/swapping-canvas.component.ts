@@ -82,12 +82,19 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   ) { }
 
   ngOnInit(): void {
+    this.roundStartMS = Date.now();
+
     this.colyseus.room$.subscribe(room => {
       this.state = room.state;
       this.drawAll();
       room.onStateChange((state: RiffleState) => {
         this.state = state;
         this.drawAll();
+      });
+
+      // adjust round timer if the player joins during an ongoing round of swapping
+      room.onMessage('round-time-elapsed-ms', (roundTimeElapsedMS: number) => {
+        this.roundStartMS -= roundTimeElapsedMS;
       });
     });
 
@@ -117,7 +124,6 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     
     this.isMobile = this.isMobileTest();
 
-    this.roundStartMS = Date.now();
     this.roundTimeInterval = setInterval(() => {
       this.drawRoundProgressBar();
     }, this.roundTimeDeltaMS);

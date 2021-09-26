@@ -12,6 +12,8 @@ export class RiffleRoom extends Room<RiffleState> {
   private rejectTimeout: NodeJS.Timeout;
   private showdownInterval: NodeJS.Timeout;
 
+  private roundStartTimeMS: number;
+
   private generateRandomPasscode(length: number): string {
     return new Array(length).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
   }
@@ -119,6 +121,7 @@ export class RiffleRoom extends Room<RiffleState> {
     this.state.players.forEach(this.sortPlayersHand.bind(this));
 
     this.updateGameView(GameView.Swapping);
+    this.roundStartTimeMS = Date.now();
 
     this.syncClientState();
 
@@ -286,7 +289,7 @@ export class RiffleRoom extends Room<RiffleState> {
     }
   }
 
-  onJoin (client: Client, options: any) {
+  onJoin(client: Client, options: any) {
     // validate passcode
     if (this.state.players.size > 0 && options.passcode !== this.metadata.passcode) {
       // server error if leave() is called straight away
@@ -309,6 +312,11 @@ export class RiffleRoom extends Room<RiffleState> {
       if (this.state.gameView === GameView.Swapping) {
         this.dealHand(player);
         this.updateCurrentHand(player);
+
+        client.send(
+          'round-time-elapsed-ms',
+          Date.now() - this.roundStartTimeMS
+        );
       }
       else if (this.state.gameView === GameView.Showdown) {
         this.calcNextRoundVotesRequired();
