@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { debounce, take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ResourceService } from '../resource.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { Subscription, timer } from 'rxjs';

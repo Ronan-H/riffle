@@ -1,9 +1,11 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
 import { skip, take } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
+import { TutorialModalComponent } from 'src/app/tutorial-modal/tutorial-modal.component';
 import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 import { SwappingCanvasService } from './swapping-canvas.service';
 
@@ -43,6 +45,7 @@ export class SwappingComponent implements OnInit, OnDestroy {
     public resourceService: ResourceService,
     private navbarService: NavbarService,
     private swapService: SwappingCanvasService,
+    private modalService: NgbModal,
   ) { }
 
   ngOnInit(): void {
@@ -96,6 +99,10 @@ export class SwappingComponent implements OnInit, OnDestroy {
 
   public sortHand(): void {
     this.colyseus.sortHand();
+  }
+
+  public openTutorialModal() {
+    this.modalService.open(TutorialModalComponent);
   }
 
   ngOnDestroy() {
