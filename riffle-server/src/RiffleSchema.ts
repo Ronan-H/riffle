@@ -152,9 +152,6 @@ export class RiffleState extends Schema {
   @type([ Card ])
   deck: ArraySchema<Card>;
 
-  @type('uint16')
-  roundTimeRemainingMS: number;
-
   @type([ ShowdownResult ])
   showdownResults: ShowdownResult[];
 

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
-import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
+import { RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 
 @Component({
   selector: 'app-showdown',

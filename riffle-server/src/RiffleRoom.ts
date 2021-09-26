@@ -122,19 +122,11 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.syncClientState();
 
-    this.state.roundTimeRemainingMS = GameConstants.roundTimeMS;
-    this.showdownInterval = setInterval(() => {
-      this.state.roundTimeRemainingMS -= 1000;
-
-      if (this.state.roundTimeRemainingMS <= 0) {
-        clearTimeout(this.showdownInterval);
-        this.updateGameView(GameView.Showdown);
-        this.startShowdown();
-      }
-      else {
-        this.syncClientState();
-      }
-    }, 1000);
+    this.showdownInterval = setTimeout(() => {
+      clearTimeout(this.showdownInterval);
+      this.updateGameView(GameView.Showdown);
+      this.startShowdown();
+    }, GameConstants.roundTimeMS);
   }
 
   private updateGameView(nextGameView: GameView): void {
