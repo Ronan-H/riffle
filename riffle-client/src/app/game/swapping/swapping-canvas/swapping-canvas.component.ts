@@ -212,16 +212,17 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   // extract mouse position based on event vars
   // (different on mobile devices)
   private extractMousePosition(event: MouseTouchEvent) {
+    const canvasPos = this.canvas.getBoundingClientRect();
     if (this.isMobile) {
       return [
-        event.touches[0].clientX - this.canvas.getBoundingClientRect().left,
-        event.touches[0].clientY - this.canvas.getBoundingClientRect().top
+        event.touches[0].clientX - canvasPos.left,
+        event.touches[0].clientY - canvasPos.top
       ];
     }
     else {
       return [
-        event.clientX - this.canvas.getBoundingClientRect().left,
-        event.clientY - this.canvas.getBoundingClientRect().top
+        event.clientX - canvasPos.left,
+        event.clientY - canvasPos.top
       ];
     }
   }
@@ -229,37 +230,40 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   private onMouseEvent(action: string, event: MouseTouchEvent): void {
     // prevent back/forward swipes etc.
     event.preventDefault();
-    
-    const [cursorX, cursorY] = this.extractMousePosition(event);
 
     switch (action) {
         case 'mousedown':
         case 'touchstart':
-          // card select detection
-          const cardIndex = Math.floor(cursorX / this.cardWidth);
-          const commonCardClicked = cursorY < this.cardHeight;
-          const handCardClicked = cursorY > this.handStartY;
-          const anyCardClicked = commonCardClicked || handCardClicked;
-
-          if (anyCardClicked) {
-            if (commonCardClicked) {
-              // common card clicked
-              this.swapService.onCommonCardClicked(cardIndex);
-            }
-            else {
-              // hand card clicked
-              this.swapService.onHandCardClicked(cardIndex);
-            }
-          }
-          else {
-            // empty area click
-            this.selectedCommonIndex = -1;
-          }
-          
-          // re-draw to render the card(s) highlight
-          this.drawAll();
+          const [cursorX, cursorY] = this.extractMousePosition(event);
+          this.onMouseDown(cursorX, cursorY)
           break;
     }
+  }
+
+  private onMouseDown(cursorX: number, cursorY: number): void {
+    // card select detection
+    const cardIndex = Math.floor(cursorX / this.cardWidth);
+    const commonCardClicked = cursorY < this.cardHeight;
+    const handCardClicked = cursorY > this.handStartY;
+    const anyCardClicked = commonCardClicked || handCardClicked;
+
+    if (anyCardClicked) {
+      if (commonCardClicked) {
+        // common card clicked
+        this.swapService.onCommonCardClicked(cardIndex);
+      }
+      else {
+        // hand card clicked
+        this.swapService.onHandCardClicked(cardIndex);
+      }
+    }
+    else {
+      // empty area click
+      this.selectedCommonIndex = -1;
+    }
+    
+    // re-draw to render the card(s) highlight
+    this.drawAll();
   }
 
   private drawAll(): void {
