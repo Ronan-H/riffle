@@ -1,11 +1,10 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { ArraySchema } from '@colyseus/schema';
 import { Subscription } from 'rxjs';
 import { skip, take } from 'rxjs/operators';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
-import { Card, Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
+import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 import { SwappingCanvasService } from './swapping-canvas.service';
 
 @Component({

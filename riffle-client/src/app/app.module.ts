@@ -11,6 +11,7 @@ import { GameLobbyComponent } from './game/game-lobby/game-lobby.component';
 import { SwappingComponent } from './game/swapping/swapping.component';
 import { ShowdownComponent } from './game/showdown/showdown.component';
 import { SwappingCanvasComponent } from './game/swapping/swapping-canvas/swapping-canvas.component';
+import { TutorialModalComponent } from './tutorial-modal/tutorial-modal.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { SwappingCanvasComponent } from './game/swapping/swapping-canvas/swappin
     GameLobbyComponent,
     SwappingComponent,
     ShowdownComponent,
-    SwappingCanvasComponent
+    SwappingCanvasComponent,
+    TutorialModalComponent
   ],
   imports: [
     BrowserModule,

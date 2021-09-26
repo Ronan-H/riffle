@@ -1,13 +1,14 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { debounce, delay, take, tap } from 'rxjs/operators';
+import { debounce, take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
 import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { ResourceService } from '../resource.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { Subscription, timer } from 'rxjs';
+import { TutorialModalComponent } from '../tutorial-modal/tutorial-modal.component';
 
 @Component({
   selector: 'app-lobby',
@@ -94,12 +95,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
     });
   }
 
-  public openTutorialModal(content: TemplateRef<any>) {
-    this.subs.add(
-      this.modalService.open(content).shown.pipe(delay(250)).subscribe(() =>
-        document.getElementById('tutorial-heading').scrollIntoView()
-      )
-    );
+  public openTutorialModal() {
+      this.modalService.open(TutorialModalComponent);
   }
 
   public tryOpenPasscodeModal(content: TemplateRef<any>, roomId: string): void {

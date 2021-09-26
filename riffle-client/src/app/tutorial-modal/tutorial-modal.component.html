@@ -1,0 +1,78 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="tutorial-heading">
+        Tutorial
+    </h4>
+</div>
+<div class="modal-body tutorial">
+    <ul>
+    <li>
+        The game is split up into rounds.
+    </li>
+
+    <li>
+        The goal of each round is to make the best poker hand you can each round.
+    </li>
+    </ul>
+
+    <div class="row justify-content-center">
+    <h3>Example round:</h3>
+    <img src="assets/example-round.png" />
+    </div>
+
+    <ul>
+    <ul>
+        <li>
+        The top row: these are the shared cards between players, "on the table".
+        </li>
+
+        <li>
+        The bottom row: these are the cards in your own hand. Only you can see these cards.
+        </li>
+
+        <li>
+        The green bar: this shows the remaining time in the round.
+        </li>
+
+        <li>
+        "Currently winning": indicates that you currently have the best hand in round out of all players.
+        </li>
+    </ul>
+
+    <li>
+        To swap a card from the table to your hand, first select the card you want from the top row. Then select a card in your hand to swap.
+    </li>
+
+    <li>
+        Each round, you will earn points corresponding to the hand you've made.
+
+        <ul>
+        <li>
+            You will score a large bonus if you have the best hand at the end of the round.
+        </li>
+        </ul>
+    </li>
+
+    <li>
+        A showdown concludes each round, showing the result of the round, and the overall scoes of the game.
+    </li>
+    </ul>
+
+    <div class="row justify-content-center">
+    <h3>Hands:</h3>
+    <img src="assets/poker-hands.png" />
+    </div>
+
+    <hr />
+
+    <div class="row justify-content-center">
+    <button
+        class="btn btn-primary"
+        aria-label="Close"
+        (click)="modal.dismiss()"
+    >
+        Close
+    </button>
+    </div>
+</div>
+
