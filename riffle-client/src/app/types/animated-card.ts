@@ -1,6 +1,6 @@
 import { Card } from "../../../../riffle-server/src/RiffleSchema";
 
-export class AnimtatedCard {
+export class AnimatedCard {
     card: Card;
     x: number;
     y: number;

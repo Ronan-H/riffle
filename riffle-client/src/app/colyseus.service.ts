@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Client as ColyseusClient, Room, RoomAvailable } from 'colyseus.js';
 import { from, Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { first, tap } from 'rxjs/operators';
 import { RoundOptions } from '../../../riffle-server/src/RiffleSchema';
 
 @Injectable({
@@ -49,6 +49,7 @@ export class ColyseusService {
         ...options
       })
     ).pipe(
+      first(),
       tap(room => {
         this.room = room;
 
@@ -69,6 +70,7 @@ export class ColyseusService {
     this.room$ = from(
       this.client.joinById(roomId, { ...options })
     ).pipe(
+      first(),
       tap(room => {
         this.room = room;
 

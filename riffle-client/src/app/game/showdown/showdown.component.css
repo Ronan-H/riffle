@@ -1,0 +1,15 @@
+
+table#showdown-table, #showdown-table tbody td, #showdown-table tbody th {
+    border: 2px solid black
+}
+
+#showdown-table thead {
+    border-width: 2px 2px 0 2px;
+    border-style: solid;
+    border-color: black;
+}
+
+#showdown-table thead td, #showdown-table thead th {
+    border-width: 0 !important;
+    border-style: none;
+}

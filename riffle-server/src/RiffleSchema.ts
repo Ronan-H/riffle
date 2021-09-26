@@ -7,7 +7,7 @@ export enum GameView {
 }
 
 export const GameConstants = {
-  roundTimeMS: 30 * 1000,
+  roundTimeMS: 25 * 1000,
   defaultNumRounds: 15,
 };
 
@@ -151,9 +151,6 @@ export class RiffleState extends Schema {
 
   @type([ Card ])
   deck: ArraySchema<Card>;
-
-  @type('uint16')
-  roundTimeRemainingMS: number;
 
   @type([ ShowdownResult ])
   showdownResults: ShowdownResult[];

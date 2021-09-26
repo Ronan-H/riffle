@@ -1,13 +1,14 @@
-import { Component, OnDestroy, OnInit, TemplateRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { debounce, delay, take, tap } from 'rxjs/operators';
+import { debounce, take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
 
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ResourceService } from '../resource.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { Subscription, timer } from 'rxjs';
+import { TutorialModalComponent } from '../tutorial-modal/tutorial-modal.component';
 
 @Component({
   selector: 'app-lobby',
@@ -24,9 +25,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
   private subs: Subscription;
 
   constructor(
+    private resourceService: ResourceService, // eagerly load card spritesheet
     private router: Router,
     public colyseus: ColyseusService,
-    private resourceService: ResourceService, // eagerly load card spritesheet
     private fb: FormBuilder,
     private modalService: NgbModal,
     private navbarService: NavbarService,
@@ -82,12 +83,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
     });
   }
 
-  public openTutorialModal(content: TemplateRef<any>) {
-    this.subs.add(
-      this.modalService.open(content).shown.pipe(delay(250)).subscribe(() =>
-        document.getElementById('tutorial-heading').scrollIntoView()
-      )
-    );
+  public openTutorialModal() {
+      this.modalService.open(TutorialModalComponent);
   }
 
   public tryOpenPasscodeModal(content: TemplateRef<any>, roomId: string): void {
@@ -96,7 +93,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     if (this.lobbyForm.get('username').valid) {
       this.modalRef = this.modalService.open(content);
 
-      this.modalRef.dismissed.pipe(take(1)).subscribe(() => {
+      this.modalRef.dismissed.subscribe(() => {
         this.wrongPasscode = false;
         this.isLoading = false;
       });
@@ -108,6 +105,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   public tryJoinRoom(): void {
+    if (this.isLoading) {
+      return;
+    }
+
     if (this.joinForm.invalid) {
       this.wrongPasscode = true;
       this.isLoading = false;
@@ -123,7 +124,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     this.colyseus.joinGame(roomId, {
       username,
       passcode,
-    }).pipe(take(1)).subscribe(room => {
+    }).subscribe(room => {
       room.onMessage('passcode-accepted', () => {
         this.modalRef.close();
         this.router.navigate(['game', room.id]);
