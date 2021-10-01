@@ -242,22 +242,27 @@ export class RiffleRoom extends Room<RiffleState> {
     winnerHand.score = handScore;
 
     // populate round results
-    const showdownSeq: ShowdownResult[] = [];
+    const leaderboardResults: ShowdownResult[] = [];
+    const handResults: ShowdownResult[] = [];
     this.state.players.forEach(player => {
       // TODO optimise this
       const hand = playerHands.find(hand => hand.player.id === player.id);
-      showdownSeq.push(new ShowdownResult(
+      const result = new ShowdownResult(
         player.id,
         player.name,
         hand.descr,
-        hand.score,
+        this.getScoreForHand(hand),
         player.score,
         player.id === winnerHand.player.id
-      ));
+      );
+      leaderboardResults.push(result);
+      handResults.push(result);
     });
-
-    showdownSeq.sort((a, b) => b.totalScore - a.totalScore);
-    this.state.showdownResults = showdownSeq;
+    
+    leaderboardResults.sort((a, b) => b.totalScore - a.totalScore);
+    handResults.sort((a, b) => b.handScore - a.handScore);
+    this.state.leaderboardResults = leaderboardResults;
+    this.state.handResults = handResults;
 
     if (this.state.roundsRemaining > 0) {
       // prepare for next round
@@ -270,9 +275,9 @@ export class RiffleRoom extends Room<RiffleState> {
     else {
       // game over, record winner(s)
       this.state.gameWinners = new ArraySchema<string>();
-      const highestScore = showdownSeq[0].totalScore;
-      for (let i = 0; i < showdownSeq.length && showdownSeq[i].totalScore === highestScore; ++i) {
-        this.state.gameWinners.push(showdownSeq[i].playerName);
+      const highestScore = leaderboardResults[0].totalScore;
+      for (let i = 0; i < leaderboardResults.length && leaderboardResults[i].totalScore === highestScore; ++i) {
+        this.state.gameWinners.push(leaderboardResults[i].playerName);
       }
     }
 
@@ -345,8 +350,10 @@ export class RiffleRoom extends Room<RiffleState> {
     this.state.players.delete(playerId);
 
     if (this.state.gameView === GameView.Showdown && this.state.roundsRemaining > 0) {
-      // delete player's showdown result
-      this.state.showdownResults = this.state.showdownResults.filter((result) => result.playerId !== playerId);
+      // delete player's showdown results
+      const removePlayerFilter = (result: ShowdownResult) => result.playerId !== playerId;
+      this.state.handResults = this.state.handResults.filter(removePlayerFilter);
+      this.state.leaderboardResults = this.state.handResults.filter(removePlayerFilter);
 
       // recalculate next round votes
       this.calcNextRoundVotesRequired();

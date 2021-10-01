@@ -92,7 +92,7 @@ export class Player extends Schema {
   }
 }
 
-export class ShowdownResult extends Schema{
+export class ShowdownResult extends Schema {
   @type('string')
   playerId: string;
 
@@ -153,7 +153,10 @@ export class RiffleState extends Schema {
   deck: ArraySchema<Card>;
 
   @type([ ShowdownResult ])
-  showdownResults: ShowdownResult[];
+  handResults: ShowdownResult[];
+
+  @type([ ShowdownResult ])
+  leaderboardResults: ShowdownResult[];
 
   @type('uint8')
   roundNum: number;
