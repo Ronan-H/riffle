@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
-import { RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
+import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 
 @Component({
   selector: 'app-showdown',
@@ -15,6 +15,10 @@ export class ShowdownComponent implements OnInit {
   public state: RiffleState;
 
   public isNextRoundClicked: boolean;
+
+  public get selfPlayer(): Player {
+    return this.state.players.get(this.colyseus.room.sessionId);
+  }
 
   constructor(
     private router: Router,
