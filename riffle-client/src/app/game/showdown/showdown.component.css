@@ -1,6 +1,18 @@
 
+table#showdown-table {
+    width: auto !important;
+    table-layout: auto !important;
+}
+
+table#showdown-table thead th, table#showdown-table tfoot th {
+    width: auto !important;
+}
+table#showdown-table tbody td, table#showdown-table tfoot td {
+    width: auto !important;
+}
+
 table#showdown-table, #showdown-table tbody td, #showdown-table tbody th {
-    border: 2px solid black
+    border: 2px solid black;
 }
 
 #showdown-table thead {

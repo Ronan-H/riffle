@@ -1,7 +1,10 @@
 
 <div class="text-center">
+    
     <div class="row justify-content-center">
         <h3>Hands</h3>
+    </div>
+    <div class="row justify-content-center">
         <table id="showdown-table" class="table table-bordered mt-3">
             <thead class="thead-dark">
                 <tr>
@@ -26,8 +29,12 @@
                 </tr>
             </tbody>
         </table>
+    </div>
 
+    <div class="row justify-content-center">
         <h3>Leaderboard</h3>
+    </div>
+    <div class="row justify-content-center">
         <table id="showdown-table" class="table table-bordered mt-3">
             <thead class="thead-dark">
                 <tr>
@@ -44,6 +51,7 @@
                     </td>
                     <td class="fit" >
                         {{ result.totalScore }}
+                        <br />
                         <ng-container *ngIf="result.isWinningHand">
                             <span class="text-success">(+ {{ result.handScore }})</span>
                         </ng-container>
