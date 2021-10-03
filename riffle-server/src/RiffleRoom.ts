@@ -89,9 +89,10 @@ export class RiffleRoom extends Room<RiffleState> {
 
     this.showdownInterval = setTimeout(() => {
       clearTimeout(this.showdownInterval);
-      this.updateGameView(GameView.Showdown);
       this.scoringManager.generateShowdownResults();
       this.calcNextRoundVotesRequired();
+      this.clearSelectedPlayerCards();
+      this.updateGameView(GameView.Showdown);
       this.syncClientState();
     }, GameConstants.roundTimeMS);
   }
@@ -99,6 +100,12 @@ export class RiffleRoom extends Room<RiffleState> {
   public calcNextRoundVotesRequired(): void {
     this.state.nextRoundVotesRequired =
       Math.floor(this.state.players.size / 2) + 1;
+  }
+
+  private clearSelectedPlayerCards(): void {
+    this.state.players.forEach(player => {
+      player.selectedCommonIndex = -1;
+    });
   }
 
   public startNextRoundIfEnoughVotes(): void {

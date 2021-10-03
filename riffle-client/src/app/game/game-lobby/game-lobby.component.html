@@ -5,6 +5,7 @@
 <div class="text-center">
     <h3 [innerText]="colyseus.gamePasscode"></h3>
 </div>
+
 <div class="text-center">
     <p [innerText]="
         selfPlayer?.isHost ?
@@ -21,6 +22,20 @@
     </div>
 </div>
 <hr />
+
+<div class="text-center">
+    <h4>Players connected:</h4>
+    <ul class="player-list">
+        <li
+            *ngFor="let player of playersAsArray"
+            [innerText]="player.name"
+            class="font-weight-bold"
+            [ngStyle]="{'color': player.colour}"
+        ></li>
+    </ul>
+</div>
+<hr />
+
 <div class="text-center" [formGroup]="optionsForm">
     <h4>Options:</h4>
 
@@ -60,12 +75,5 @@
             </div>
         </ng-template>
     </div>
-</div>
-<hr />
-<div class="text-center">
-    <h4>Players connected:</h4>
-    <ul class="player-list">
-        <li *ngFor="let player of playersAsArray" [innerText]="player.name"></li>
-    </ul>
 </div>
 <hr />

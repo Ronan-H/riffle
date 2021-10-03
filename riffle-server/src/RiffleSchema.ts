@@ -64,8 +64,14 @@ export class Player extends Schema {
   @type('string')
   name: string;
 
+  @type('string')
+  colour: string;
+
   @type([ Card ])
   cards = new ArraySchema<Card>();
+
+  @type('int8')
+  selectedCommonIndex: number = -1;
 
   @type('string')
   currentHandDesc: string;
@@ -85,10 +91,11 @@ export class Player extends Schema {
   @type('boolean')
   isHost: boolean = false;
 
-  constructor(id: string, name: string, isHost: boolean) {
+  constructor(id: string, name: string, colour: string, isHost: boolean) {
     super();
     this.id = id;
     this.name = name;
+    this.colour = colour;
     this.isHost =  isHost;
   }
 }
@@ -97,8 +104,8 @@ export class ShowdownResult extends Schema {
   @type('string')
   playerId: string;
 
-  @type('string')
-  playerName: string;
+  @type(Player)
+  player: Player;
 
   @type('string')
   hand: string;
@@ -114,7 +121,7 @@ export class ShowdownResult extends Schema {
 
   constructor(
     playerId: string,
-    playerName: string,
+    player: Player,
     hand: string,
     handScore: number,
     totalScore: number,
@@ -122,7 +129,7 @@ export class ShowdownResult extends Schema {
   ) {
     super();
     this.playerId = playerId;
-    this.playerName = playerName;
+    this.player = player;
     this.hand = hand;
     this.handScore = handScore;
     this.totalScore = totalScore;
@@ -174,8 +181,8 @@ export class RiffleState extends Schema {
   @type(RoundOptions)
   roundOptions: RoundOptions = new RoundOptions();
 
-  @type([ 'string' ])
-  gameWinners: ArraySchema<string>;
+  @type([ Player ])
+  gameWinners: ArraySchema<Player>;
 
   @type('string')
   roomName: string;

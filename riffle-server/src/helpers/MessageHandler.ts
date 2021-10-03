@@ -34,6 +34,11 @@ export class MessageHandler {
       }
     });
 
+    this.room.onMessage("select-common-index", (client, index) => {
+      this.state.players.get(client.id).selectedCommonIndex = index;
+      this.room.syncClientState();
+    });
+
     this.room.onMessage("swap-cards", (client, message) => {
       const commonIndex: number = message.commonIndex;
       const handIndex: number = message.handIndex;
@@ -47,8 +52,13 @@ export class MessageHandler {
       common[commonIndex] = hand[handIndex];
       hand[handIndex] = temp;
 
+      this.room.broadcast('common-index-swapped', commonIndex);
+      this.state.players.forEach(player => {
+        if (player.selectedCommonIndex === commonIndex) {
+          player.selectedCommonIndex = -1;
+        }
+      });
       this.scoringManager.updateCurrentHand(player);
-
       this.room.syncClientState();
     });
 

@@ -1,5 +1,6 @@
 import { Card, Player, RiffleState } from "../RiffleSchema";
 import { ArraySchema } from "@colyseus/schema";
+import * as Utils from "./Utils";
 
 export class DeckManager {
   private state: RiffleState;
@@ -11,7 +12,7 @@ export class DeckManager {
   public resetAndDeal(): void {
     this.resetCards();
     this.populateDeck();
-    this.shuffle(this.state.deck);
+    Utils.shuffleInPlace(this.state.deck);
     this.deal();
   }
 
@@ -39,21 +40,6 @@ export class DeckManager {
     this.state.players.forEach((player) => {
       player.cards = new ArraySchema<Card>();
     });
-  }
-
-  private shuffle(cards: ArraySchema<Card>): void {
-    // Fisher–Yates shuffle -- https://bost.ocks.org/mike/shuffle/
-    let m = cards.length,
-      t,
-      i;
-
-    while (m) {
-      i = Math.floor(Math.random() * m--);
-
-      t = cards[m];
-      cards[m] = cards[i];
-      cards[i] = t;
-    }
   }
 
   private deal(): void {

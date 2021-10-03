@@ -278,8 +278,18 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     this.drawCards(this.state.commonCards, 0);
     this.drawCards(this.stateHandCards, this.handStartY);
 
-    if (this.swapService.selectedCommonIndex.getValue() !== -1) {
-      this.drawCommonCardHighlight(this.selectedCommonIndex);
+    // draw all player's common card highlight, if selected
+    this.state.players.forEach(player => {
+      if (player.selectedCommonIndex !== -1) {
+        this.drawCommonCardHighlight(player.selectedCommonIndex, player.colour);
+      }
+    });
+
+    // draw self player's common card highlight, if selected
+    // (this should already be drawn from the above, but drawing
+    // the self player's card highlight right away will help hide any network latency)
+    if (this.selectedCommonIndex !== -1) {
+      this.drawCommonCardHighlight(this.selectedCommonIndex, this.selfPlayer.colour);
     }
 
     this.drawCardSwapAnimations();
@@ -304,9 +314,9 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
 
-  private drawCommonCardHighlight(index: number) {
+  private drawCommonCardHighlight(index: number, colour: string) {
     const offsetX = this.cardWidth * index;
-    this.ctx.strokeStyle = '#0000BB';
+    this.ctx.strokeStyle = colour;
     this.ctx.lineWidth = 3;
     this.ctx.beginPath();
     this.ctx.rect(offsetX, 0, this.cardWidth, this.cardHeight);

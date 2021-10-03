@@ -75,7 +75,7 @@ export class ScoringManager {
 
       const showdownResult = new ShowdownResult(
         player.id,
-        player.name,
+        player,
         playerHand.descr,
         handScore,
         player.score,
@@ -98,7 +98,7 @@ export class ScoringManager {
       });
     } else {
       // game over, record winner(s)
-      this.state.gameWinners = new ArraySchema<string>();
+      this.state.gameWinners = new ArraySchema<Player>();
       const highestScore = leaderboardResults[0].totalScore;
       for (
         let i = 0;
@@ -106,7 +106,7 @@ export class ScoringManager {
         leaderboardResults[i].totalScore === highestScore;
         ++i
       ) {
-        this.state.gameWinners.push(leaderboardResults[i].playerName);
+        this.state.gameWinners.push(leaderboardResults[i].player);
       }
     }
   }

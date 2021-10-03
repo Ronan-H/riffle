@@ -69,6 +69,8 @@ export class SwappingComponent implements OnInit, OnDestroy {
         if (newIndex === prevIndex) {
           this.selectedCommonIndex = -1;
         }
+
+        this.colyseus.setSelectedCommonIndex(this.selectedCommonIndex);
       })
     );
     this.subs.add(

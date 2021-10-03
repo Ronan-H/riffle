@@ -3,6 +3,7 @@ import { Client } from "colyseus";
 import { RiffleRoom } from "../RiffleRoom";
 import { DeckManager } from "./DeckManager";
 import { ScoringManager } from "./ScoringManager";
+import * as Utils from "./Utils";
 
 export class PlayerAdmission {
   private room: RiffleRoom;
@@ -12,6 +13,8 @@ export class PlayerAdmission {
 
   private roundStartTimeMS: number;
   private rejectTimeout: NodeJS.Timeout;
+
+  private remainingColours: Array<string>;
 
   constructor(
     room: RiffleRoom,
@@ -23,6 +26,8 @@ export class PlayerAdmission {
     this.state = state;
     this.deckManager = deckManager;
     this.scoringManager = scoringManager;
+
+    this.remainingColours = this.generateRandomisedColourStack();
   }
 
   public onJoin(client: Client, options: any): void {
@@ -43,6 +48,7 @@ export class PlayerAdmission {
       const player = new Player(
         client.sessionId,
         options.username,
+        this.getNextPlayerColour(),
         this.state.players.size === 0
       );
       this.state.players.set(client.sessionId, player);
@@ -63,9 +69,10 @@ export class PlayerAdmission {
 
   public onLeave(client: Client, consented: boolean): void {
     const playerId = client.sessionId;
-    const wasHost = this.state.players.get(playerId).isHost;
+    const player = this.state.players.get(playerId)
+    const wasHost = player.isHost;
 
-    this.deletePlayer(playerId);
+    this.deletePlayer(player);
 
     if (wasHost && this.state.players.size > 0) {
       // transfer host status to the next player
@@ -74,8 +81,11 @@ export class PlayerAdmission {
     }
   }
 
-  private deletePlayer(playerId: string): void {
-    this.state.players.delete(playerId);
+  private deletePlayer(player: Player): void {
+    this.state.players.delete(player.id);
+
+    // add player's colour back to the stack
+    this.remainingColours.unshift(player.colour);
 
     if (
       this.state.gameView === GameView.Showdown &&
@@ -83,7 +93,7 @@ export class PlayerAdmission {
     ) {
       // delete player's showdown results
       const removePlayerFilter = (result: ShowdownResult) =>
-        result.playerId !== playerId;
+        result.playerId !== player.id;
       this.state.handResults =
         this.state.handResults.filter(removePlayerFilter);
       this.state.leaderboardResults =
@@ -102,6 +112,23 @@ export class PlayerAdmission {
     } else if (this.state.gameView === GameView.Swapping) {
       this.state.players.forEach(player => this.scoringManager.updateCurrentHand(player));
     }
+  }
+
+  private generateRandomisedColourStack(): Array<string> {
+    return Utils.shuffleInPlace([
+      '#ff0000', // red
+      '#ffa500', // orange
+      '#00f000', // green
+      '#0000ff', // blue
+      '#4b0082', // indifo
+      '#ee82ee', // violet
+      '#666666', // gray
+      '#000000', // black
+    ]);
+  }
+
+  private getNextPlayerColour(): string {
+    return this.remainingColours.pop();
   }
 
   public onRoundStart(): void {

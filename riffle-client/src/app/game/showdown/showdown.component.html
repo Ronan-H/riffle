@@ -33,7 +33,10 @@
     <div *ngIf="state.roundsRemaining === 0">
         <h1>Game Over</h1>
         <h3 *ngIf="state.gameWinners.length === 1; else multipleWinners">
-            <span class="text-primary" [textContent]="state.gameWinners[0]"></span> Wins!
+            <span
+                [textContent]="state.gameWinners[0].name"
+                [ngStyle]="{'color': state.gameWinners[0].colour}"
+            ></span> Wins!
         </h3>
 
         <ng-template #multipleWinners>
@@ -53,8 +56,8 @@
             </thead>
             <tbody>
                 <tr *ngFor="let result of state.handResults">
-                    <th class="fit" scope="row">
-                        {{ result.playerName }}
+                    <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
+                        {{ result.player.name }}
                         <ng-container *ngIf="result.playerId === selfPlayer.id">
                             <br />
                             <span class="text-muted font-italic">(you)</span>
@@ -93,8 +96,8 @@
             </thead>
             <tbody>
                 <tr *ngFor="let result of state.leaderboardResults">
-                    <th class="fit" scope="row">
-                        {{ result.playerName }}
+                    <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
+                        {{ result.player.name }}
                         <ng-container *ngIf="result.playerId === selfPlayer.id">
                             <br />
                             <span class="text-muted font-italic">(you)</span>

@@ -92,6 +92,10 @@ export class ColyseusService {
     this.room.leave();
   }
 
+  public setSelectedCommonIndex(commonIndex: number): void {
+    this.room.send('select-common-index', commonIndex);
+  }
+
   public swapCards(commonIndex: number, handIndex: number): void {
     this.room.send('swap-cards', {
       handIndex,
