@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { NavbarService } from 'src/app/navbar/navbar.service';
 import { ResourceService } from 'src/app/resource.service';
-import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
+import { GameConstants, Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 
 @Component({
   selector: 'app-showdown',
@@ -13,6 +13,8 @@ import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSche
 export class ShowdownComponent implements OnInit {
   @Input()
   public state: RiffleState;
+
+  public GameConstants = GameConstants;
 
   public isNextRoundClicked: boolean;
 

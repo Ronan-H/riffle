@@ -69,6 +69,14 @@
                     </td>
                     <td class="fit" >
                         {{ result.handScore }}
+                        <ng-container *ngIf="result.isWinningHand">
+                            <br />
+                            <!-- the round winner score multipler -->
+                            <span class="text-success font-weight-bold">
+                                (x{{ GameConstants.roundWinnerMultiplier }} =
+                                {{ GameConstants.roundWinnerMultiplier * result.handScore}})
+                            </span>
+                        </ng-container>
                     </td>
                 </tr>
             </tbody>
@@ -94,10 +102,6 @@
                     </th>
                     <td class="fit" >
                         {{ result.totalScore }}
-                        <br />
-                        <ng-container *ngIf="result.isWinningHand">
-                            <span class="text-success">(+ {{ result.handScore }})</span>
-                        </ng-container>
                     </td>
                 </tr>
             </tbody>

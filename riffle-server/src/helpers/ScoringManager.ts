@@ -1,4 +1,4 @@
-import { Player, RiffleState, ShowdownResult } from "../RiffleSchema";
+import { GameConstants, Player, RiffleState, ShowdownResult } from "../RiffleSchema";
 import { BaseHandScores } from "../BaseHandScores";
 import { ArraySchema } from "@colyseus/schema";
 
@@ -62,27 +62,27 @@ export class ScoringManager {
   public generateShowdownResults(): void {
     const { playerHands, winnerHand } = this.solveHands();
 
-    const player = winnerHand.player as Player;
-    const handScore = this.getScoreForHand(winnerHand);
-    player.score += handScore;
-    winnerHand.score = handScore;
-
     // populate round results
     const leaderboardResults: ShowdownResult[] = [];
     const handResults: ShowdownResult[] = [];
-    this.state.players.forEach((player) => {
-      // TODO optimise this
-      const hand = playerHands.find((hand) => hand.player.id === player.id);
-      const result = new ShowdownResult(
+
+    playerHands.forEach(playerHand => {
+      const player = playerHand.player as Player;
+      const handScore = this.getScoreForHand(playerHand);
+      const isRoundWinner = player.id === winnerHand.player.id;
+      const scoreInc = isRoundWinner ? handScore * GameConstants.roundWinnerMultiplier : handScore;
+      player.score += scoreInc;
+
+      const showdownResult = new ShowdownResult(
         player.id,
         player.name,
-        hand.descr,
-        this.getScoreForHand(hand),
+        playerHand.descr,
+        handScore,
         player.score,
-        player.id === winnerHand.player.id
+        isRoundWinner
       );
-      leaderboardResults.push(result);
-      handResults.push(result);
+      leaderboardResults.push(showdownResult);
+      handResults.push(showdownResult);
     });
 
     leaderboardResults.sort((a, b) => b.totalScore - a.totalScore);
