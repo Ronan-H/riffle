@@ -21,3 +21,12 @@
 - Added tutorial button/modal to the swapping screen.
 - Minor style changes.
 - Stability/consistency improvements.
+
+### 1.2.0 (2021-10-03)
+- Added unique colours for each player:
+  - Each players name is stylized with their assigned random colour.
+  - Selected card outlines are visible to all players, using each player's respective colour.
+- Points are now awarded for all players, based on their hand, with a bonus multiplier for the winner of the round.
+- Added separate hand ranking and leaderboard tables to the showdown screen.
+  - This allows players to be ranked both according to their hand for the current round, and their score for the game as a whole.
+- Style tweaks & improvements to the showdown screen.
