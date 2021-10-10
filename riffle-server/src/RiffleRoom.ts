@@ -39,6 +39,7 @@ export class RiffleRoom extends Room<RiffleState> {
       ...this.metadata,
       ...options,
       passcode: this.generateRandomPasscode(4),
+      createdBy: options.username,
     });
 
     this.setState(new RiffleState());
