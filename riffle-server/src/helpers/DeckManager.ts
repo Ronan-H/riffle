@@ -22,6 +22,12 @@ export class DeckManager {
     }
   }
 
+  public addPlayerCardsBackToDeck(player: Player): void {
+    while (player.cards.length > 0) {
+      this.state.deck.push(player.cards.pop());
+    }
+  }
+
   public sortPlayersHand(player: Player): void {
     player.cards = player.cards.sort((a, b) => a.num - b.num);
   }

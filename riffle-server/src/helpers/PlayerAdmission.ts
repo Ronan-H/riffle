@@ -111,6 +111,7 @@ export class PlayerAdmission {
       this.room.startNextRoundIfEnoughVotes();
     } else if (this.state.gameView === GameView.Swapping) {
       this.state.players.forEach(player => this.scoringManager.updateCurrentHand(player));
+      this.deckManager.addPlayerCardsBackToDeck(player);
     }
   }
 
