@@ -66,12 +66,13 @@
             </thead>
             <tbody>
               <tr
+                [ngClass]="isRoomFull(room) ? 'table-danger' : 'cursor-pointer'"
                 *ngFor="let room of colyseus.allRooms"
-                (click)="tryOpenPasscodeModal(passcodeModal, room.roomId)"
+                (click)="tryOpenPasscodeModal(passcodeModal, room)"
               >
                 <th scope="row">{{ room.metadata.roomName }}</th>
                 <td>{{ room.roomId }}</td>
-                <td>{{ room.clients }}</td>
+                <td>{{ room.clients }} / {{ room.maxClients }}</td>
               </tr>
             </tbody>
           </table>

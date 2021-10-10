@@ -9,6 +9,8 @@ import { ResourceService } from '../resource.service';
 import { NavbarService } from '../navbar/navbar.service';
 import { Subscription, timer } from 'rxjs';
 import { TutorialModalComponent } from '../tutorial-modal/tutorial-modal.component';
+import { GameConstants } from '../../../../riffle-server/src/RiffleSchema';
+import { RoomAvailable } from 'colyseus.js';
 
 @Component({
   selector: 'app-lobby',
@@ -23,6 +25,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   public wrongPasscode: boolean;
   public isLoading: boolean;
   private subs: Subscription;
+  public GameConstants = GameConstants;
 
   constructor(
     private resourceService: ResourceService, // eagerly load card spritesheet
@@ -99,8 +102,16 @@ export class LobbyComponent implements OnInit, OnDestroy {
       this.modalService.open(TutorialModalComponent);
   }
 
-  public tryOpenPasscodeModal(content: TemplateRef<any>, roomId: string): void {
-    this.joinForm.controls['roomId'].setValue(roomId);
+  public isRoomFull(room: RoomAvailable) {
+    return room.clients >= room.maxClients;
+  }
+
+  public tryOpenPasscodeModal(content: TemplateRef<any>, room: RoomAvailable): void {
+    if (this.isRoomFull(room)) {
+      return;
+    }
+
+    this.joinForm.controls['roomId'].setValue(room.roomId);
 
     if (this.lobbyForm.get('username').valid) {
       this.modalRef = this.modalService.open(content);

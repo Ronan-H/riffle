@@ -33,6 +33,8 @@ export class RiffleRoom extends Room<RiffleState> {
       }
     }, 50);
 
+    this.maxClients = GameConstants.maxGamePlayers;
+
     this.setMetadata({
       ...this.metadata,
       ...options,

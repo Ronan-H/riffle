@@ -7,6 +7,7 @@ export enum GameView {
 }
 
 export const GameConstants = {
+  maxGamePlayers: 8,
   defaultNumRounds: 15,
   roundTimeMS: 25 * 1000,
   roundWinnerMultiplier: 2,
