@@ -30,3 +30,7 @@
 - Added separate hand ranking and leaderboard tables to the showdown screen.
   - This allows players to be ranked both according to their hand for the current round, and their score for the game as a whole.
 - Style tweaks & improvements to the showdown screen.
+
+### 1.2.1 (2021-10-13)
+- Added a hard limit to the number of players which can join a game - currently set at 8.
+- More style and layout improvements to the lobby and showdown screens.
