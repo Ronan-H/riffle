@@ -51,10 +51,33 @@ export class LobbyComponent implements OnInit, OnDestroy {
     });
 
     this.lobbyForm = this.fb.group({
-      username:  [localStorage.getItem('username') || '', [Validators.required, Validators.minLength(2), Validators.maxLength(16)]],
+      username:  [
+        localStorage.getItem(
+          'username') || '',
+            [
+              Validators.required,
+              Validators.minLength(2),
+              Validators.maxLength(16),
+              // match anything that doesn't have leading or trailing whitespace
+              Validators.pattern('(?! )[A-Za-z0-9\\s]+(?<! )'),
+            ]],
       createForm: this.createForm,
       joinForm: this.joinForm,
     })
+
+    this.subs.add(
+      this.lobbyForm.get('username').valueChanges.subscribe((username: string) => {
+        const trimmedUsername = username.trim();
+
+        if (trimmedUsername.length === 0) {
+          // remove whitespace when entered by itself
+          this.lobbyForm.controls['username'].setValue('', { emitEvent: false });
+        }
+        else {
+          localStorage.setItem('username', username);
+        }
+      })
+    );
 
     this.subs.add(
       this.joinForm.get('passcode').valueChanges.subscribe(() => {
@@ -62,15 +85,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subs.add(
-      this.lobbyForm.get('username').valueChanges.pipe(
-        debounce(()  => timer(1000)),
-      ).subscribe((username) => {
-        localStorage.setItem('username', username);
-      })
-    );
-
-    // TODO remove this, temporary while debugging
     this.lobbyForm.setValue({
       username: 'Ronan',
       createForm: {

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameConstants, RiffleState, GameView, Player } from '../../../../riffle-server/src/RiffleSchema';
+import { GameConstants, RiffleState, GameView } from '../../../../riffle-server/src/RiffleSchema';
 import { ColyseusService } from '../colyseus.service';
 import { ResourceService } from '../resource.service';
 

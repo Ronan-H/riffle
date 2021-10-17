@@ -25,7 +25,9 @@
 
     <div class="row justify-content-center">
       <div class="col-xs-6">
-        <h4>Choose a Username</h4>
+        <div class="row justify-content-center">
+          <h4>Choose a Username</h4>
+        </div>
         <input
           id="username-input"
           formControlName="username"
@@ -34,17 +36,19 @@
           placeholder="Username"
           required
         />
-        <div
+        <ng-container
           *ngIf="
             lobbyForm.get('username').invalid &&
             lobbyForm.get('username').touched
           "
-          class="row justify-content-center"
         >
-          <strong>
-            <span class="text-danger">Please enter a valid name</span>
-          </strong>
-        </div>
+          <div class="row justify-content-center">
+            <span class="font-weight-bold text-danger">Please enter a valid name</span>
+          </div>
+          <div class="row justify-content-center">
+            <span class="font-italic text-danger">(2-16 characters, no leading/trailing spaces)</span>
+          </div>
+        </ng-container>
       </div>
     </div>
 
