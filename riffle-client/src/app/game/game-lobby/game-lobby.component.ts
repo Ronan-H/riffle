@@ -59,6 +59,12 @@ export class GameLobbyComponent implements OnInit {
           roundOptions.numRounds = 100;
         }
 
+        // prevent floating point values, by rounding to the nearest whole number
+        this.optionsForm.controls['numRounds'].setValue(
+          Math.round(roundOptions.numRounds),
+          { emitEvent: false }
+        );
+
         this.colyseus.updateRoundOptions(roundOptions);
       }
       else {
