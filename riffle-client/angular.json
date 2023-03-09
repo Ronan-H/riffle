@@ -107,5 +107,8 @@
       }
     }
   },
-  "defaultProject": "resource-game-client"
+  "defaultProject": "resource-game-client",
+  "cli": {
+    "analytics": false
+  }
 }
