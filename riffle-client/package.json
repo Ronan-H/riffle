@@ -1,9 +1,9 @@
 {
-  "name": "resource-game-client",
+  "name": "riffle-client",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
     "build": "ng build",
     "test": "jest",
     "test:coverage": "jest --coverage",
