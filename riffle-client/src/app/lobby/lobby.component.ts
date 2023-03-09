@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { debounce, take } from 'rxjs/operators';
 import { ColyseusService } from '../colyseus.service';
@@ -18,9 +18,9 @@ import { RoomAvailable } from 'colyseus.js';
   styleUrls: ['./lobby.component.css']
 })
 export class LobbyComponent implements OnInit, OnDestroy {
-  public createForm: FormGroup;
-  public joinForm: FormGroup;
-  public lobbyForm: FormGroup;
+  public createForm: UntypedFormGroup;
+  public joinForm: UntypedFormGroup;
+  public lobbyForm: UntypedFormGroup;
   private modalRef: NgbModalRef;
   public wrongPasscode: boolean;
   public isLoading: boolean;
@@ -31,7 +31,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     private resourceService: ResourceService, // eagerly load card spritesheet
     private router: Router,
     public colyseus: ColyseusService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private navbarService: NavbarService,
   ) { }

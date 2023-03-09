@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { ResourceService } from 'src/app/resource.service';
 import { GameConstants, Player, RiffleState, RoundOptions } from '../../../../../riffle-server/src/RiffleSchema';
@@ -13,7 +13,7 @@ export class GameLobbyComponent implements OnInit {
   @Input()
   public state: RiffleState;
 
-  public optionsForm: FormGroup;
+  public optionsForm: UntypedFormGroup;
 
   public get selfPlayer(): Player {
     return this.state.players.get(this.colyseus.room.sessionId);
@@ -28,7 +28,7 @@ export class GameLobbyComponent implements OnInit {
   constructor(
     public colyseus: ColyseusService,
     public resourceService: ResourceService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
   ) { }
 
   ngOnInit(): void {
