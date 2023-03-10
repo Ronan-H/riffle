@@ -16,16 +16,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'resource-game-client'`, () => {
+  it(`should have as title 'riffle-client'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('resource-game-client');
+    expect(app.title).toEqual('riffle-client');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('resource-game-client app is running!');
+    expect(compiled.querySelector('.content span').textContent).toContain('riffle-client app is running!');
   });
 });

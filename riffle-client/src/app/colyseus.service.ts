@@ -24,7 +24,7 @@ export class ColyseusService {
       lobby.onMessage("rooms", (rooms) => {
         this.allRooms = rooms;
       });
-      
+
       lobby.onMessage("+", ([roomId, room]) => {
         const roomIndex = this.allRooms.findIndex((room) => room.roomId === roomId);
         if (roomIndex !== -1) {
@@ -33,7 +33,7 @@ export class ColyseusService {
           this.allRooms.push(room);
         }
       });
-      
+
       lobby.onMessage("-", (roomId) => {
         this.allRooms = this.allRooms.filter((room) => room.roomId !== roomId);
       });

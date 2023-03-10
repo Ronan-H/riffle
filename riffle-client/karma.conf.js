@@ -25,7 +25,7 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/resource-game-client'),
+      dir: require('path').join(__dirname, './coverage/riffle-client'),
       subdir: '.',
       reporters: [
         { type: 'html' },
