@@ -3,5 +3,10 @@
   "workspaces": [
     "riffle-client",
     "riffle-server"
-  ]
+  ],
+  "scripts": {
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
+    "heroku-build": "sh ./ci-cd/build.sh",
+    "heroku-deploy": "git push -f heroku master"
+  }
 }
