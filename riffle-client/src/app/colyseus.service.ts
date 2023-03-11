@@ -3,6 +3,7 @@ import { Client as ColyseusClient, Room, RoomAvailable } from 'colyseus.js';
 import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
 import { RoundOptions } from '../../../riffle-server/src/RiffleSchema';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,11 @@ export class ColyseusService {
   }
 
   private initClient(): void {
-    this.client = new ColyseusClient('ws://localhost:2567');
+    const host = window.document.location.host.replace(/:.*/, '');
+    const serverUrl = `ws://${host}:${environment.colyseusPort}`;
+
+    this.client = new ColyseusClient(serverUrl);
+
     this.client.joinOrCreate('lobby').then(lobby => {
       lobby.onMessage("rooms", (rooms) => {
         this.allRooms = rooms;
