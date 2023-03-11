@@ -1,7 +1,6 @@
 import Arena from "@colyseus/arena";
 import { monitor } from "@colyseus/monitor";
 import { LobbyRoom } from "colyseus";
-
 import { RiffleRoom } from "./RiffleRoom";
 
 export default Arena({

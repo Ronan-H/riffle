@@ -8,8 +8,5 @@
     "start": "npm start -w riffle-server",
     "build": "export PRODUCTION=true; sh ./ci-cd/build.sh",
     "deploy": "git push -f heroku master"
-  },
-  "dependencies": {
-      "typescript": "^4.3.2"
   }
 }
