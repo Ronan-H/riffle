@@ -21,7 +21,8 @@ export class ColyseusService {
 
   private initClient(): void {
     const host = window.document.location.host.replace(/:.*/, '');
-    const serverUrl = `ws://${host}:${environment.colyseusPort}`;
+    const protocol = location.protocol.replace("http", "ws");
+    const serverUrl = `${protocol}//${host}${(environment.colyseusPort ? ':' + environment.colyseusPort : '')}`;
 
     this.client = new ColyseusClient(serverUrl);
 
