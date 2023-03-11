@@ -5,7 +5,7 @@
     "riffle-server"
   ],
   "scripts": {
-    "start": "npm start -w riffle-server",
+    "start": "export PRODUCTION=true; npm start -w riffle-server",
     "build": "export PRODUCTION=true; sh ./ci-cd/build.sh",
     "deploy": "git push -f heroku master"
   }
