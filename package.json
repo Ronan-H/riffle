@@ -5,9 +5,9 @@
     "riffle-server"
   ],
   "scripts": {
-    "start": "export PRODUCTION=true; npm run heroku-build && npm start -w riffle-server",
-    "heroku-build": "sh ./ci-cd/build.sh",
-    "heroku-deploy": "git push -f heroku master"
+    "start": "npm start -w riffle-server",
+    "build": "export PRODUCTION=true; sh ./ci-cd/build.sh",
+    "deploy": "git push -f heroku master"
   },
   "dependencies": {
       "typescript": "^4.3.2"
