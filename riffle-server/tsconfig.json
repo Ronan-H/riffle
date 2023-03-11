@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "outDir": "lib",
-    "outFile": "lib/types.d.ts",
     "target": "es6",
     "moduleResolution": "node",
     "module": "none",

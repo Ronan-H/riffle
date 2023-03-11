@@ -5,8 +5,11 @@
     "riffle-server"
   ],
   "scripts": {
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
+    "start": "npm run heroku-build && npm start -w riffle-server",
     "heroku-build": "sh ./ci-cd/build.sh",
     "heroku-deploy": "git push -f heroku master"
+  },
+  "dependencies": {
+      "typescript": "^4.3.2"
   }
 }
