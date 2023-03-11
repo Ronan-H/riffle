@@ -28,7 +28,7 @@ export default Arena({
     initializeExpress: (app) => {
         app
             .use(compression())
-            // .use(requireHTTPS)
+            .use(requireHTTPS)
             .use(express.static(path.join(__dirname, 'static')))
             .use((req: any, res: any) => res.sendFile('index.html', { root: path.join(__dirname, 'static') })
         );
