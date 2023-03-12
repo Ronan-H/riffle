@@ -84,17 +84,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.wrongPasscode = false;
       })
     );
-
-    this.lobbyForm.setValue({
-      username: 'Ronan',
-      createForm: {
-        roomName: 'Test room',
-      },
-      joinForm: {
-        roomId: 'ABCDEF',
-        passcode: ''
-      }
-    });
   }
 
   ngOnDestroy() {
