@@ -1,5 +1,6 @@
-node_modules
+.DS_Store
 .vscode
 .angular
+node_modules
 riffle-server/lib/
 !riffle-server/lib/static/types.d.ts

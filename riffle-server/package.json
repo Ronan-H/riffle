@@ -21,7 +21,6 @@
   "dependencies": {
     "@colyseus/arena": "^0.14.24",
     "@colyseus/monitor": "^0.14.22",
-    "@colyseus/social": "^0.11.7",
     "colyseus": "^0.14.24",
     "cors": "^2.8.5",
     "express": "^4.18.2",
