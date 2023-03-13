@@ -31,7 +31,6 @@ export class ShowdownComponent implements OnInit {
 
   ngOnInit(): void {
     this.isNextRoundClicked = false;
-    this.navbarService.setMessage('Showdown!');
 
     this.colyseus.room$.subscribe(room => {
       this.state = room.state;
