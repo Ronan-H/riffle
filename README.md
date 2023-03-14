@@ -1,8 +1,8 @@
 # Riffle
 
-Riffle is a poker based speed card game. I built it using Angular for the front end, and a websocket based node framework for the backend called Colyseus.
+Play now at https://playriffle.com!
 
-Originally, I had hosted it on Heroku and had a domain bought for it, but eventually I decided to take it down when I hadn't played it in a while.
+Riffle is a poker based speed card game. I built it using Angular for the front end, and a websocket based node framework for the backend called Colyseus.
 
 The game can be hosted locally by running `npm start` in both the server and client directories, after installing node and running `npm ci`.
 
