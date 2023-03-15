@@ -34,3 +34,7 @@
 ### 1.2.1 (2021-10-13)
 - Added a hard limit to the number of players which can join a game - currently set at 8.
 - More style and layout improvements to the lobby and showdown screens.
+
+### 1.2.2 (2023-03-15)
+- Updated the showdown screen to show the round number in the nav bar.
+- Fixed a bug causing the card highlight to remain after clicking elsewhere.
