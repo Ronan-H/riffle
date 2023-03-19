@@ -14,9 +14,6 @@ type MouseTouchEvent = MouseEvent & TouchEvent;
   styleUrls: ['./swapping-canvas.component.css']
 })
 export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input()
-  public state: RiffleState;
-
   @ViewChild('cardCanvas')
   cardCanvas: ElementRef<HTMLCanvasElement>;
 
@@ -46,7 +43,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
   private subs: Subscription;
 
   public get selfPlayer(): Player {
-    return this.state.players.get(this.colyseus.room.sessionId);
+    return this.colyseus.state.players.get(this.colyseus.room.sessionId);
   }
 
   public get stateHandCards() {
@@ -85,10 +82,9 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     this.roundStartMS = Date.now();
 
     this.colyseus.room$.subscribe(room => {
-      this.state = room.state;
       this.drawAll();
-      room.onStateChange((state: RiffleState) => {
-        this.state = state;
+
+      this.colyseus.state$.subscribe(state => {
         this.drawAll();
       });
 
@@ -105,7 +101,7 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
     this.subs.add(
       this.swapService.animateCard.subscribe(() => {
         this.animatedCards.push(new AnimatedCard(
-          this.state.commonCards[this.selectedCommonIndex],
+          this.colyseus.state.commonCards[this.selectedCommonIndex],
           this.selectedCommonIndex * this.cardWidth,
           0,
           this.selectedHandIndex * this.cardWidth,
@@ -275,11 +271,11 @@ export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.drawRoundProgressBar();
-    this.drawCards(this.state.commonCards, 0);
+    this.drawCards(this.colyseus.state.commonCards, 0);
     this.drawCards(this.stateHandCards, this.handStartY);
 
     // draw all player's common card highlight, if selected
-    this.state.players.forEach(player => {
+    this.colyseus.state.players.forEach(player => {
       if (player.selectedCommonIndex !== -1) {
         this.drawCommonCardHighlight(player.selectedCommonIndex, player.colour);
       }

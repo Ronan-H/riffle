@@ -3,7 +3,7 @@
 
     <div class="row justify-content-center">
         <button
-            *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
+            *ngIf="colyseus.state.roundsRemaining > 0; else returnToLobbyButton"
             class="btn btn-primary mb-3"
             type="button"
             [disabled]="isNextRoundClicked"
@@ -15,7 +15,7 @@
                 role="status"
                 aria-hidden="true"
               ></span>
-            {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
+            {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ colyseus.state.numVotedNextRound }} / {{ colyseus.state.nextRoundVotesRequired }}]
         </button>
 
         <ng-template #returnToLobbyButton>
@@ -30,18 +30,18 @@
         </ng-template>
     </div>
 
-    <div *ngIf="state.roundsRemaining === 0">
+    <div *ngIf="colyseus.state.roundsRemaining === 0">
         <h1>Game Over</h1>
-        <h3 *ngIf="state.gameWinners.length === 1; else multipleWinners">
+        <h3 *ngIf="colyseus.state.gameWinners.length === 1; else multipleWinners">
             <span
-                [textContent]="state.gameWinners[0].name"
-                [ngStyle]="{'color': state.gameWinners[0].colour}"
+                [textContent]="colyseus.state.gameWinners[0].name"
+                [ngStyle]="{'color': colyseus.state.gameWinners[0].colour}"
             ></span> Wins!
         </h3>
 
         <ng-template #multipleWinners>
             <h3>Joint Winners:</h3>
-            <h3>{{ state.gameWinners.join(', ') }}</h3>
+            <h3>{{ colyseus.state.gameWinners.join(', ') }}</h3>
         </ng-template>
     </div>
 
@@ -53,7 +53,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let result of state.handResults">
+                <tr *ngFor="let result of colyseus.state.handResults">
                     <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
                         {{ result.player.name }}
                         <ng-container *ngIf="result.playerId === selfPlayer.id">
@@ -92,7 +92,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let result of state.leaderboardResults">
+                <tr *ngFor="let result of colyseus.state.leaderboardResults">
                     <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
                         {{ result.player.name }}
                         <ng-container *ngIf="result.playerId === selfPlayer.id">
@@ -108,7 +108,7 @@
         </table>
     </div>
 
-    <div *ngIf="state.roundsRemaining > 0">
+    <div *ngIf="colyseus.state.roundsRemaining > 0">
         <hr />
         <div class="row justify-content-center mt-3">
             <div>
@@ -122,9 +122,9 @@
                     </thead>
                     <tbody>
                     <tr>
-                        <td>{{ state.roomName }}</td>
+                        <td>{{ colyseus.state.roomName }}</td>
                         <td>{{ colyseus.room.id }}</td>
-                        <td>{{ colyseus.gamePasscode }}</td>
+                        <td>{{ colyseus.gamePasscode$ | async }}</td>
                     </tr>
                     </tbody>
                 </table>

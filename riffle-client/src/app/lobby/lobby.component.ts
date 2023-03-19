@@ -153,7 +153,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
     }).subscribe(room => {
       room.onMessage('passcode-accepted', () => {
         this.modalRef.close();
-        this.router.navigate(['game', room.id]);
+        this.router.navigate(['game', room.id], { queryParams: { pass: passcode } });
       });
 
       room.onMessage('passcode-rejected', () => {

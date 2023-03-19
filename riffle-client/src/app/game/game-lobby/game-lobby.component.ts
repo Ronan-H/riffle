@@ -1,5 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { ColyseusService } from 'src/app/colyseus.service';
 import { ResourceService } from 'src/app/resource.service';
 import { GameConstants, Player, RiffleState, RoundOptions } from '../../../../../riffle-server/src/RiffleSchema';
@@ -9,19 +11,17 @@ import { GameConstants, Player, RiffleState, RoundOptions } from '../../../../..
   templateUrl: './game-lobby.component.html',
   styleUrls: ['./game-lobby.component.css']
 })
-export class GameLobbyComponent implements OnInit {
-  @Input()
-  public state: RiffleState;
-
+export class GameLobbyComponent implements OnInit, OnDestroy {
+  private subs: Subscription;
   public optionsForm: UntypedFormGroup;
 
   public get selfPlayer(): Player {
-    return this.state.players.get(this.colyseus.room.sessionId);
+    return this.colyseus.state.players.get(this.colyseus.room.sessionId);
   }
 
   public get playersAsArray(): Player[] {
     const arr = [];
-    this.state.players.forEach((player) => arr.push(player));
+    this.colyseus.state.players.forEach((player) => arr.push(player));
     return arr;
   }
 
@@ -29,17 +29,29 @@ export class GameLobbyComponent implements OnInit {
     public colyseus: ColyseusService,
     public resourceService: ResourceService,
     private fb: UntypedFormBuilder,
+    private router: Router,
+    private route: ActivatedRoute,
   ) { }
 
   ngOnInit(): void {
-    this.colyseus.room$.subscribe(room => {
-      this.state = room.state;
-      room.onStateChange((state: RiffleState) => {
-        this.state = state;
+    this.subs = new Subscription();
 
+    this.subs.add(
+      this.colyseus.state$.subscribe(state => {
         if (!this.selfPlayer.isHost) {
           this.optionsForm.controls['numRounds'].setValue(state.roundOptions.numRounds);
         }
+      })
+    );
+
+    this.colyseus.gamePasscode$.pipe(
+      filter(pass => pass !== null),
+    ).subscribe(pass => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { pass },
+        // preserve the existing query params in the route
+        queryParamsHandling: 'merge',
       });
     });
 
@@ -83,6 +95,10 @@ export class GameLobbyComponent implements OnInit {
     if (this.optionsForm.controls['numRounds'].value === null) {
       this.optionsForm.controls['numRounds'].setValue(1);
     }
+  }
+
+  ngOnDestroy(): void {
+      this.subs.unsubscribe();
   }
 
 }

@@ -3,7 +3,7 @@
     <h4>Passcode:</h4>
 </div>
 <div class="text-center">
-    <h3 [innerText]="colyseus.gamePasscode"></h3>
+    <h3>{{ colyseus.gamePasscode$ | async }}</h3>
 </div>
 
 <div class="text-center">

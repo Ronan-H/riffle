@@ -1,13 +1,13 @@
 <div class="container mt-1">
-    <div *ngIf="state.gameView === GameView.GameLobby || state.gameView === undefined">
-        <app-game-lobby [state]="state"></app-game-lobby>
+    <div *ngIf="colyseus.state.gameView === GameView.GameLobby || colyseus.state.gameView === undefined">
+        <app-game-lobby></app-game-lobby>
     </div> 
 
-    <div *ngIf="state.gameView === GameView.Swapping">
-        <app-swapping [state]="state"></app-swapping>
+    <div *ngIf="colyseus.state.gameView === GameView.Swapping">
+        <app-swapping></app-swapping>
     </div>
 
-    <div *ngIf="state.gameView === GameView.Showdown">
-        <app-showdown [state]="state"></app-showdown>
+    <div *ngIf="colyseus.state.gameView === GameView.Showdown">
+        <app-showdown></app-showdown>
     </div>
 </div>

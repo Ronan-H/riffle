@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Client as ColyseusClient, Room, RoomAvailable } from 'colyseus.js';
-import { from, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable, Observer } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-import { RoundOptions } from '../../../riffle-server/src/RiffleSchema';
+import { RoundOptions, RiffleState, GameView } from '../../../riffle-server/src/RiffleSchema';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -13,7 +13,9 @@ export class ColyseusService {
   private client: ColyseusClient;
   public room: Room;
   public room$: Observable<Room>;
-  public gamePasscode: string;
+  public state: RiffleState;
+  public state$: Observable<RiffleState>;
+  public gamePasscode$: BehaviorSubject<string>;
 
   constructor() {
     this.initClient();
@@ -25,6 +27,8 @@ export class ColyseusService {
     const serverUrl = `${protocol}//${host}${(environment.colyseusPort ? ':' + environment.colyseusPort : '')}`;
 
     this.client = new ColyseusClient(serverUrl);
+
+    this.gamePasscode$ = new BehaviorSubject(null);
 
     this.client.joinOrCreate('lobby').then(lobby => {
       lobby.onMessage("rooms", (rooms) => {
@@ -47,47 +51,56 @@ export class ColyseusService {
   }
 
   public createRoom(options: any): Observable<Room> {
+    // start with default state to prevent undefined errors before the state is downloaded initially
+    this.state = new RiffleState();
+
     this.room$ = from(
       this.client.create('riffle_room', {
         ...options
       })
     ).pipe(
       first(),
-      tap(room => {
-        this.room = room;
-
-        room.onMessage('debug', (debugInfo) => {
-          console.log('DEBUG:', debugInfo);
-        });
-
-        room.onMessage('passcode', (passcode) => {
-          this.gamePasscode = passcode;
-        });
-      }),
+      tap((state) => this.onNewRoom(state)),
     );
 
     return this.room$;
   }
 
   public joinGame(roomId: string, options: any): Observable<Room> {
+    // start with default state to prevent undefined errors before the state is downloaded initially
+    this.state = new RiffleState();
+
     this.room$ = from(
       this.client.joinById(roomId, { ...options })
     ).pipe(
       first(),
-      tap(room => {
-        this.room = room;
-
-        room.onMessage('debug', (debugInfo) => {
-          console.log('DEBUG:', debugInfo);
-        });
-
-        room.onMessage('passcode', (passcode) => {
-          this.gamePasscode = passcode;
-        });
-      }),
+      tap((state) => this.onNewRoom(state)),
     );
 
     return this.room$;
+  }
+
+  private onNewRoom(room: Room): void {
+    this.room = room;
+    const roomState = room.state as RiffleState;
+    this.state = roomState;
+
+    this.state$ = new Observable((observer) => {
+      observer.next(roomState);
+      
+      room.onStateChange((state: RiffleState) => {
+        this.state = state;
+        observer.next(state);
+      });
+    });
+
+    room.onMessage('debug', (debugInfo) => {
+      console.log('DEBUG:', debugInfo);
+    });
+
+    room.onMessage('passcode', (passcode) => {
+      this.gamePasscode$.next(passcode);
+    });
   }
 
   public startGame(): void {

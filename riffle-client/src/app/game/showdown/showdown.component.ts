@@ -11,15 +11,12 @@ import { GameConstants, Player, RiffleState } from '../../../../../riffle-server
   styleUrls: ['./showdown.component.css']
 })
 export class ShowdownComponent implements OnInit {
-  @Input()
-  public state: RiffleState;
-
   public GameConstants = GameConstants;
 
   public isNextRoundClicked: boolean;
 
   public get selfPlayer(): Player {
-    return this.state.players.get(this.colyseus.room.sessionId);
+    return this.colyseus.state.players.get(this.colyseus.room.sessionId);
   }
 
   constructor(
@@ -31,13 +28,6 @@ export class ShowdownComponent implements OnInit {
 
   ngOnInit(): void {
     this.isNextRoundClicked = false;
-
-    this.colyseus.room$.subscribe(room => {
-      this.state = room.state;
-      room.onStateChange((state: RiffleState) => {
-        this.state = state;
-      });
-    });
   }
 
   public onNextRoundClicked(): void {

@@ -15,11 +15,8 @@ import { SwappingCanvasService } from './swapping-canvas.service';
   styleUrls: ['./swapping.component.css']
 })
 export class SwappingComponent implements OnInit, OnDestroy {
-  @Input()
-  public state: RiffleState;
-
   public get selfPlayer(): Player {
-    return this.state.players.get(this.colyseus.room.sessionId);
+    return this.colyseus.state.players.get(this.colyseus.room.sessionId);
   }
 
   public get selectedCommonIndex(): number {
@@ -50,11 +47,6 @@ export class SwappingComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.colyseus.room$.subscribe(room => {
-      this.state = room.state;
-      room.onStateChange((state: RiffleState) => {
-        this.state = state;
-      });
-
       room.onMessage('common-index-swapped', (commonIndex) => {
         if (this.selectedCommonIndex === commonIndex) {
           // deselect selected common card, since it was swapped out by someone else
@@ -85,7 +77,7 @@ export class SwappingComponent implements OnInit, OnDestroy {
     );
 
     this.swapService.deselectAllCards();
-    this.navbarService.setMessage(`Round ${this.state.roundNum} of ${this.state.roundOptions.numRounds}`);
+    this.navbarService.setMessage(`Round ${this.colyseus.state.roundNum} of ${this.colyseus.state.roundOptions.numRounds}`);
   }
 
   private swapIfBothSelected(): void {

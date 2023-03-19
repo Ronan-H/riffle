@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve --configuration development",
     "build": "ng build",
     "serve-static": "npx http-server --port 4200 ./dist/riffle-client",
     "test": "jest",
