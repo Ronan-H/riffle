@@ -107,7 +107,6 @@
       }
     }
   },
-  "defaultProject": "riffle-client",
   "cli": {
     "analytics": false
   }
