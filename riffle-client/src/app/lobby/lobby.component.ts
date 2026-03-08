@@ -13,9 +13,10 @@ import { GameConstants } from '../../../../riffle-server/src/RiffleSchema';
 import { RoomAvailable } from 'colyseus.js';
 
 @Component({
-  selector: 'app-lobby',
-  templateUrl: './lobby.component.html',
-  styleUrls: ['./lobby.component.css']
+    selector: 'app-lobby',
+    templateUrl: './lobby.component.html',
+    styleUrls: ['./lobby.component.css'],
+    standalone: false
 })
 export class LobbyComponent implements OnInit, OnDestroy {
   public createForm: UntypedFormGroup;

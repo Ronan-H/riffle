@@ -5,9 +5,10 @@ import { ResourceService } from 'src/app/resource.service';
 import { GameConstants, Player, RiffleState, RoundOptions } from '../../../../../riffle-server/src/RiffleSchema';
 
 @Component({
-  selector: 'app-game-lobby',
-  templateUrl: './game-lobby.component.html',
-  styleUrls: ['./game-lobby.component.css']
+    selector: 'app-game-lobby',
+    templateUrl: './game-lobby.component.html',
+    styleUrls: ['./game-lobby.component.css'],
+    standalone: false
 })
 export class GameLobbyComponent implements OnInit {
   @Input()

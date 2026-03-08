@@ -2,9 +2,10 @@ import { AfterViewInit, Component } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'app-tutorial-modal',
-  templateUrl: './tutorial-modal.component.html',
-  styleUrls: ['./tutorial-modal.component.css']
+    selector: 'app-tutorial-modal',
+    templateUrl: './tutorial-modal.component.html',
+    styleUrls: ['./tutorial-modal.component.css'],
+    standalone: false
 })
 export class TutorialModalComponent implements AfterViewInit {
 

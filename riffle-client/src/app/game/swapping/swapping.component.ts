@@ -10,9 +10,10 @@ import { Player, RiffleState } from '../../../../../riffle-server/src/RiffleSche
 import { SwappingCanvasService } from './swapping-canvas.service';
 
 @Component({
-  selector: 'app-swapping',
-  templateUrl: './swapping.component.html',
-  styleUrls: ['./swapping.component.css']
+    selector: 'app-swapping',
+    templateUrl: './swapping.component.html',
+    styleUrls: ['./swapping.component.css'],
+    standalone: false
 })
 export class SwappingComponent implements OnInit, OnDestroy {
   @Input()

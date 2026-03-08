@@ -9,9 +9,10 @@ import { Subscription } from 'rxjs';
 type MouseTouchEvent = MouseEvent & TouchEvent;
 
 @Component({
-  selector: 'app-swapping-canvas',
-  templateUrl: './swapping-canvas.component.html',
-  styleUrls: ['./swapping-canvas.component.css']
+    selector: 'app-swapping-canvas',
+    templateUrl: './swapping-canvas.component.html',
+    styleUrls: ['./swapping-canvas.component.css'],
+    standalone: false
 })
 export class SwappingCanvasComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input()

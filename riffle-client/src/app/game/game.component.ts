@@ -5,9 +5,10 @@ import { ColyseusService } from '../colyseus.service';
 import { ResourceService } from '../resource.service';
 
 @Component({
-  selector: 'app-game',
-  templateUrl: './game.component.html',
-  styleUrls: ['./game.component.css']
+    selector: 'app-game',
+    templateUrl: './game.component.html',
+    styleUrls: ['./game.component.css'],
+    standalone: false
 })
 export class GameComponent {
   public state: RiffleState;

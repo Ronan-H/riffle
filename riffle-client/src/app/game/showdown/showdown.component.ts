@@ -6,9 +6,10 @@ import { ResourceService } from 'src/app/resource.service';
 import { GameConstants, Player, RiffleState } from '../../../../../riffle-server/src/RiffleSchema';
 
 @Component({
-  selector: 'app-showdown',
-  templateUrl: './showdown.component.html',
-  styleUrls: ['./showdown.component.css']
+    selector: 'app-showdown',
+    templateUrl: './showdown.component.html',
+    styleUrls: ['./showdown.component.css'],
+    standalone: false
 })
 export class ShowdownComponent implements OnInit {
   @Input()
