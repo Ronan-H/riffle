@@ -2,7 +2,12 @@
 
 Riffle is a poker based speed card game. I built it using Angular for the front end, and a websocket based node framework for the backend called Colyseus.
 
-The game can be hosted locally by running `npm start` in both the server and client directories, after installing node and running `npm ci`.
+## Install & Run
+
+- Install node on [nodejs.org](https://nodejs.org/en/download), or through [fnm](https://github.com/Schniz/fnm?tab=readme-ov-file#installation).
+- Run `npm ci` in the root of this repository.
+- Run `npm run build` within `riffle-server`.
+- Run `npm start` from within `riffle-client`, alongside `npm run dev` from `riffle-server`.
 
 ## Contributing
 
@@ -11,18 +16,23 @@ I keep track of feature development and bugs with Github Issues. If anyone wante
 ## Screenshots
 
 ### Home Screen
+
 <kbd><img src="resources/readme/home-screen.png" width=300></kbd>
 
 ### Lobby (As Host)
+
 <kbd><img src="resources/readme/lobby-host.png" width=300></kbd>
 
 ### Lobby (As Guest)
+
 <kbd><img src="resources/readme/lobby-guest.png" width=300></kbd>
 
 ### Playing
+
 <kbd><img src="resources/readme/playing.png" width=300></kbd>
 
 ### Round End
+
 <kbd><img src="resources/readme/round-end.png" width=300></kbd>
 
 ### Game Over
