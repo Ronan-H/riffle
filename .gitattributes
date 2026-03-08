@@ -1,0 +1,2 @@
+# exclude package-lock from git diff (see https://stackoverflow.com/q/58378724/5921)
+package-lock.json -diff
