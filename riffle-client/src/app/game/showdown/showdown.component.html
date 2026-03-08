@@ -1,138 +1,146 @@
 
 <div class="text-center mt-3">
 
-    <div class="row justify-content-center">
-        <button
-            *ngIf="state.roundsRemaining > 0; else returnToLobbyButton"
-            class="btn btn-primary mb-3"
-            type="button"
-            [disabled]="isNextRoundClicked"
-            (click)="onNextRoundClicked()"
+  <div class="row justify-content-center">
+    @if (state.roundsRemaining > 0) {
+      <button
+        class="btn btn-primary mb-3"
+        type="button"
+        [disabled]="isNextRoundClicked"
+        (click)="onNextRoundClicked()"
         >
-            <span
-                *ngIf="isNextRoundClicked"
-                class="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              ></span>
-            {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
-        </button>
+        @if (isNextRoundClicked) {
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+        }
+        {{ isNextRoundClicked ? 'Waiting for others...' : 'Next Round' }} [{{ state.numVotedNextRound }} / {{ state.nextRoundVotesRequired }}]
+      </button>
+    } @else {
+      <button
+        class="btn btn-success mb-3"
+        type="button"
+        [disabled]="isNextRoundClicked"
+        (click)="onReturnToLobbyClicked()"
+        >
+        Return to Lobby
+      </button>
+    }
 
-        <ng-template #returnToLobbyButton>
-            <button
-                class="btn btn-success mb-3"
-                type="button"
-                [disabled]="isNextRoundClicked"
-                (click)="onReturnToLobbyClicked()"
-            >
-                Return to Lobby
-            </button>
-        </ng-template>
-    </div>
+  </div>
 
-    <div *ngIf="state.roundsRemaining === 0">
-        <h1>Game Over</h1>
-        <h3 *ngIf="state.gameWinners.length === 1; else multipleWinners">
-            <span
-                [textContent]="state.gameWinners[0].name"
-                [ngStyle]="{'color': state.gameWinners[0].colour}"
-            ></span> Wins!
+  @if (state.roundsRemaining === 0) {
+    <div>
+      <h1>Game Over</h1>
+      @if (state.gameWinners.length === 1) {
+        <h3>
+          <span
+            [textContent]="state.gameWinners[0].name"
+            [ngStyle]="{'color': state.gameWinners[0].colour}"
+          ></span> Wins!
         </h3>
-
-        <ng-template #multipleWinners>
-            <h3>Joint Winners:</h3>
-            <h3>{{ state.gameWinners.join(', ') }}</h3>
-        </ng-template>
+      } @else {
+        <h3>Joint Winners:</h3>
+        <h3>{{ state.gameWinners.join(', ') }}</h3>
+      }
     </div>
+  }
 
-    <div class="row justify-content-center">
-        <table id="showdown-table" class="table table-bordered mt-3">
-            <thead class="thead-dark">
-                <tr>
-                    <th class="fit" scope="col" colspan="3">Round Scores</th>
-                </tr>
+  <div class="row justify-content-center">
+    <table id="showdown-table" class="table table-bordered mt-3">
+      <thead class="thead-dark">
+        <tr>
+          <th class="fit" scope="col" colspan="3">Round Scores</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (result of state.handResults; track result) {
+          <tr>
+            <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
+              {{ result.player.name }}
+              @if (result.playerId === selfPlayer.id) {
+                <br />
+                <span class="text-muted font-italic">(you)</span>
+              }
+            </th>
+            <td class="fit" >
+              <span [class.font-weight-bold]="result.isWinningHand">{{ result.hand }}</span>
+              @if (result.isWinningHand) {
+                <br />
+                <span class="text-success font-weight-bold">BEST HAND</span>
+              }
+            </td>
+            <td class="fit" >
+              {{ result.handScore }}
+              @if (result.isWinningHand) {
+                <br />
+                <!-- the round winner score multipler -->
+                <span class="text-success font-weight-bold">
+                  (x{{ GameConstants.roundWinnerMultiplier }} =
+                  {{ GameConstants.roundWinnerMultiplier * result.handScore}})
+                </span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row justify-content-center">
+    <table id="showdown-table" class="table table-bordered mt-3">
+      <thead class="thead-dark">
+        <tr>
+          <th class="fit" scope="col" colspan="2">Leaderboard</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (result of state.leaderboardResults; track result) {
+          <tr>
+            <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
+              {{ result.player.name }}
+              @if (result.playerId === selfPlayer.id) {
+                <br />
+                <span class="text-muted font-italic">(you)</span>
+              }
+            </th>
+            <td class="fit" >
+              {{ result.totalScore }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (state.roundsRemaining > 0) {
+    <div>
+      <hr />
+      <div class="row justify-content-center mt-3">
+        <div>
+          <table class="table table-responsive table-sm table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Room Name</th>
+                <th scope="col">Room ID</th>
+                <th scope="col">Passcode</th>
+              </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let result of state.handResults">
-                    <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
-                        {{ result.player.name }}
-                        <ng-container *ngIf="result.playerId === selfPlayer.id">
-                            <br />
-                            <span class="text-muted font-italic">(you)</span>
-                        </ng-container>
-                    </th>
-                    <td class="fit" >
-                        <span [class.font-weight-bold]="result.isWinningHand">{{ result.hand }}</span>
-                        <ng-container *ngIf="result.isWinningHand">
-                            <br />
-                            <span class="text-success font-weight-bold">BEST HAND</span>
-                        </ng-container>
-                    </td>
-                    <td class="fit" >
-                        {{ result.handScore }}
-                        <ng-container *ngIf="result.isWinningHand">
-                            <br />
-                            <!-- the round winner score multipler -->
-                            <span class="text-success font-weight-bold">
-                                (x{{ GameConstants.roundWinnerMultiplier }} =
-                                {{ GameConstants.roundWinnerMultiplier * result.handScore}})
-                            </span>
-                        </ng-container>
-                    </td>
-                </tr>
+              <tr>
+                <td>{{ state.roomName }}</td>
+                <td>{{ colyseus.room.id }}</td>
+                <td>{{ colyseus.gamePasscode }}</td>
+              </tr>
             </tbody>
-        </table>
-    </div>
-
-    <div class="row justify-content-center">
-        <table id="showdown-table" class="table table-bordered mt-3">
-            <thead class="thead-dark">
-                <tr>
-                    <th class="fit" scope="col" colspan="2">Leaderboard</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let result of state.leaderboardResults">
-                    <th class="fit" scope="row" [ngStyle]="{'color': result.player.colour}">
-                        {{ result.player.name }}
-                        <ng-container *ngIf="result.playerId === selfPlayer.id">
-                            <br />
-                            <span class="text-muted font-italic">(you)</span>
-                        </ng-container>
-                    </th>
-                    <td class="fit" >
-                        {{ result.totalScore }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div *ngIf="state.roundsRemaining > 0">
-        <hr />
-        <div class="row justify-content-center mt-3">
-            <div>
-                <table class="table table-responsive table-sm table-bordered">
-                    <thead>
-                    <tr>
-                        <th scope="col">Room Name</th>
-                        <th scope="col">Room ID</th>
-                        <th scope="col">Passcode</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>{{ state.roomName }}</td>
-                        <td>{{ colyseus.room.id }}</td>
-                        <td>{{ colyseus.gamePasscode }}</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+          </table>
         </div>
-
-        <div class="row justify-content-center">
-            <p>This game is still open to new players!</p>
-        </div>
+      </div>
+      <div class="row justify-content-center">
+        <p>This game is still open to new players!</p>
+      </div>
     </div>
+  }
 </div>

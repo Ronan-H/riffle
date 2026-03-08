@@ -1,13 +1,19 @@
 <div class="container mt-1">
-    <div *ngIf="state.gameView === GameView.GameLobby || state.gameView === undefined">
-        <app-game-lobby [state]="state"></app-game-lobby>
-    </div> 
-
-    <div *ngIf="state.gameView === GameView.Swapping">
-        <app-swapping [state]="state"></app-swapping>
+  @if (state.gameView === GameView.GameLobby || state.gameView === undefined) {
+    <div>
+      <app-game-lobby [state]="state"></app-game-lobby>
     </div>
+  }
 
-    <div *ngIf="state.gameView === GameView.Showdown">
-        <app-showdown [state]="state"></app-showdown>
+  @if (state.gameView === GameView.Swapping) {
+    <div>
+      <app-swapping [state]="state"></app-swapping>
     </div>
+  }
+
+  @if (state.gameView === GameView.Showdown) {
+    <div>
+      <app-showdown [state]="state"></app-showdown>
+    </div>
+  }
 </div>
