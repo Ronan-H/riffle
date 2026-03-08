@@ -19,6 +19,7 @@
     "types": [
       "node"
     ],
+    "skipLibCheck": true,
     "useDefineForClassFields": false
   },
   "references": [
