@@ -65,18 +65,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "riffle-client:build"
+            "buildTarget": "riffle-client:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "riffle-client:build:production"
+              "buildTarget": "riffle-client:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "riffle-client:build"
+            "buildTarget": "riffle-client:build"
           }
         },
         "lint": {
